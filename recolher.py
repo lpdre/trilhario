@@ -30,6 +30,8 @@ LIMIT_DATE = TODAY + timedelta(days=150)
 # Os caminhos das páginas dos eventos não são iguais entre os organizadores.
 # Se uma fonte não responder, as restantes continuam a ser consultadas.
 SOURCES = [
+    {"organizer": "Hiking Around Adventures", "url": "https://www.hikingaround.pt/aventurasnacionais",
+     "path": r"^/informa-es-do-evento-e-registro/[^/]+/?$"},
     {"organizer": "Mais Trilhos", "url": "https://maistrilhos.pt/caminhadas", "path": r"^/caminhadas/[^/]+"},
     {"organizer": "Indoeu", "url": "https://indoeu.pt/caminhadas/", "path": r"^/[a-z0-9-]+/?$"},
     {"organizer": "GreenTrekker", "url": "https://www.greentrekker.pt/agenda/", "path": r"^/agenda/[^/]+"},
@@ -347,6 +349,34 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
             mloc = re.search(r"zona da atividade\s*:\s*([^.;]{4,70})", value, re.I)
             if mloc:
                 item["town"] = clean(mloc[1])
+    elif organizer == "Hiking Around Adventures":
+        title = scope.find("h1") or html.find("h1")
+        if title:
+            item["title"] = clean(title.get_text(" ", strip=True))[:140]
+        # Wix inclui a data e hora em «Horário e local».
+        when = re.search(r"\b(\d{1,2}/\d{1,2}/20\d{2}),?\s*(\d{1,2}:\d{2})(?:\s*[–-]\s*(\d{1,2}:\d{2}))?", value)
+        if when:
+            parsed = date_from(when[1])
+            if parsed:
+                item["date"] = parsed.isoformat()
+            item["time"] = when[2].zfill(5)
+            if when[3]:
+                t1,t2=when[2],when[3]
+                h1,m1=map(int,t1.split(':'));h2,m2=map(int,t2.split(':'))
+                mins=(h2*60+m2)-(h1*60+m1)
+                if 0<mins<=14*60:
+                    item["duration"] = mins/60
+        # Na descrição pode aparecer a tarifa com transfer; usar o preço base.
+        mprice = re.search(r"\b(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:euros?|€)\s+por\s+pessoa", value, re.I)
+        if mprice:
+            item["price"] = float(mprice[1].replace(',', '.'))
+        start = re.search(r"(?:Horário e local)\s+\d{1,2}/\d{1,2}/20\d{2},?\s*\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?\s+(.{8,105}?)(?:\s+Sobre o evento|\s+Descrição)", value, re.I)
+        if start:
+            item["start"] = clean(start[1])
+        if 'esgotado' in folded(value[:1600]):
+            item["status"] = "Esgotado"
+        elif 'registo encerrado' in folded(value[:1600]):
+            item["status"] = "Inscrições encerradas"
     elif organizer == "Basto Trekking":
         if item.get("price") is None:
             m = re.search(r"(?:inscri[cç][oõ]es|custo)\s*[:\-]?\s*(\d{1,3}(?:[,.]\d{1,2})?)\s*euros?", value, re.I)
