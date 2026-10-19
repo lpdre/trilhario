@@ -47,6 +47,33 @@ SOURCES = [
      "path": r"^/caminhada/[^/]+/?$"},
     {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/experiencia/",
      "path": r"^/[a-z0-9-]+/?$"},
+    # Agendas oficiais adicionais. Só são importados anúncios com data validada.
+    {"organizer": "Montanhas do Norte", "url": "https://montanhasdonorte.pt/percursos-1-dia/",
+     "path": r"^/(?:tour|percursos|percurso|produto|atividade|actividade)/[^/]+/?$"},
+    {"organizer": "Clube de Montanhismo da Guarda", "url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/",
+     "path": r"^/portal/evento/[^/]+/?$"},
+    {"organizer": "Amigos da Montanha", "url": "https://amigosdamontanha.com/",
+     "fallback": ["https://amigosdamontanha.com/agenda/", "https://amigosdamontanha.com/eventos/"],
+     "path": r"^/(?:evento|eventos|atividade|actividade|caminhada|pedestrianismo)/[^/]+/?$"},
+    {"organizer": "Caminhando.pt", "url": "https://caminhando.pt/agenda-eventos/caminhadas/",
+     "fallback": ["https://caminhando.pt/"],
+     "path": r"^/eventos/[^/]+/?$", "required_keyword": "caminhada"},
+    {"organizer": "Pé no Mundo", "url": "https://penomundo.pt/",
+     "path": r"^/(?:evento|eventos|caminhada|caminhadas|experiencias|experiencia)/[^/]+/?$"},
+    {"organizer": "CAAL — Clube de Actividades de Ar Livre", "url": "https://clubearlivre.org/",
+     "fallback": ["https://clubearlivre.org/actividades/proximas/"],
+     "path": r"^/produto/[^/]+/?$"},
+    {"organizer": "Trilhos Nocturnos", "url": "https://trilhosnocturnos.com/eventos-agenda/",
+     "path": r"^/eventos/[^/]+/?$", "required_keyword": "caminhada"},
+    {"organizer": "Associação Geopark Estrela", "url": "https://geoparkestrela.pt/atividades",
+     "path": r"^/atividades/[^/]+/?$", "required_keyword": "caminhada"},
+    # Agendas de página única / programas municipais: extractores próprios.
+    {"organizer": "DRenergies", "url": "https://www.drenergies.com/calendario-inscricoes-caminhadas", "mode": "drenergies"},
+    {"organizer": "SAL — Sistemas de Ar Livre", "url": "https://www.sal.pt/", "mode": "sal"},
+    {"organizer": "Gerês Viver Turismo", "url": "https://geres.pt/programa-anual-de-caminhadas-2026/", "mode": "programa"},
+    {"organizer": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39", "mode": "lousada"},
+    # Agregador como segunda fonte; a entidade promotora mantém o nome real.
+    {"organizer": "Trilhos & Caminhadas", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php", "mode": "agregador"},
 ]
 
 MONTHS = {
@@ -384,6 +411,218 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
                 item["price"] = float(m[1].replace(',', '.'))
 
 
+
+# Filtragem prudente: não usar anúncios de BTT, trails competitivos,
+# excursões longas, eventos de sala ou datas fora da janela de recolha.
+NON_WALK_TITLES = re.compile(
+    r"\b(?:btt|bike|bicicleta|pedalar|ciclismo|maratona|ultra\s?trail|"
+    r"trail\s?running|corrida|jipes?|bugg?ys?|visita\s+guiada\s+ao\s+museu|"
+    r"jantar|workshop|formac[aã]o|confer[eê]ncia|semin[aá]rio|mercados?\s+de\s+natal)\b", re.I
+)
+MULTIDAY = re.compile(
+    r"\b(?:fim\s+de\s+semana|viagem|expedi[cç][aã]o|"
+    r"\d+\s*(?:dias|noites)|de\s+\d{1,2}\s+a\s+\d{1,2}\s+de)\b", re.I
+)
+WALK_TERMS = re.compile(r"caminhad|pedestr|trekking|marcha|trilho|rota|levada|percurs|passeio", re.I)
+
+
+def valid_new_event(item: dict) -> bool:
+    try:
+        dt = date.fromisoformat(item.get("date", ""))
+    except (TypeError, ValueError):
+        return False
+    if not TODAY <= dt <= LIMIT_DATE:
+        return False
+    title = clean(item.get("title", ""))
+    if not 7 <= len(title) <= 140 or NON_WALK_TITLES.search(title):
+        return False
+    if MULTIDAY.search(title):
+        return False
+    if item.get("km") is not None and not (0 < float(item["km"]) <= 40):
+        return False
+    if item.get("duration") is not None and not (0 < float(item["duration"]) <= 14):
+        return False
+    return True
+
+
+def new_event(organizer: str, url: str, title: str, dt: date, **fields) -> dict:
+    return {
+        "id": "web-" + hashlib.sha256(f"{organizer}|{url}|{dt.isoformat()}|{folded(title)}".encode()).hexdigest()[:15],
+        "title": clean(title)[:140], "date": dt.isoformat(), "organizer": organizer,
+        "url": url, "town": "Por confirmar", "start": "Por confirmar",
+        "region": "", "area": "", "time": "", "km": None, "gain": None,
+        "duration": None, "price": None, "difficulty": None,
+        "description": "Consultar informações e inscrições junto do organizador.",
+        "tag": "Caminhada", **fields,
+    }
+
+
+def collect_aggregator(source: dict) -> list[dict]:
+    """Lê calendário e páginas individuais do Trilhos & Caminhadas.
+
+    O agregador fornece nome do promotor real, dia e ligação de detalhe.
+    Mantém-se a atribuição correcta; o deduplicador privilegia a fonte oficial.
+    """
+    result = []
+    # O calendário expõe o mês pedido na query string. Percorrer ~3 meses.
+    months = set()
+    for step in range(4):
+        m = TODAY.month + step
+        year = TODAY.year + (m - 1) // 12
+        month = (m - 1) % 12 + 1
+        months.add((year, month))
+    links = set()
+    for year, month in sorted(months):
+        listing = f"{source['url']}?ano={year}&mes={month}"
+        html = fetch(listing)
+        if html is None:
+            continue
+        for a in html.find_all('a', href=True):
+            url = canonical(listing, a['href'])
+            if url and re.fullmatch(r'/percursos/evento_info\.php', urlparse(url).path) and re.search(r'[?&]id=\d+', a['href']):
+                # canonical remove query strings; preserve the official event ID.
+                full = urljoin(listing, a['href']).split('#', 1)[0]
+                links.add(full)
+    for url in sorted(links)[:95]:
+        html = fetch(url)
+        if html is None:
+            continue
+        scope = html.find('main') or html
+        content = clean(scope.get_text(' ', strip=True))
+        title_tag = scope.find('h2') or scope.find('h1')
+        if not title_tag:
+            continue
+        title = clean(title_tag.get_text(' ', strip=True))
+        dtm = re.search(r'Data\s*:\s*(20\d{2}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})', content, re.I)
+        dt = date_from(dtm[1]) if dtm else None
+        orgm = re.search(r'Entidade\s+Promotora\s*:\s*(.{3,90}?)(?=\s+(?:Local\s*:|Data\s*:))', content, re.I)
+        if not dt or not orgm:
+            continue
+        organizer = clean(orgm[1])
+        # Evitar nomes poluídos por texto da página, mas admitir associações locais.
+        if len(organizer) > 75 or len(organizer) < 3:
+            continue
+        loc = re.search(r'Local\s*:\s*(.{2,80}?)(?=\s+Data\s*:)', content, re.I)
+        city = clean(loc[1]) if loc else 'Por confirmar'
+        price = number(r'Valor\s+Inscri[cç][aã]o\s*:\s*(\d{1,3}(?:[.,]\d{1,2})?)', content, 500)
+        km = number(r'Dist[aâ]ncia\s*:\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*km', content, 40)
+        # Preserva URL verificável do evento: não adivinhar ligações a partir do texto.
+        event = new_event(organizer,url,title,dt,town=city,start=city,
+                          time=(dtm[2] if dtm else ''),price=price,km=km,source='Trilhos & Caminhadas')
+        if valid_new_event(event):
+            result.append(event)
+        time.sleep(0.12)
+    logging.info('Agregador: %d eventos de %d promotores',len(result),len({e['organizer'] for e in result}))
+    return result
+
+
+def collect_drenergies(source: dict) -> list[dict]:
+    """Agenda por meses: criar evento só quando título e data estão contíguos."""
+    html = fetch(source['url'])
+    if html is None:
+        return []
+    result = []
+    year = TODAY.year
+    for heading in html.find_all(re.compile(r'^h[1-6]$')):
+        t = clean(heading.get_text(' ', strip=True))
+        match = re.search(r'\b(\d{1,2})\s+de\s+(janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\b',folded(t))
+        if not match:
+            continue
+        dateobj = date_from(t,short_year=year)
+        if not dateobj:
+            continue
+        nxt = heading.find_next(re.compile(r'^h[1-6]$'))
+        if not nxt:
+            continue
+        title = clean(nxt.get_text(' ', strip=True))
+        if not (WALK_TERMS.search(title) or re.search('faias|covao|castelo|tun[eé]is|azeitona|ribeira',folded(title))):
+            continue
+        e = new_event(source['organizer'],source['url'],title,dateobj)
+        if valid_new_event(e):
+            result.append(e)
+    return result
+
+
+def collect_sal(source: dict) -> list[dict]:
+    """Homepage apresenta datas e ligações de percursos curtos; tratar só passeios de um dia."""
+    html = fetch(source['url'])
+    if html is None:
+        return []
+    found=[]
+    for a in html.find_all('a',href=True):
+        url=canonical(source['url'],a['href'])
+        if not url or urlparse(url).hostname not in ('www.sal.pt','sal.pt') or not re.search(r'\.shtml$',urlparse(url).path):
+            continue
+        title=clean(a.get_text(' ',strip=True))
+        if len(title)<7 or not re.search(r'rota|passeio|caminhad|percurso|trilho',folded(title)):
+            continue
+        detail=fetch(url)
+        if detail is None:
+            continue
+        content=clean(detail.get_text(' ',strip=True))
+        # Sites SAL podem publicar datas de edições distintas na mesma página.
+        for m in re.finditer(r'Data\s*:\s*(?:Segunda|Ter[cç]a|Quarta|Quinta|Sexta|S[aá]bado|Domingo)?\s*(\d{1,2})\s+(?:de\s+)?(janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+(20\d{2})\s*(\d{1,2})[:h](\d{2})',content,re.I):
+            dt=date_from(f'{m[1]} {m[2]} {m[3]}')
+            if not dt: continue
+            item=new_event(source['organizer'],url,title,dt,time=f'{int(m[4]):02d}:{m[5]}')
+            parse_meta(detail,item)
+            # O preço 0 só é usado quando está explicitamente marcado como gratuito.
+            if re.search(r'pre[cç]o\s*:\s*gratuito',content,re.I): item['price']=0
+            if valid_new_event(item):found.append(item)
+    return found
+
+
+def collect_simple_program(source: dict) -> list[dict]:
+    """Agenda informativa: exigir datas individuais para não inventar saídas."""
+    html=fetch(source['url'])
+    if html is None:return []
+    # O calendário Gerês é PDF e as entradas de Lousada podem ter múltiplas
+    # entidades; sem ligação individual + data inequívoca não importar.
+    if source['mode']=='programa':
+        logging.info('%s: calendário PDF; fonte registada para consulta, sem importar datas genéricas.',source['organizer'])
+        return []
+    result=[]
+    for a in html.find_all('a',href=True):
+        parent=a.parent
+        block=clean(parent.get_text(' ',strip=True)) if parent else ''
+        dt=date_from(block)
+        title=clean(a.get_text(' ',strip=True))
+        url=canonical(source['url'],a['href'])
+        if dt and url and 7<=len(title)<=110 and WALK_TERMS.search(title) and urlparse(url).hostname==urlparse(source['url']).hostname:
+            item=new_event(source['organizer'],url,title,dt,town='Lousada',start='Lousada (local exacto a confirmar)')
+            if valid_new_event(item):result.append(item)
+    return result
+
+
+def similarity_key(item: dict) -> tuple[str,str,str]:
+    title = folded(item.get('title', ''))
+    title = re.sub(r'[^a-z0-9 ]', ' ', title)
+    title = re.sub(r'\b(?:caminhada|trilho|trekking|rota|passeio|ao|aos|da|das|de|do|dos|pela|pelas|pelo|pelos|na|no|em)\b',' ', title)
+    title = re.sub(r'\s+',' ',title).strip()
+    org = re.sub(r'[^a-z0-9]','',folded(item.get('organizer','')))
+    return (item.get('date',''),org,title)
+
+
+def deduplicate(events: list[dict]) -> list[dict]:
+    """Remover repetidos de fonte oficial + agregador, sem misturar promotores."""
+    from difflib import SequenceMatcher
+    grouped: dict[tuple[str,str],list[dict]]={}
+    # Preferir links oficiais, campos mais preenchidos e eventos recentes.
+    for item in sorted(events,key=lambda e: (bool(e.get('source')=='Trilhos & Caminhadas'),-sum(e.get(k)!=None for k in ('km','gain','price','time','duration')))):
+        date_s,org,title=similarity_key(item)
+        if not date_s or not org:continue
+        key=(date_s,org)
+        target=grouped.setdefault(key,[])
+        existing=next((old for old in target if old['url'].rstrip('/')==item['url'].rstrip('/') or
+                       SequenceMatcher(None,similarity_key(old)[2],title).ratio()>=0.87),None)
+        if existing:
+            # Registos oficiais prevalecem, mas completar apenas campos em falta.
+            for fld in ('km','gain','price','duration','time','town','start'):
+                if existing.get(fld) in (None,'','Por confirmar') and item.get(fld) not in (None,'','Por confirmar'):
+                    existing[fld]=item[fld]
+        else:target.append(item)
+    return [item for part in grouped.values() for item in part]
+
 def collect_source(source: dict) -> list[dict]:
     domain = urlparse(source["url"]).hostname.removeprefix("www.")
     links: dict[str, tuple[str, str]] = {}
@@ -419,6 +658,13 @@ def collect_source(source: dict) -> list[dict]:
             continue  # excursões com vários dias
         event_date = date_from(block) or date_from(url)
         if event_date and (event_date < TODAY or event_date > LIMIT_DATE):
+            continue
+        if NON_WALK_TITLES.search(title) or MULTIDAY.search(title):
+            continue
+        # Fontes recentes têm elementos fora de contexto: exigir pelo menos
+        # terminologia de marcha no cartão ou título, salvo paginação datada.
+        if source.get('required_keyword') and not (WALK_TERMS.search(title) or
+                                                   WALK_TERMS.search(block[:300])):
             continue
         # Sem data na lista, consulta-se a página individual antes de aceitar.
         item = {
@@ -480,8 +726,10 @@ def collect_source(source: dict) -> list[dict]:
             continue  # para já, apenas saídas de um dia
         if item["km"] is not None and item["km"] > 40:
             continue
+        if not valid_new_event(item) or MULTIDAY.search(block[:220]):
+            continue
         result.append(item)
-        time.sleep(0.25)
+        time.sleep(0.12)
     logging.info("%s: %d caminhadas futuras validadas", source["organizer"], len(result))
     return result
 
@@ -501,7 +749,12 @@ def main() -> int:
     succeeded = 0
     for source in SOURCES:
         try:
-            found = collect_source(source)
+            mode=source.get('mode')
+            if mode=='agregador': found=collect_aggregator(source)
+            elif mode=='drenergies': found=collect_drenergies(source)
+            elif mode=='sal': found=collect_sal(source)
+            elif mode in ('programa','lousada'): found=collect_simple_program(source)
+            else: found=collect_source(source)
             if found:
                 succeeded += 1
             for item in found:
@@ -513,7 +766,7 @@ def main() -> int:
     if not aggregated:
         logging.warning("Não foram encontrados eventos válidos; não substituir o site por uma lista vazia.")
         return 0
-    ordered = sorted(aggregated.values(), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
+    ordered = sorted(deduplicate(list(aggregated.values())), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "events": ordered}
     # Só reescrever quando os dados do catálogo mudam; evitar commits desnecessários.
     if OUT.exists():
