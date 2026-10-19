@@ -270,7 +270,21 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
     """Campos específicos de eventos de organizadores com estruturas próprias."""
     scope = html.find("main") or html.find("article") or html
     value = clean(scope.get_text(" ", strip=True))[:16000]
-    if organizer == "Indoeu":
+    if organizer == "GreenTrekker":
+        # Os preços surgem normalmente em «Faça Já A Sua Reserva», frequentemente
+        # depois dos 12 000 caracteres lidos por parse_meta. Procurar o valor
+        # APENAS nessa secção evita confundir preços de anúncios relacionados.
+        if item.get("price") is None:
+            full_text = clean(scope.get_text(" ", strip=True))
+            for heading in re.finditer(r"fa[cç]a\s+j[aá]\s+a\s+sua\s+reserva", full_text, re.I):
+                booking = full_text[heading.end():heading.end() + 240]
+                m_price = re.search(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|euros?)", booking, re.I)
+                if m_price:
+                    price = float(m_price[1].replace(",", "."))
+                    if 0 < price <= 500:
+                        item["price"] = price
+                        break
+    elif organizer == "Indoeu":
         # Neste site o ponto de encontro surge como título e depois um item de lista,
         # sem dois pontos, pelo que não era detectado pelo colector genérico.
         for heading in scope.find_all(re.compile(r"^h[1-6]$")):
