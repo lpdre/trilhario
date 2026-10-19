@@ -389,18 +389,88 @@ input[type=range]{width:100%;accent-color:#547656;margin:8px 0 0}.range-foot{dis
   .content-head{margin-bottom:10px;align-items:center}
   .count{font-size:11px}
 }
+
+/* v14 — identidade original, resumo na apresentação e acções compactas. */
+.hero-inner{padding:23px 0 25px;display:block}
+.hero-copy{max-width:760px}
+.hero .brand-hero{display:inline-flex;width:max-content;font-size:30px;line-height:1.15;letter-spacing:-1.3px;gap:11px;margin:0 0 15px}
+.hero .brand-hero::before{width:30px;height:30px;flex:0 0 30px;border-width:2px}
+.hero .eyebrow{margin-bottom:7px;font-size:10px;letter-spacing:1.8px}
+.hero p{font-size:12.5px;line-height:1.55;max-width:650px;margin:0}
+.hero-stats{font-size:11.5px;color:#f0d2aa;margin-top:10px;font-weight:650;letter-spacing:.12px}
+.content-head{justify-content:flex-start;gap:0;margin-bottom:11px}
+.switches{width:100%;justify-content:flex-start}
+.walk-row{grid-template-columns:58px minmax(225px,1fr) minmax(230px,300px) 144px}
+.walk-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:7px 8px;flex-wrap:nowrap}
+.walk-open,.walk-expand{
+ display:inline-flex;align-items:center;justify-content:center;gap:4px;
+ width:auto;min-width:0;height:28px;min-height:28px;padding:0 7px;
+ border-radius:4px;background:#fcfbf6;color:#355841;border:1px solid #cdd9ce;
+ font-size:10px;font-weight:650;line-height:1;text-decoration:none;white-space:nowrap;
+ box-shadow:none;
+}
+.walk-open{background:#edf2e9;border-color:#b8cbb9;color:#2c563b}
+.walk-open:hover,.walk-expand:hover{background:#dfeadf;color:#244b35}
+.walk-open .btn-icon,.walk-expand .btn-icon{font-size:12px;font-weight:500;line-height:1}
+.walk-expand.selected{background:#dce7d8;border-color:#9eb9a2}
+.walk-favorite{display:none!important}
+.walk-detail-panel{grid-template-columns:minmax(0,1fr) auto;gap:15px;padding:12px 14px 13px 70px;align-items:center}
+.walk-inline-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:5px}
+.walk-inline-actions .detail-action{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:28px;
+ background:#fbfcf8;border:1px solid #bfcebf;border-radius:4px;color:#355640;
+ padding:5px 8px;font-size:10px;font-weight:650;line-height:1.25;white-space:nowrap}
+.walk-inline-actions .detail-action:hover{background:#e1ebdd;border-color:#93ad98}
+.walk-inline-actions .mobile-favorite{display:inline-flex}
+.walk-inline-actions .detail-icon{font-size:13px;font-weight:500;line-height:1;color:#4c7458}
+.walk-inline-actions .is-saved{background:#dce9d8;border-color:#91ad94}
+.walk-inline-actions .detail-danger{color:#925142;border-color:#d7bdb6}
+@media(max-width:1060px) and (min-width:781px){
+ .walk-row{grid-template-columns:54px minmax(200px,1fr) minmax(190px,250px) 140px}
+ .walk-actions{padding:6px 5px;gap:4px}
+ .walk-detail-panel{grid-template-columns:1fr;padding-left:64px;gap:10px}
+ .walk-inline-actions{justify-content:flex-start}
+}
+@media(max-width:780px){
+ .hero-inner{padding:20px 0 21px}
+ .hero .brand-hero{font-size:27px;margin-bottom:12px}
+ .hero .brand-hero::before{width:27px;height:27px;flex-basis:27px}
+ .hero p{font-size:12px}
+ .hero-stats{font-size:11px;margin-top:9px}
+ .content-head{display:block;margin-bottom:10px}
+ .switches{justify-content:space-between}
+ .walk-row{grid-template-columns:49px minmax(0,1fr);grid-template-rows:auto auto auto auto}
+ .walk-date{grid-column:1;grid-row:1/4}
+ .walk-main{grid-column:2;grid-row:1}
+ .walk-metrics{grid-column:2;grid-row:2}
+ .walk-actions{grid-column:2;grid-row:3;position:static;top:auto;right:auto;justify-content:flex-end;gap:5px;padding:5px 10px 9px;border-top:0}
+ .walk-open,.walk-expand{height:28px;min-height:28px;padding:0 7px;font-size:10px}
+ .walk-detail-panel{grid-column:1/-1;grid-row:4;grid-template-columns:1fr;gap:10px;padding:12px}
+ .walk-inline-actions{justify-content:flex-start}
+}
+@media(max-width:480px){
+ .hero-inner{padding:19px 0 20px}
+ .hero .brand-hero{font-size:26px;gap:9px;margin-bottom:12px}
+ .hero .brand-hero::before{width:26px;height:26px;flex-basis:26px}
+ .hero .eyebrow{font-size:9.5px;letter-spacing:1.3px}
+ .hero p{font-size:11.5px}
+ .walk-row{grid-template-columns:44px minmax(0,1fr)}
+ .walk-main{padding:10px 10px 8px}
+ .walk-metrics{padding:3px 10px 10px}
+ .walk-actions{padding:4px 10px 9px}
+ .walk-inline-actions .detail-action{font-size:10px;padding:6px 8px}
+}
 </style>
 </head>
 <body>
-<section class="hero" id="top"><div class="hero-inner shell"><div>
+<section class="hero" id="top"><div class="hero-inner shell"><div class="hero-copy">
+<a aria-label="Trilhário — início" class="brand brand-hero" href="#top">trilhário<span class="brand-dot">.</span></a>
 <div class="eyebrow">AGENDA DE CAMINHADAS · PORTUGAL</div>
-<h1>As próximas caminhadas<span class="hero-period">.</span></h1>
-<p>Consulta caminhadas por data, organizador, distância e desnível.</p>
-</div><div class="hero-note" id="heroStats"><strong>19 eventos</strong><span>Dados de demonstração, a confirmar no organizador.</span></div>
-</div></section>
+<p>Encontra e compara caminhadas organizadas por data, distância e desnível.</p>
+<div class="hero-stats" id="heroStats" aria-live="polite">A carregar caminhadas…</div>
+</div></div></section>
 <main class="shell main">
 <div class="layout">
-<section aria-live="polite" class="results"><div class="content-head"><div><div class="count" id="resultCount"></div></div><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
+<section aria-live="polite" class="results"><div class="content-head"><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
   <div class="filters-content">
     <div class="filter-grid">
       <div class="field filter-search"><label for="search">Pesquisar</label><input class="control" id="search" placeholder="Serra, trilho, organizador..." type="search"/></div>
@@ -563,7 +633,7 @@ async function loadEventFeed(){
     .map(e=>({...e,url:(typeof e.url==='string'&&/^https?:\/\//i.test(e.url))?e.url:''}));
   remoteEvents=events;
   remoteUpdatedAt=typeof json.updated_at==='string'?json.updated_at:null;
-  $('heroStats').innerHTML='<strong>'+allEvents().length+' eventos na agenda</strong><span>Agendas oficiais e fontes complementares</span>';
+  // A contagem é actualizada em render(), incluindo os filtros seleccionados.
   if(events.length){const first=events.map(e=>e.date).sort()[0];state.year=Number(first.slice(0,4));state.month=Number(first.slice(5,7))-1;}
   geo.selectionShown=false;
   populateOrganizers();
@@ -643,8 +713,7 @@ function eventRow(x){
    <span><small>Preço</small><b>${fmtP(x.price)}</b></span>
   </div>
   <div class="walk-actions">
-   <button class="walk-favorite ${fav?'selected':''}" onclick="toggleFav('${esc(x.id)}')" aria-label="${fav?'Remover dos favoritos':'Adicionar aos favoritos'}" title="Favorito">${fav?'♥':'♡'}</button>
-   ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Ver evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
+   ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
     <button type="button" class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="false" title="Mostrar detalhes"><span class="btn-label">Detalhes</span><span class="btn-icon" aria-hidden="true">⌄</span></button>
   </div>
   <div class="walk-detail-panel" id="details-${esc(x.id)}" hidden>
@@ -653,7 +722,13 @@ function eventRow(x){
     <p><b>Local de partida:</b> ${esc(spot)}${verified?' (confirmado)':' (localidade de referência; confirmar com o organizador)'}</p>
     <p><b>Dificuldade:</b> ${esc(names[x.difficulty]||'Por confirmar')}</p>
    </div>
-   <div class="walk-inline-actions"><button onclick="focusEvent('${esc(x.id)}')">Ver no mapa</button><button onclick="focusEvent('${esc(x.id)}',true)">Meteorologia</button><button onclick="downloadIcs('${esc(x.id)}')">Adicionar à agenda</button><button class="mobile-favorite" onclick="toggleFav('${esc(x.id)}')">${fav?'♥ Remover favorito':'♡ Guardar favorito'}</button>${x.userAdded?`<button onclick="removeEvent('${esc(x.id)}')">Eliminar</button>`:''}</div>
+   <div class="walk-inline-actions" role="group" aria-label="Acções de ${esc(x.title)}">
+   <button type="button" class="detail-action" onclick="focusEvent('${esc(x.id)}')"><span class="detail-icon" aria-hidden="true">⌖</span> Mapa</button>
+   <button type="button" class="detail-action" onclick="focusEvent('${esc(x.id)}',true)"><span class="detail-icon" aria-hidden="true">☁</span> Previsão</button>
+   <button type="button" class="detail-action" onclick="downloadIcs('${esc(x.id)}')"><span class="detail-icon" aria-hidden="true">▦</span> Agenda</button>
+   <button type="button" class="detail-action detail-favorite mobile-favorite ${fav?'is-saved':''}" onclick="toggleFav('${esc(x.id)}')" aria-pressed="${fav?'true':'false'}"><span class="detail-icon" aria-hidden="true">${fav?'♥':'♡'}</span> ${fav?'Guardado':'Guardar'}</button>
+   ${x.userAdded?`<button type="button" class="detail-action detail-danger" onclick="removeEvent('${esc(x.id)}')">Eliminar</button>`:''}
+   </div>
   </div>
  </article>`;
 }
@@ -746,12 +821,12 @@ function render(){const events=selected();
  $('filtersCounterMini').textContent=applied?String(applied):'';$('filtersCounterMini').hidden=!applied;
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
- $('resultCount').textContent=`${events.length} caminhada${events.length===1?'':'s'} · ${new Set(events.map(e=>e.organizer)).size} organizador${new Set(events.map(e=>e.organizer)).size===1?'':'es'}`;$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;}else if(state.view==='calendar')renderCalendar(events);else renderMap(events)}
+ $('heroStats').textContent=`${events.length} caminhada${events.length===1?'':'s'} · ${new Set(events.map(e=>e.organizer)).size} organizador${new Set(events.map(e=>e.organizer)).size===1?'':'es'}`;$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;}else if(state.view==='calendar')renderCalendar(events);else renderMap(events)}
 function renderCalendar(events){const m=state.month,y=state.year,first=new Date(y,m,1),start=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;let html=`<div class="month"><div class="monthbar"><h3>${first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}</h3><div class="arrows"><button onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button><button onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div><div class="calendar-grid">`;['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);for(let i=0;i<len;i++){let day=i-start+1,inMonth=day>=1&&day<=total;const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const today=events.filter(e=>e.date===iso);html+=`<div class="day-cell ${inMonth?'':'outside'} ${state.day===iso?'picked':''}">${inMonth?`<button type="button" class="day-number" onclick="setDay('${iso}')" title="${state.day===iso?'Retirar selecção de':'Filtrar por'} ${iso}" aria-label="${state.day===iso?'Retirar selecção de':'Seleccionar'} ${iso}">${day}</button>${today.slice(0,2).map(x=>`<button title="${esc(x.title)}" class="mini-event" onclick="setDay('${iso}')">${esc(x.title)}</button>`).join('')}${today.length>2?`<button class="mini-more" onclick="setDay('${iso}')">+${today.length-2} mais</button>`:''}`:''}</div>`}html+='</div><div class="legend">Toca numa data para filtrar; remove o dia no filtro acima para voltar a ver todos.</div></div>';$('calendarView').innerHTML=html}
 function shiftMonth(n){state.month+=n;if(state.month<0){state.month=11;state.year--}if(state.month>11){state.month=0;state.year++}render()}
 function clearSelectedDay(){state.day='all';render()}
 function setDay(d){if(state.day===d){clearSelectedDay();return;}state.day=d;state.view='list';render();document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'})}
-function toggleFav(id){favorites.has(id)?favorites.delete(id):favorites.add(id);try{localStorage.setItem('trilhario_fav_v1',JSON.stringify([...favorites]))}catch{}render()}
+function toggleFav(id){favorites.has(id)?favorites.delete(id):favorites.add(id);try{localStorage.setItem('trilhario_fav_v1',JSON.stringify([...favorites]))}catch{}render();if(document.querySelector('.walk-row[data-eid="'+CSS.escape(id)+'"] .walk-detail-panel'))toggleRow(id)}
 function resetFilters(){Object.assign(state,{day:'all',organizer:'all',difficulty:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,search:'',onlyFavorites:false});$('search').value='';$('organizer').value='all';$('difficulty').value='all';$('favoritesOnly').checked=false;render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
