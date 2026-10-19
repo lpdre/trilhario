@@ -340,23 +340,67 @@ input[type=range]{width:100%;accent-color:#547656;margin:8px 0 0}.range-foot{dis
 .sources-directory h4{font-size:11px;grid-column:1/-1;margin:9px 0 0;color:#7b8977;border-top:1px solid #dce6d8;padding-top:8px}
 @media(max-width:790px){.sources-directory{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.sources-directory{grid-template-columns:1fr}}
+
+/* v13 — cartão informativo e cabeçalho simplificado. Base v11 preservada. */
+.hero-inner{padding-top:27px;padding-bottom:27px}
+.content-head{align-items:center;gap:10px}
+.count{font-size:12px;font-weight:600}
+.walk-row{grid-template-columns:58px minmax(230px,1fr) minmax(230px,305px) 216px}
+.walk-actions{gap:6px;padding:8px 10px;justify-content:flex-end;flex-wrap:nowrap}
+.walk-favorite{width:31px;height:32px;min-width:31px}
+.walk-open,.walk-expand{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:0;width:auto;height:34px;min-height:34px;padding:0 9px;white-space:nowrap;font-size:11px;line-height:1.2;font-weight:750;border-radius:5px;text-decoration:none;box-sizing:border-box}
+.walk-open{background:#264c37;border:1px solid #264c37;color:#fff}
+.walk-open:hover{background:#3d6a4c}
+.walk-expand{border:1px solid #b7c9b7;color:#365642;background:#fafbf7}
+.walk-expand:hover{background:#e9f1e7}
+.walk-open .btn-icon,.walk-expand .btn-icon{font-size:14px;line-height:1;display:inline-block}
+.walk-text-link{font-size:inherit;font-weight:750;color:#245d42;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;text-decoration-color:#a8c4ad;overflow-wrap:anywhere}
+.walk-text-link:hover{color:#133e2b;text-decoration-color:currentColor}
+.tiny-external{font-size:.85em;color:#63816a;white-space:nowrap}
+.pill-clear-day{border:1px solid #aac3a7;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font:650 11px var(--sans)}
+.pill-clear-day:hover{background:#c6dec4}
+.pill-clear-day span{font-size:16px;line-height:1}
+.day-number{font-size:12px;font-weight:800;color:#46654e;border:0;background:transparent;padding:2px 5px;margin:-2px -5px;cursor:pointer;border-radius:3px;line-height:1.4}
+.day-number:hover,.day-cell.picked .day-number{background:#315941;color:white}
+@media(max-width:1060px) and (min-width:781px){
+  .walk-row{grid-template-columns:56px minmax(185px,1fr) minmax(220px,250px) 210px}
+  .walk-actions{gap:4px;padding:6px}
+  .walk-open,.walk-expand{font-size:10.5px;padding:0 8px}
+}
+@media(max-width:780px){
+  .walk-row{grid-template-columns:49px minmax(0,1fr);grid-template-rows:auto auto auto auto;align-items:start;min-height:0}
+  .walk-date{grid-column:1;grid-row:1/4;min-height:100%;align-self:stretch}
+  .walk-main{grid-column:2;grid-row:1;min-width:0;padding:11px 12px 9px}
+  .walk-main h3{padding-right:0;font-size:13.5px}
+  .walk-organizer,.walk-start,.walk-times{font-size:11.8px}
+  .walk-metrics{grid-column:2;grid-row:2;padding:3px 12px 10px}
+  .walk-actions{grid-column:2;grid-row:3;position:static;right:auto;top:auto;padding:9px 12px 10px;justify-content:flex-start;border-top:1px solid #e0e6d9;gap:8px;min-width:0}
+  .walk-favorite{display:inline-grid;width:32px;min-width:32px;height:33px}
+  .walk-open,.walk-expand{width:auto;height:34px;min-height:34px;padding:0 10px;font-size:11px}
+  .walk-detail-panel{grid-column:1/-1;grid-row:4}
+}
+@media(max-width:480px){
+  .walk-row{grid-template-columns:44px minmax(0,1fr)}
+  .walk-main{padding:10px 10px 8px}
+  .walk-main h3{font-size:13px;margin-bottom:7px}
+  .walk-metrics{padding:3px 10px 10px}
+  .walk-actions{padding:8px 10px 10px;gap:7px}
+  .walk-open,.walk-expand{font-size:10.5px;padding:0 9px}
+  .content-head{margin-bottom:10px;align-items:center}
+  .count{font-size:11px}
+}
 </style>
 </head>
 <body>
-<header><div class="nav shell">
-<a aria-label="Trilhário — início" class="brand" href="#top">trilhário<span class="brand-dot">.</span></a>
-<span class="masthead-label">Agenda de caminhadas organizadas</span>
-<div class="nav-right"><span class="minor">Projecto experimental</span><button class="add-top" id="addBtn">+ Adicionar caminhada</button></div>
-</div></header>
 <section class="hero" id="top"><div class="hero-inner shell"><div>
-<div class="eyebrow">AGENDA INDEPENDENTE  /  PORTUGAL</div>
+<div class="eyebrow">AGENDA DE CAMINHADAS · PORTUGAL</div>
 <h1>As próximas caminhadas<span class="hero-period">.</span></h1>
-<p>Uma agenda, muitos caminhos. Encontra saídas organizadas, compara o percurso e parte à descoberta.</p>
+<p>Consulta caminhadas por data, organizador, distância e desnível.</p>
 </div><div class="hero-note" id="heroStats"><strong>19 eventos</strong><span>Dados de demonstração, a confirmar no organizador.</span></div>
 </div></section>
 <main class="shell main">
 <div class="layout">
-<section aria-live="polite" class="results"><div class="content-head"><div><h2 id="resultTitle">Próximas saídas</h2><div class="count" id="resultCount"></div></div><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
+<section aria-live="polite" class="results"><div class="content-head"><div><div class="count" id="resultCount"></div></div><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
   <div class="filters-content">
     <div class="filter-grid">
       <div class="field filter-search"><label for="search">Pesquisar</label><input class="control" id="search" placeholder="Serra, trilho, organizador..." type="search"/></div>
@@ -446,7 +490,7 @@ let remoteEvents=null;
 let remoteUpdatedAt=null;
 
 // Fontes monitorizadas; a presença aqui não significa vagas ou eventos confirmados.
-const ORGANIZER_DIRECTORY = [{"name": "Hiking Around Adventures", "url": "https://www.hikingaround.pt/aventurasnacionais"}, {"name": "Mais Trilhos", "url": "https://maistrilhos.pt/caminhadas"}, {"name": "Indoeu", "url": "https://indoeu.pt/caminhadas/"}, {"name": "GreenTrekker", "url": "https://www.greentrekker.pt/agenda/"}, {"name": "Trekking Roots", "url": "https://trekkingroots.pt/calendario-caminhadas/"}, {"name": "Hike Land", "url": "https://www.hikeland.pt/atividades-1-dia/"}, {"name": "Montanhas Dentro", "url": "https://montanhasdentro.pt/"}, {"name": "Trekkin", "url": "https://www.trekkin.pt/eventos/"}, {"name": "Basto Trekking", "url": "https://bastotrekking.pt/"}, {"name": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/experiencia/"}, {"name": "Montanhas do Norte", "url": "https://montanhasdonorte.pt/percursos-1-dia/"}, {"name": "RB Hiking & Trekking", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php?entidade=RB+Hiking"}, {"name": "DRenergies", "url": "https://www.drenergies.com/calendario-inscricoes-caminhadas"}, {"name": "Clube de Montanhismo da Guarda", "url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/"}, {"name": "Amigos da Montanha", "url": "https://amigosdamontanha.com/"}, {"name": "Caminhando.pt", "url": "https://caminhando.pt/agenda-eventos/caminhadas/"}, {"name": "Pé no Mundo", "url": "https://penomundo.pt/"}, {"name": "CAAL — Clube de Actividades de Ar Livre", "url": "https://clubearlivre.org/"}, {"name": "Trilhos Nocturnos", "url": "https://trilhosnocturnos.com/eventos-agenda/"}, {"name": "SAL — Sistemas de Ar Livre", "url": "https://www.sal.pt/"}, {"name": "Associação Geopark Estrela", "url": "https://geoparkestrela.pt/atividades"}, {"name": "Gerês Viver Turismo", "url": "https://geres.pt/programa-anual-de-caminhadas-2026/"}];
+const ORGANIZER_DIRECTORY = [{"name": "Hiking Around Adventures", "url": "https://www.hikingaround.pt/aventurasnacionais"}, {"name": "Mais Trilhos", "url": "https://maistrilhos.pt/caminhadas"}, {"name": "Indoeu", "url": "https://indoeu.pt/caminhadas/"}, {"name": "GreenTrekker", "url": "https://www.greentrekker.pt/agenda/"}, {"name": "Trekking Roots", "url": "https://trekkingroots.pt/calendario-caminhadas/"}, {"name": "Hike Land", "url": "https://www.hikeland.pt/atividades-1-dia/"}, {"name": "Montanhas Dentro", "url": "https://montanhasdentro.pt/"}, {"name": "Trekkin", "url": "https://www.trekkin.pt/eventos/"}, {"name": "Basto Trekking", "url": "https://bastotrekking.pt/"}, {"name": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/experiencia/"}, {"name": "Montanhas do Norte", "url": "https://montanhasdonorte.pt/percursos-1-dia/"}, {"name": "RB Hiking & Trekking", "url": "https://barbosa-trekking.pt/"}, {"name": "DRenergies", "url": "https://www.drenergies.com/calendario-inscricoes-caminhadas"}, {"name": "Clube de Montanhismo da Guarda", "url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/"}, {"name": "Amigos da Montanha", "url": "https://amigosdamontanha.com/"}, {"name": "Caminhando.pt", "url": "https://caminhando.pt/agenda-eventos/caminhadas/"}, {"name": "Pé no Mundo", "url": "https://penomundo.pt/"}, {"name": "CAAL — Clube de Actividades de Ar Livre", "url": "https://clubearlivre.org/"}, {"name": "Trilhos Nocturnos", "url": "https://trilhosnocturnos.com/eventos-agenda/"}, {"name": "SAL — Sistemas de Ar Livre", "url": "https://www.sal.pt/"}, {"name": "Associação Geopark Estrela", "url": "https://geoparkestrela.pt/atividades"}, {"name": "Gerês Viver Turismo", "url": "https://geres.pt/programa-anual-de-caminhadas-2026/"}];
 const AGGREGATOR_DIRECTORY = [{"name": "Trilhos & Caminhadas", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php"}, {"name": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39"}];
 function renderSourcesDirectory(){
  const link=e=>'<a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+esc(e.name)+' ↗</a>';
@@ -548,8 +592,25 @@ function selected(){return allEvents().filter(x=>
   fold(`${x.title} ${x.town} ${x.area} ${x.organizer} ${x.description}`).includes(fold(state.search))
  ).sort((a,b)=>a.date.localeCompare(b.date)||String(a.time).localeCompare(String(b.time))||a.title.localeCompare(b.title,'pt'))}
 function dateShort(x){return new Date(x.date+'T12:00:00').toLocaleDateString('pt-PT',{weekday:'short',day:'2-digit',month:'short'}).replaceAll('.','')}
+// Links fiáveis e em novo separador. Não transformar textos em URLs sem validação.
+const safeExternalUrl=u=>typeof u==='string'&&/^https?:\/\//i.test(u)?u:'';
+function organizerHomepage(x){
+ const entry=ORGANIZER_DIRECTORY.find(org=>fold(org.name)===fold(x.organizer));
+ if(entry&&safeExternalUrl(entry.url))return entry.url;
+ try{return safeExternalUrl(x.url)?new URL(x.url).origin+'/':'';}catch{return '';}
+}
+function googleMapsDeparture(x,spot){
+ const text=String(spot||'').trim();
+ if(!text||/^(?:por confirmar|a confirmar|desconhecido)(?:\b|$)/i.test(text))return '';
+ // Usar coordenadas apenas quando o próprio ponto foi confirmado pela fonte.
+ const query=x.verified&&hasCoords(x)?Number(x.lat)+','+Number(x.lon):
+   [text.replace(/\s*\([^)]*(?:a confirmar|ponto exacto|local exacto)[^)]*\)/gi,'').trim(),
+    x.town&&fold(text).includes(fold(x.town))?'':x.town,'Portugal'].filter(Boolean).join(', ');
+ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
+}
 function eventRow(x){
  const fav=favorites.has(x.id),spot=x.start||x.town||'Por confirmar',verified=!!x.verified;
+  const organizerUrl=organizerHomepage(x),mapsUrl=googleMapsDeparture(x,spot);
  const dt=new Date(x.date+'T12:00:00');
  const month=dt.toLocaleDateString('pt-PT',{month:'short'}).replace('.','').toUpperCase();
  const weekday=dt.toLocaleDateString('pt-PT',{weekday:'short'}).replace('.','').toUpperCase();
@@ -571,8 +632,8 @@ function eventRow(x){
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
    <h3><button class="walk-title-button" onclick="toggleRow('${esc(x.id)}')" aria-label="Ver detalhes de ${esc(x.title)}">${esc(x.title)}</button>${x.status?`<span class="walk-closed">${esc(x.status)}</span>`:''}</h3>
-   <p class="walk-organizer"><span class="walk-caption">Organizador:</span> <strong>${esc(x.organizer)}</strong></p>
-   <p class="walk-start"><span class="walk-caption">Local de partida:</span> <strong>${esc(spot)}</strong>${verified?'':' <span class="walk-unconfirmed">(a confirmar)</span>'}</p>
+   <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}</p>
+   <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':' <span class="walk-unconfirmed">(a confirmar)</span>'}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
   </div>
   <div class="walk-metrics">
@@ -583,8 +644,8 @@ function eventRow(x){
   </div>
   <div class="walk-actions">
    <button class="walk-favorite ${fav?'selected':''}" onclick="toggleFav('${esc(x.id)}')" aria-label="${fav?'Remover dos favoritos':'Adicionar aos favoritos'}" title="Favorito">${fav?'♥':'♡'}</button>
-   ${x.url?`<a class="walk-open" href="${esc(x.url)}" aria-label="Abrir anúncio de ${esc(x.title)}" title="Abrir página do organizador" rel="noopener noreferrer" target="_blank">↗</a>`:''}
-   <button class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="false" title="Mais informações">⌄</button>
+   ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Ver evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
+    <button type="button" class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="false" title="Mostrar detalhes"><span class="btn-label">Detalhes</span><span class="btn-icon" aria-hidden="true">⌄</span></button>
   </div>
   <div class="walk-detail-panel" id="details-${esc(x.id)}" hidden>
    <div class="walk-detail-copy">
@@ -602,16 +663,16 @@ function toggleRow(id){
  const panel=row.querySelector('.walk-detail-panel'),btn=row.querySelector('.walk-expand');
  if(!panel)return;
  panel.hidden=!panel.hidden;
- if(btn){btn.setAttribute('aria-expanded',String(!panel.hidden));btn.classList.toggle('selected',!panel.hidden);btn.textContent=panel.hidden?'⌄':'⌃';}
+ if(btn){btn.setAttribute('aria-expanded',String(!panel.hidden));btn.classList.toggle('selected',!panel.hidden);btn.querySelector('.btn-icon').textContent=panel.hidden?'⌄':'⌃';btn.querySelector('.btn-label').textContent=panel.hidden?'Detalhes':'Fechar';btn.title=panel.hidden?'Mostrar detalhes':'Recolher detalhes';}
 }
 function chips(){let xs=[];
- if(state.day!=='all')xs.push('Dia: '+state.day);
+ if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" onclick="clearSelectedDay()" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
  if(state.organizer!=='all')xs.push('Organizador: '+state.organizer);
  if(state.difficulty!=='all')xs.push(names[+state.difficulty]);
  if(state.kmMin>0||state.kmMax<KM_CAP)xs.push('Distância: '+state.kmMin+'–'+state.kmMax+' km');
  if(state.gainMin>0||state.gainMax<GAIN_CAP)xs.push('D+: '+state.gainMin+'–'+state.gainMax+' m');
  if(state.onlyFavorites)xs.push('Favoritos');
- return xs.map(t=>`<span class="pill">${esc(t)}</span>`).join('')}
+ return xs.map(t=>t.startsWith('<button')?t:`<span class="pill">${esc(t)}</span>`).join('')}
 
 
 let geo={zoom:7,center:{lat:40.50,lon:-8.15},layer:'satellite',picked:null,initialized:false,selectionShown:false};
@@ -686,9 +747,10 @@ function render(){const events=selected();
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
  $('resultCount').textContent=`${events.length} caminhada${events.length===1?'':'s'} · ${new Set(events.map(e=>e.organizer)).size} organizador${new Set(events.map(e=>e.organizer)).size===1?'':'es'}`;$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;}else if(state.view==='calendar')renderCalendar(events);else renderMap(events)}
-function renderCalendar(events){const m=state.month,y=state.year,first=new Date(y,m,1),start=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;let html=`<div class="month"><div class="monthbar"><h3>${first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}</h3><div class="arrows"><button onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button><button onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div><div class="calendar-grid">`;['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);for(let i=0;i<len;i++){let day=i-start+1,inMonth=day>=1&&day<=total;const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const today=events.filter(e=>e.date===iso);html+=`<div class="day-cell ${inMonth?'':'outside'} ${state.day===iso?'picked':''}">${inMonth?`<span class="number">${day}</span>${today.slice(0,2).map(x=>`<button title="${esc(x.title)}" class="mini-event" onclick="setDay('${iso}')">${esc(x.title)}</button>`).join('')}${today.length>2?`<button class="mini-more" onclick="setDay('${iso}')">+${today.length-2} mais</button>`:''}`:''}</div>`}html+='</div><div class="legend">Selecciona um dia para ver as respectivas caminhadas. Os filtros aplicam-se também ao calendário.</div></div>';$('calendarView').innerHTML=html}
+function renderCalendar(events){const m=state.month,y=state.year,first=new Date(y,m,1),start=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;let html=`<div class="month"><div class="monthbar"><h3>${first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}</h3><div class="arrows"><button onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button><button onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div><div class="calendar-grid">`;['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);for(let i=0;i<len;i++){let day=i-start+1,inMonth=day>=1&&day<=total;const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const today=events.filter(e=>e.date===iso);html+=`<div class="day-cell ${inMonth?'':'outside'} ${state.day===iso?'picked':''}">${inMonth?`<button type="button" class="day-number" onclick="setDay('${iso}')" title="${state.day===iso?'Retirar selecção de':'Filtrar por'} ${iso}" aria-label="${state.day===iso?'Retirar selecção de':'Seleccionar'} ${iso}">${day}</button>${today.slice(0,2).map(x=>`<button title="${esc(x.title)}" class="mini-event" onclick="setDay('${iso}')">${esc(x.title)}</button>`).join('')}${today.length>2?`<button class="mini-more" onclick="setDay('${iso}')">+${today.length-2} mais</button>`:''}`:''}</div>`}html+='</div><div class="legend">Toca numa data para filtrar; remove o dia no filtro acima para voltar a ver todos.</div></div>';$('calendarView').innerHTML=html}
 function shiftMonth(n){state.month+=n;if(state.month<0){state.month=11;state.year--}if(state.month>11){state.month=0;state.year++}render()}
-function setDay(d){state.day=d;state.view='list';render();document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'})}
+function clearSelectedDay(){state.day='all';render()}
+function setDay(d){if(state.day===d){clearSelectedDay();return;}state.day=d;state.view='list';render();document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'})}
 function toggleFav(id){favorites.has(id)?favorites.delete(id):favorites.add(id);try{localStorage.setItem('trilhario_fav_v1',JSON.stringify([...favorites]))}catch{}render()}
 function resetFilters(){Object.assign(state,{day:'all',organizer:'all',difficulty:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,search:'',onlyFavorites:false});$('search').value='';$('organizer').value='all';$('difficulty').value='all';$('favoritesOnly').checked=false;render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
@@ -696,7 +758,7 @@ function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.create
 function downloadIcs(id){const e=allEvents().find(x=>x.id===id);if(!e)return;const dt=e.date.replaceAll('-',''),start=(e.time||'09:00').replace(':','')+'00';const safe=s=>String(s??'').replaceAll('\\','\\\\').replaceAll('\n','\\n').replaceAll(',','\\,').replaceAll(';','\\;');let end='';if(e.duration){const [hh,mm]=(e.time||'09:00').split(':').map(Number);const d=new Date(e.date+'T12:00:00');d.setHours(hh,mm);d.setMinutes(d.getMinutes()+Math.round(e.duration*60));const ed=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');end='DTEND:'+ed+'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00\r\n'}const content=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Trilhario//Agenda//PT\r\nBEGIN:VEVENT\r\nUID:${e.id}@trilhario.local\r\nDTSTAMP:20261018T120000Z\r\nDTSTART:${dt}T${start}\r\n${end}SUMMARY:${safe(e.title)}\r\nLOCATION:${safe(e.start||e.town)}\r\nDESCRIPTION:${safe(e.organizer+' | '+(e.url||''))}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n`;saveBlob(new Blob([content],{type:'text/calendar;charset=utf-8'}),e.id+'.ics');toast('Evento exportado. Confirma sempre o horário real.')}
 function removeEvent(id){if(!confirm('Eliminar este evento?'))return;custom=custom.filter(e=>e.id!==id);try{localStorage.setItem('trilhario_custom_v1',JSON.stringify(custom))}catch{}populateOrganizers();render();toast('Evento eliminado')}
 function openModal(){$('modal').hidden=false;$('fTitle').focus();document.body.style.overflow='hidden'}function closeModal(){$('modal').hidden=true;document.body.style.overflow=''}
-$('addBtn').addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
+$('addBtn')?.addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
 $('eventForm').addEventListener('submit',e=>{e.preventDefault();const val=id=>$(id).value.trim(),maybeNumber=id=>val(id)!==''?Number(val(id)):null;const lat=maybeNumber('fLat'),lon=maybeNumber('fLon');const entry={id:'meu-'+Date.now(),userAdded:true,title:val('fTitle'),date:val('fDate'),time:val('fTime'),town:val('fTown'),region:val('fRegion'),area:val('fTown'),organizer:val('fOrg'),km:maybeNumber('fKm'),gain:maybeNumber('fGain'),price:maybeNumber('fPrice'),duration:maybeNumber('fDuration'),capacity:maybeNumber('fMaxParticipants'),start:val('fStart'),lat,lon,verified:lat!=null&&lon!=null,difficulty:Number(val('fDifficulty')),description:val('fDescription'),url:val('fUrl'),tag:'Manual'};if(!entry.title||!entry.date||!entry.town||!entry.organizer)return;custom.push(entry);try{localStorage.setItem('trilhario_custom_v1',JSON.stringify(custom))}catch{}$('eventForm').reset();closeModal();populateOrganizers();resetFilters();toast('Evento guardado neste navegador.')});
 $('search').addEventListener('input',e=>{state.search=e.target.value;render()});
 $('difficulty').addEventListener('change',e=>{state.difficulty=e.target.value;render()});
