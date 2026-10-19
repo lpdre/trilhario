@@ -27,11 +27,24 @@ ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "eventos.json"
 TODAY = date.today()
 LIMIT_DATE = TODAY + timedelta(days=150)
+# Os caminhos das páginas dos eventos não são iguais entre os organizadores.
+# Se uma fonte não responder, as restantes continuam a ser consultadas.
 SOURCES = [
     {"organizer": "Mais Trilhos", "url": "https://maistrilhos.pt/caminhadas", "path": r"^/caminhadas/[^/]+"},
-    {"organizer": "Indoeu", "url": "https://indoeu.pt/caminhadas/", "path": r"^/caminhadas/[^/]+"},
+    {"organizer": "Indoeu", "url": "https://indoeu.pt/caminhadas/", "path": r"^/[a-z0-9-]+/?$"},
     {"organizer": "GreenTrekker", "url": "https://www.greentrekker.pt/agenda/", "path": r"^/agenda/[^/]+"},
     {"organizer": "Trekking Roots", "url": "https://trekkingroots.pt/calendario-caminhadas/", "path": r"^/caminhada/[^/]+"},
+    {"organizer": "Hike Land", "url": "https://www.hikeland.pt/atividades-1-dia/",
+     "fallback": ["https://www.hikeland.pt/atividades/", "https://www.hikeland.pt/eventos/categorias/1-dia/"],
+     "path": r"^/eventos/(?!categorias/|etiquetas/|locais/|page/)[^/]+/?$"},
+    {"organizer": "Montanhas Dentro", "url": "https://montanhasdentro.pt/",
+     "path": r"^/evento/\d+/[^/]+/?$"},
+    {"organizer": "Trekkin", "url": "https://www.trekkin.pt/eventos/",
+     "path": r"^/evento/[^/]+/[^/]+/?$"},
+    {"organizer": "Basto Trekking", "url": "https://bastotrekking.pt/",
+     "path": r"^/caminhada/[^/]+/?$"},
+    {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/experiencia/",
+     "path": r"^/[a-z0-9-]+/?$"},
 ]
 
 MONTHS = {
@@ -67,6 +80,13 @@ def date_from(text: str, *, short_year: int | None = None) -> date | None:
     if m:
         try:
             return date(int(m[1]), int(m[2]), int(m[3]))
+        except ValueError:
+            return None
+    # Em especial para Trekkin e outras agendas no formato DD/MM/AAAA.
+    m = re.search(r"\b(0?[1-9]|[12]\d|3[01])[-/](0?[1-9]|1[0-2])[-/](20\d{2})\b", s)
+    if m:
+        try:
+            return date(int(m[3]), int(m[2]), int(m[1]))
         except ValueError:
             return None
     m = re.search(r"\b(\d{1,2})\s+(?:de\s+)?(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\b(?:\s+(?:de\s+)?(20\d{2}))?", s)
@@ -127,7 +147,7 @@ def smallest_context(anchor) -> str:
 
 def title_from(anchor, block: str, organizer: str) -> str:
     title = clean(anchor.get_text(" ", strip=True))
-    if len(title) < 8 or title.lower() in {"ver detalhes", "mais informações", "ver mais", "+info", "informações"}:
+    if len(title) < 8 or folded(title) in {"ver detalhes", "mais informacoes", "ver mais", "+info", "informacoes", "visualizar evento", "ver evento", "consultar", "saber mais"}:
         for parent in list(anchor.parents)[:5]:
             heading = parent.find(re.compile(r"^h[1-6]$"))
             if heading:
@@ -137,6 +157,7 @@ def title_from(anchor, block: str, organizer: str) -> str:
     title = re.sub(r"\s*(?:\+INFO|Mais Informações|Ver Detalhes)\s*$", "", title, flags=re.I)
     title = re.sub(r"^(?:\d{1,2}\s+(?:Jan|Fev|Mar|Abr|Mai|Jun|Jul|Ago|Set|Out|Nov|Dez)\s+)", "", title, flags=re.I)
     title = re.sub(r"\s*20\d{2}-\d{2}-\d{2}\s*$", "", title)
+    title = re.sub(r"^\d{1,2}\s+(?:de\s+)?(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+20\d{2}\s+", "", title, flags=re.I)
     return title.strip(" -—|")[:140]
 
 
@@ -161,6 +182,8 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
         event["km"] = number(r"\b(\d{1,3}(?:[.,]\d{1,2})?)\s*km\b", text, 160)
     if not event.get("gain"):
         gain = number(r"(?:D\+|desn[ií]vel(?: positivo| acumulado)?|ascens[aã]o)\s*[:\-]?\s*(\d{2,4})\s*m", text, 4500)
+        if gain is None:
+            gain = number(r"\b(\d{2,4})\s*m\s*d\+(?=\s|$)", text + ' ', 4500)
         if gain is not None:
             event["gain"] = round(gain)
     if event.get("price") is None:
@@ -170,7 +193,7 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
     if not event.get("duration"):
         event["duration"] = number(r"(?:dura[cç][aã]o|tempo previsto|tempo estimado)\s*[:\-]?\s*(\d{1,2}(?:[.,]\d)?)\s*(?:h|horas?)", text, 24)
     if not event.get("time"):
-        m = re.search(r"(?:in[ií]cio|partida|hora de encontro|concentra[cç][aã]o)\s*[:\-]?\s*(\d{1,2})[:h](\d{2})", text, re.I)
+        m = re.search(r"(?:in[ií]cio|partida|hora de encontro|concentra[cç][aã]o|data)\s*[:\-]?\s*(?:\d{1,2}/\d{1,2}/20\d{2}\s*,?\s*)?(\d{1,2})[:h](\d{2})", text, re.I)
         if m and int(m[1]) <= 23 and int(m[2]) <= 59:
             event["time"] = f"{int(m[1]):02d}:{m[2]}"
     if event.get("start") == "Por confirmar":
@@ -178,7 +201,7 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
         if m:
             event["start"] = clean(m[1])
     if event.get("town") == "Por confirmar":
-        m = re.search(r"(?:localiza[cç][aã]o|localidade)\s*[:\-]\s*([^.;,]{3,55})", text, re.I)
+        m = re.search(r"(?:localiza[cç][aã]o|localidade|local)\s*[:\-]\s*([^.;,]{3,55})", text, re.I)
         if m:
             event["town"] = clean(m[1])
     if event.get("difficulty") is None:
@@ -243,31 +266,113 @@ def enrich_jsonld(html: BeautifulSoup, event: dict) -> None:
                         pass
 
 
+def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
+    """Campos específicos de eventos de organizadores com estruturas próprias."""
+    scope = html.find("main") or html.find("article") or html
+    value = clean(scope.get_text(" ", strip=True))[:16000]
+    if organizer == "Indoeu":
+        # Neste site o ponto de encontro surge como título e depois um item de lista,
+        # sem dois pontos, pelo que não era detectado pelo colector genérico.
+        for heading in scope.find_all(re.compile(r"^h[1-6]$")):
+            if folded(clean(heading.get_text(" ", strip=True))) != "ponto de encontro":
+                continue
+            following = heading.find_next(["li", "p"])
+            if following:
+                place = clean(following.get_text(" ", strip=True))
+                if 4 <= len(place) <= 110 and "coordenadas" not in folded(place):
+                    item["start"] = place
+                    item["town"] = place
+                break
+        # Hora no formato «Início: 9:15 horas» (extractor genérico aceita-o).
+    elif organizer == "Hike Land":
+        if not item.get("time"):
+            mtime = re.search(r"in[ií]cio\s*:\s*\d{1,2}\s+de\s+\w+\s*[|–-]\s*(\d{1,2}):(\d{2})", value, re.I)
+            if mtime and int(mtime[1]) < 24 and int(mtime[2]) < 60:
+                item["time"] = f"{int(mtime[1]):02d}:{mtime[2]}"
+        m = re.search(r"(?:ponto de encontro)\s+(?:localiza[cç][aã]o\s*[:\-]\s*)?(.{5,105}?)(?:\s+o pre[cç]o|\s+pre[cç]o inclui|\s+o pre[cç]o inclui|\s+inscreva-se|$)", value, re.I)
+        if m and "localiza" not in folded(m[1][:10]):
+            place = clean(m[1]).rstrip('. ')
+            if len(place) <= 105:
+                item["start"] = place
+        if item.get("duration") is None:
+            m = re.search(r"dura[cç][aã]o\s*[:\-]?\s*(\d{1,2})h(\d{2})", value, re.I)
+            if m:
+                item["duration"] = int(m[1]) + int(m[2]) / 60
+    elif organizer == "Montanhas Dentro":
+        if not item.get("time"):
+            mtime = re.search(r"(?:segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo)\s*,?\s*\d{1,2}\s+de\s+\w+\s*[,.]?\s*(\d{1,2}):(\d{2})", value, re.I)
+            if mtime and int(mtime[1]) < 24 and int(mtime[2]) < 60:
+                item["time"] = f"{int(mtime[1]):02d}:{mtime[2]}"
+        if item.get("town") == "Por confirmar":
+            m = re.search(r"localiza[cç][aã]o\s+([^.;]{3,70}?)(?:\s+como chegar|\s+ver no google maps|\s+programa)", value, re.I)
+            if m:
+                item["town"] = clean(m[1])
+        # É habitual o local de encontro só ser comunicado após a inscrição.
+        if item.get("km") is None:
+            m = re.search(r"\b(\d{1,2}(?:[,.]\d)?)\s*km\b", value, re.I)
+            if m:
+                item["km"] = float(m[1].replace(',', '.'))
+    elif organizer == "Trekkin":
+        m = re.search(r"\blocal\s*:\s*([^.;]{3,80}?)(?:\s+pre[cç]o\s*:|\s+descri[cç][aã]o)", value, re.I)
+        if m:
+            place = clean(m[1])
+            if folded(place) != "local por definir":
+                item["town"] = place
+                item["start"] = place
+        # Data «15/11/2026, 10:00», que não existia no date_from original.
+    elif organizer == "Caminhadas Smile":
+        if not item.get("time"):
+            mtime = re.search(r"hora e local de encontro\s*:\s*(\d{1,2}):(\d{2})", value, re.I)
+            if mtime and int(mtime[1]) < 24 and int(mtime[2]) < 60:
+                item["time"] = f"{int(mtime[1]):02d}:{mtime[2]}"
+        if item.get("start") == "Por confirmar" or re.match(r"^\d{1,2}:\d{2}\s*h?\s*[–-]", item.get("start") or ""):
+            mplace = re.search(r"hora e local de encontro\s*:\s*\d{1,2}:\d{2}\s*h?\s*[–\-]\s*(.{5,120}?)(?:\s+coordenadas gps|\s+\|\s+ver mapa|\s+percurso\s*:)", value, re.I)
+            if mplace:
+                item["start"] = clean(mplace[1]).strip(' .')
+        if item.get("town") == "Por confirmar":
+            mloc = re.search(r"zona da atividade\s*:\s*([^.;]{4,70})", value, re.I)
+            if mloc:
+                item["town"] = clean(mloc[1])
+    elif organizer == "Basto Trekking":
+        if item.get("price") is None:
+            m = re.search(r"(?:inscri[cç][oõ]es|custo)\s*[:\-]?\s*(\d{1,3}(?:[,.]\d{1,2})?)\s*euros?", value, re.I)
+            if m:
+                item["price"] = float(m[1].replace(',', '.'))
+
+
 def collect_source(source: dict) -> list[dict]:
-    html = fetch(source["url"])
-    if html is None:
-        return []
     domain = urlparse(source["url"]).hostname.removeprefix("www.")
     links: dict[str, tuple[str, str]] = {}
-    for anchor in html.find_all("a", href=True):
-        url = canonical(source["url"], anchor["href"])
-        if not url:
+    for listing_url in [source["url"], *source.get("fallback", [])]:
+        html = fetch(listing_url)
+        if html is None:
             continue
-        parsed = urlparse(url)
-        if parsed.hostname.removeprefix("www.") != domain:
-            continue
-        if not re.match(source["path"], parsed.path) or parsed.path.rstrip("/") == urlparse(source["url"]).path.rstrip("/"):
-            continue
-        block = smallest_context(anchor)
-        title = title_from(anchor, block, source["organizer"])
-        if len(title) < 7 or title.lower().startswith(("contact", "inscrev", "ler mais")):
-            continue
-        # Excluir links repetidos na mesma listagem.
-        if url not in links or len(block) < len(links[url][1]):
-            links[url] = (title, block)
+        for anchor in html.find_all("a", href=True):
+            url = canonical(source["url"], anchor["href"])
+            if not url:
+                continue
+            parsed = urlparse(url)
+            if parsed.hostname.removeprefix("www.") != domain:
+                continue
+            if not re.match(source["path"], parsed.path) or parsed.path.rstrip("/") == urlparse(source["url"]).path.rstrip("/"):
+                continue
+            block = smallest_context(anchor)
+            title = title_from(anchor, block, source["organizer"])
+            if len(title) < 7 or title.lower().startswith(("contact", "inscrev", "ler mais")):
+                continue
+            # Excluir links repetidos na mesma listagem.
+            if url not in links or len(block) < len(links[url][1]):
+                links[url] = (title, block)
+        if links:
+            break  # usar só a primeira listagem que forneça eventos
     logging.info("%s: %d possíveis anúncios", source["organizer"], len(links))
     result = []
-    for url, (title, block) in list(links.items())[:55]:
+    for url, (title, block) in list(links.items())[:75]:
+        # Links genéricos na navegação destas páginas não são caminhadas.
+        if source["organizer"] in {"Indoeu", "Caminhadas Smile"} and not date_from(block):
+            continue
+        if source["organizer"] == "Caminhadas Smile" and re.search(r"\b\d{1,2}\s*[-–]\s*\d{1,2}\s+(?:JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\b", block, re.I):
+            continue  # excursões com vários dias
         event_date = date_from(block) or date_from(url)
         if event_date and (event_date < TODAY or event_date > LIMIT_DATE):
             continue
@@ -292,10 +397,26 @@ def collect_source(source: dict) -> list[dict]:
         # Campos extraídos da listagem, se for um bloco isolado e inequívoco.
         if event_date and len(block) < 650:
             parse_meta(BeautifulSoup(f"<main>{block}</main>", "html.parser"), item)
+        if source["organizer"] == "Trekkin":
+            mloc = re.search(r"\blocal\s*:\s*([^.;]{4,90}?)(?=\s+(?:ver detalhes|descri[cç][aã]o|pre[cç]o|visualizar evento)|$)", block, re.I)
+            if mloc and folded(clean(mloc[1])) != "local por definir":
+                item["town"] = clean(mloc[1])
         detail = fetch(url)
         if detail is not None:
             enrich_jsonld(detail, item)
             parse_meta(detail, item)
+            extra_source_meta(detail, item, source["organizer"])
+            # Usar o nome real do anúncio se o link apenas disser «Ver detalhes».
+            if folded(item["title"]) in {"ver detalhes", "mais informacoes", "ver mais", "visualizar evento", "ver evento", "saber mais"}:
+                h = detail.find("h1")
+                if h:
+                    item["title"] = clean(h.get_text(" ", strip=True))[:140]
+            # Datas sem ano em páginas dos organizadores: confirmar no conteúdo.
+            if not item["date"]:
+                main = detail.find("main") or detail.find("article") or detail
+                dt = date_from(clean(main.get_text(" ", strip=True))[:1500])
+                if dt:
+                    item["date"] = dt.isoformat()
             meta = detail.find("meta", attrs={"name":"description"})
             if meta and meta.get("content"):
                 item["description"] = clean(meta["content"])[:260]
@@ -306,6 +427,10 @@ def collect_source(source: dict) -> list[dict]:
         if not TODAY <= dt <= LIMIT_DATE:
             continue
         if not (7 <= len(item["title"]) <= 140):
+            continue
+        if source["organizer"] in {"Trekkin", "Montanhas Dentro"} and re.search(r"\b(?:dois dias|2 dias|3 dias|fim de semana|noites?)\b", folded(block)):
+            continue  # não misturar viagens de vários dias com caminhadas de um dia
+        if "via ferrata" in folded(item["title"]):
             continue
         if item["duration"] is not None and item["duration"] > 14:
             continue  # para já, apenas saídas de um dia
