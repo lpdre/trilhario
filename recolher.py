@@ -708,7 +708,170 @@ def collect_ndesafios(source: dict) -> list[dict]:
     return result
 
 
+
+# A data de um evento não pode ser copiada de cartões adjacentes.
+# Montanhas Dentro: consultar a página INDIVIDUAL e validar a data e o tipo
+# no cabeçalho do evento, antes da secção «Outros eventos».
+MONTANHAS_ORG = "Montanhas Dentro"
+MONTANHAS_MONTHS = (
+    r"janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|"
+    r"setembro|outubro|novembro|dezembro"
+)
+MONTANHAS_WD = r"segunda(?:-feira)?|ter[cç]a(?:-feira)?|quarta(?:-feira)?|quinta(?:-feira)?|sexta(?:-feira)?|s[aá]bado|domingo"
+MONTANHAS_HEAD_DATE = re.compile(
+    rf"\b(?P<weekday>{MONTANHAS_WD})\s*,?\s*(\d{{1,2}})\s+de\s+({MONTANHAS_MONTHS})\b(?:\s+de\s+(20\d{{2}}))?",
+    re.I,
+)
+MONTANHAS_MULTIDAY = re.compile(
+    rf"\b\d{{1,2}}\s+de\s+(?:{MONTANHAS_MONTHS})\s+a\s+\d{{1,2}}\s+de\s+(?:{MONTANHAS_MONTHS})\b"
+    r"|\b(?:fim de semana|\d+\s*(?:dias|noites))\b",
+    re.I,
+)
+MONTANHAS_PREFIX_DATE = re.compile(r"^\s*(?:seg|ter|qua|qui|sex|s[aá]b|dom)[a-zçãé-]*\s*,?\s*(\d{1,2})\s+(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\b", re.I)
+
+
+def header_date_conflicts(item: dict) -> bool:
+    """Detecta títulos com 'Sex, 30 out' que contradizem a data guardada."""
+    m = MONTANHAS_PREFIX_DATE.search(item.get('title') or '')
+    if not m:
+        return False
+    try:
+        dt = date.fromisoformat(item['date'])
+    except (ValueError, KeyError, TypeError):
+        return True
+    return (dt.day != int(m[1]) or dt.month != MONTHS[folded(m[2])])
+
+
+def parse_montanhas_detail(soup: BeautifulSoup, url: str) -> dict | None:
+    """Só aceita caminhadas de 1 dia, com data/hora no cabeçalho da página oficial.
+
+    Não usa o texto de «Outros eventos», não infere datas a partir da
+    homepage e não confunde o preço de membro com a tarifa de adulto.
+    """
+    # Se não há conteúdo oficial verificável, falhar fechado.
+    main = soup.find('main') or soup.find('article') or soup
+    heading = main.find('h1') or soup.find('h1')
+    if heading is None:
+        return None
+    title = clean(heading.get_text(' ', strip=True))
+    if not title or not 7 <= len(title) <= 140:
+        return None
+    full = clean(main.get_text(' ', strip=True))
+    pos = full.find(title)
+    if pos < 0:
+        return None
+    # A área do cabeçalho termina antes da apresentação detalhada da actividade.
+    beginning = full[pos + len(title):pos + len(title) + 1200]
+    if 'Adicionar ao calendário' in beginning:
+        beginning = beginning.split('Adicionar ao calendário', 1)[0]
+    if 'Outros eventos' in beginning:
+        beginning = beginning.split('Outros eventos', 1)[0]
+    m = MONTANHAS_HEAD_DATE.search(beginning)
+    if m is None:
+        logging.warning('Montanhas Dentro: sem data principal inequívoca: %s', url)
+        return None
+    # Uma caminhada de dois dias pode ter várias distâncias: não resumir
+    # ambas num único cartão com um dia errado.
+    if MONTANHAS_MULTIDAY.search(beginning) or NON_WALK_TITLES.search(title):
+        logging.info('Montanhas Dentro: actividade não elegível (multi-dia/não pedestre): %s', title)
+        return None
+    after_date = beginning[m.end():m.end() + 115]
+    # É um campo de tipo do anúncio: '19:00 Caminhada 4,5 km'.
+    if not re.search(r'^\s*(?:[012]?\d:[0-5]\d\s+)?Caminhada\b', after_date, re.I):
+        logging.info('Montanhas Dentro: não é caminhada: %s', title)
+        return None
+    date_text = f'{m[2]} de {m[3]}' + (f' de {m[4]}' if m[4] else '')
+    d = date_from(date_text)
+    if d is None or not TODAY <= d <= LIMIT_DATE:
+        return None
+    weekdays = {'segunda': 0, 'terca': 1, 'quarta': 2, 'quinta': 3,
+                'sexta': 4, 'sabado': 5, 'domingo': 6}
+    announced_weekday = folded(m['weekday']).split('-')[0]
+    if weekdays.get(announced_weekday) != d.weekday():
+        logging.warning('Montanhas Dentro: dia da semana contradiz a data (%s)', url)
+        return None
+    time_match = re.match(r'\s*([01]?\d|2[0-3]):([0-5]\d)\s+', after_date)
+    time_str = f'{int(time_match[1]):02d}:{time_match[2]}' if time_match else ''
+    km_match = re.search(r'\bCaminhada\s+(\d{1,2}(?:[,.]\d{1,2})?)\s*km\b', after_date, re.I)
+    kms = float(km_match[1].replace(',', '.')) if km_match else None
+    # Tarifa base do adulto, não a de membro/criança.
+    pm = re.search(r'\bAdulto\s+(\d{1,3}(?:[,.]\d{1,2})?)\s*€', beginning, re.I)
+    price = float(pm[1].replace(',', '.')) if pm else None
+    prog_idx = full.find('Programa', pos + len(title))
+    outro_idx = full.find('Outros eventos', pos + len(title))
+    prog = full[prog_idx:(outro_idx if outro_idx > prog_idx else prog_idx + 1600)] if prog_idx >= 0 else ''
+    gain_match = re.search(r'\+\s*(\d{2,4})\s*m\b', prog, re.I)
+    gain = int(gain_match[1]) if gain_match else None
+    town = 'Por confirmar'
+    loc_idx = full.find('Localização', pos + len(title))
+    if loc_idx >= 0 and (outro_idx < 0 or loc_idx < outro_idx):
+        loc = full[loc_idx + len('Localização'):loc_idx + len('Localização')+145]
+        loc = re.split(r'Como chegar|Ver no Google Maps|Programa|O que',loc,maxsplit=1)[0]
+        if 3 <= len(clean(loc)) <= 105:
+            town = clean(loc).split(' · ')[0]
+    start = 'Por confirmar'
+    start_match = re.search(r'Início\s+Início de caminhada em\s+(.{5,100}?)(?:\.|\s+Faremos|\s+Piquenique|$)', prog, re.I)
+    if start_match:
+        start = clean(start_match[1])
+    item = {
+        'id': 'web-' + hashlib.sha256(f'{MONTANHAS_ORG}|{url}'.encode()).hexdigest()[:15],
+        'title': title,
+        'date': d.isoformat(),
+        'time': time_str,
+        'organizer': MONTANHAS_ORG,
+        'url': url,
+        'town': town,
+        'start': start,
+        'region': '',
+        'area': '',
+        'km': kms,
+        'gain': gain,
+        'duration': None,
+        'price': price,
+        'difficulty': None,
+        'description': 'Ver programa e confirmação de detalhes no site do organizador.',
+        'tag': 'Caminhada',
+        'date_verified': 'official_detail',
+    }
+    if re.search(r'\bEsgotado\b', beginning, re.I):
+        item['status'] = 'Esgotado'
+    if not valid_new_event(item):
+        return None
+    return item
+
+
+def collect_montanhas_dentro(source: dict) -> list[dict]:
+    """Anúncios oficiais, com cada data obtida da sua própria página."""
+    base = source['url']
+    listing = fetch(base)
+    if listing is None:
+        logging.warning('Montanhas Dentro: consulta falhou, não reutilizar dados antigos')
+        return []
+    domain = urlparse(base).hostname.removeprefix('www.')
+    found = {}
+    for a in listing.find_all('a',href=True):
+        link = canonical(base,a['href'])
+        if not link:
+            continue
+        parsed = urlparse(link)
+        if parsed.hostname.removeprefix('www.') == domain and re.fullmatch(r'/evento/\d+/[^/]+', parsed.path.rstrip('/')):
+            found[link] = None
+    result = []
+    for link in list(found)[:90]:
+        detail = fetch(link)
+        if detail is None:
+            continue
+        e = parse_montanhas_detail(detail, link)
+        if e is not None:
+            result.append(e)
+        time.sleep(.12)
+    logging.info('Montanhas Dentro: %d caminhadas de 1 dia confirmadas em %d anúncios',len(result),len(found))
+    return result
+
+
 def collect_source(source: dict) -> list[dict]:
+    if source["organizer"] == MONTANHAS_ORG:
+        return collect_montanhas_dentro(source)
     domain = urlparse(source["url"]).hostname.removeprefix("www.")
     links: dict[str, tuple[str, str]] = {}
     for listing_url in [source["url"], *source.get("fallback", [])]:
@@ -811,6 +974,9 @@ def collect_source(source: dict) -> list[dict]:
             continue  # para já, apenas saídas de um dia
         if item["km"] is not None and item["km"] > 40:
             continue
+        if header_date_conflicts(item):
+            logging.warning("Data do título não coincide com a data recolhida: %s", url)
+            continue
         if not valid_new_event(item) or MULTIDAY.search(block[:220]):
             continue
         result.append(item)
@@ -826,6 +992,13 @@ def main() -> int:
             saved = json.loads(OUT.read_text(encoding="utf-8"))
             if saved.get("mode") != "demo":
                 for item in saved.get("events", []):
+                    if item.get("organizer") == MONTANHAS_ORG:
+                        # Recatalogar EXCLUSIVAMENTE através da página oficial;
+                        # entradas antigas contêm datas erradas e tipo mal identificado.
+                        continue
+                    if header_date_conflicts(item):
+                        logging.warning('Registo antigo com data contraditória eliminado: %s',item.get('url'))
+                        continue
                     if item.get("id") and item.get("date", "") >= TODAY.isoformat():
                         aggregated[item["id"]] = item
         except (ValueError, OSError, AttributeError) as exc:
@@ -836,7 +1009,7 @@ def main() -> int:
         try:
             mode=source.get('mode')
             if mode=='ndesafios': found=collect_ndesafios(source)
-            if mode=='agregador': found=collect_aggregator(source)
+            elif mode=='agregador': found=collect_aggregator(source)
             elif mode=='drenergies': found=collect_drenergies(source)
             elif mode=='sal': found=collect_sal(source)
             elif mode in ('programa','lousada'): found=collect_simple_program(source)
@@ -844,6 +1017,11 @@ def main() -> int:
             if found:
                 succeeded += 1
             for item in found:
+                if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
+                    # Não aceitar datas desta empresa reenviadas por agregadores.
+                    continue
+                if header_date_conflicts(item):
+                    continue
                 if item["id"] not in aggregated:
                     new_ids.append(item["id"])
                 aggregated[item["id"]] = item

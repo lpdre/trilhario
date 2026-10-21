@@ -728,7 +728,8 @@ async function loadEventFeed(){
   if(!response.ok)return;
   const json=await response.json();
   if(!json||!Array.isArray(json.events)||json.events.length>10000)return;
-  const events=json.events.filter(e=>e&&typeof e.id==='string'&&typeof e.title==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&typeof e.organizer==='string')
+  const events=json.events.filter(e=>e&&typeof e.id==='string'&&typeof e.title==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&typeof e.organizer==='string'
+    && !(e.organizer==='Montanhas Dentro' && e.date_verified!=='official_detail'))
     .map(e=>({...e,url:(typeof e.url==='string'&&/^https?:\/\//i.test(e.url))?e.url:''}));
   remoteEvents=events;
   remoteUpdatedAt=typeof json.updated_at==='string'?json.updated_at:null;
