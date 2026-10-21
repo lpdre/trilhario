@@ -47,6 +47,10 @@ SOURCES = [
      "path": r"^/caminhada/[^/]+/?$"},
     {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/experiencia/",
      "path": r"^/[a-z0-9-]+/?$"},
+    {"organizer": "NDesafios — Natureza e Desafios", "url": "https://ndesafios.pt/",
+     "mode": "ndesafios"},
+    # Trekking4Life: site Wix oficial sem calendário de saídas parseável.
+    # Eventos válidos podem entrar pelo agregador; não usar data 2926.
     # Agendas oficiais adicionais. Só são importados anúncios com data validada.
     {"organizer": "Montanhas do Norte", "url": "https://montanhasdonorte.pt/percursos-1-dia/",
      "path": r"^/(?:tour|percursos|percurso|produto|atividade|actividade)/[^/]+/?$"},
@@ -623,6 +627,87 @@ def deduplicate(events: list[dict]) -> list[dict]:
         else:target.append(item)
     return [item for part in grouped.values() for item in part]
 
+def collect_ndesafios(source: dict) -> list[dict]:
+    """Consulta apenas os cartões de 1 dia do site oficial.
+
+    O site reutiliza por vezes links de páginas antigas. Quando a data no
+    detalhe não coincide com a anunciada na página inicial, rejeitar o anúncio
+    em vez de misturar anos ou publicar uma data inferida.
+    """
+    html = fetch(source['url'])
+    if html is None:
+        return []
+    heading = next((h for h in html.find_all(re.compile(r'^h[1-6]$'))
+                    if folded(clean(h.get_text(' ', strip=True))) == 'atividades de um dia'), None)
+    if heading is None:
+        logging.warning('NDesafios: secção de actividades de um dia não encontrada')
+        return []
+    result, visited = [], set()
+    datepat = re.compile(r'(\d{1,2}\s+de\s+(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+20\d{2})?)\b', re.I)
+    for node in heading.next_elements:
+        if getattr(node, 'name', None) in ('h1','h2','h3','h4','h5','h6'):
+            head=folded(clean(node.get_text(' ',strip=True)))
+            if head in ('aventuras','programas de varios dias','workshops e formacoes'):
+                break
+        if getattr(node, 'name', None) != 'a' or not node.get('href'):
+            continue
+        href=canonical(source['url'],node['href'])
+        if not href or urlparse(href).hostname not in ('ndesafios.pt','www.ndesafios.pt') or href in visited:
+            continue
+        visited.add(href)
+        raw=clean(node.get_text(' ',strip=True))
+        match=datepat.search(raw)
+        if not match:
+            continue
+        announced=date_from(match[1],short_year=TODAY.year)
+        if not announced or not TODAY<=announced<=LIMIT_DATE:
+            continue
+        title=clean(raw[:match.start()]).strip(' –-:|')
+        if not 7<=len(title)<=140 or NON_WALK_TITLES.search(title) or MULTIDAY.search(title):
+            continue
+        detail=fetch(href)
+        if detail is None: # Não inventar metadados com uma página indisponível.
+            continue
+        main=detail.find('main') or detail.find('article') or detail
+        title_tag=main.find('h1') or detail.find('h1')
+        if title_tag:
+            t=clean(title_tag.get_text(' ',strip=True))
+            if 7<=len(t)<=140:
+                title=t
+        if NON_WALK_TITLES.search(title) or MULTIDAY.search(title):
+            continue
+        # A data mais próxima do título costuma estar no h2/h3 do anúncio.
+        heading_date=next((h for h in main.find_all(['h2','h3','h4'])[:8]
+                           if datepat.search(clean(h.get_text(' ',strip=True)))),None)
+        if heading_date:
+            m=datepat.search(clean(heading_date.get_text(' ',strip=True)))
+            detail_date=date_from(m[1],short_year=announced.year) if m else None
+            if detail_date and detail_date!=announced:
+                logging.warning('NDesafios: data divergente %s (lista %s, detalhe %s)',href,announced,detail_date)
+                continue
+        item={'id':'web-'+hashlib.sha256(f"{source['organizer']}|{href}".encode()).hexdigest()[:15],
+              'title':title,'date':announced.isoformat(),'organizer':source['organizer'],
+              'url':href,'town':'Por confirmar','start':'Por confirmar','region':'',
+              'area':'','time':'','km':None,'gain':None,'duration':None,
+              'price':None,'difficulty':None,'description':'Consultar detalhes no organizador.',
+              'tag':'Caminhada'}
+        enrich_jsonld(detail,item)
+        item['date']=announced.isoformat() # Data de destaque da agenda prevalece.
+        parse_meta(detail,item)
+        opening=clean(main.get_text(' ',strip=True))[:600]
+        clock=re.search(r'\b(?:[àa]s|inicio:?)\s*(\d{1,2})[h:](\d{2})\b',opening,re.I)
+        if clock and int(clock[1])<24 and int(clock[2])<60:
+            item['time']=f"{int(clock[1]):02d}:{clock[2]}"
+        if item.get('km') is not None and item['km']>40:
+            continue
+        if not valid_new_event(item):
+            continue
+        result.append(item)
+        time.sleep(0.12)
+    logging.info('NDesafios: %d eventos futuros de um dia validados',len(result))
+    return result
+
+
 def collect_source(source: dict) -> list[dict]:
     domain = urlparse(source["url"]).hostname.removeprefix("www.")
     links: dict[str, tuple[str, str]] = {}
@@ -750,6 +835,7 @@ def main() -> int:
     for source in SOURCES:
         try:
             mode=source.get('mode')
+            if mode=='ndesafios': found=collect_ndesafios(source)
             if mode=='agregador': found=collect_aggregator(source)
             elif mode=='drenergies': found=collect_drenergies(source)
             elif mode=='sal': found=collect_sal(source)
