@@ -45,8 +45,6 @@ SOURCES = [
      "path": r"^/evento/[^/]+/[^/]+/?$"},
     {"organizer": "Basto Trekking", "url": "https://bastotrekking.pt/",
      "path": r"^/caminhada/[^/]+/?$"},
-    {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/experiencia/",
-     "path": r"^/[a-z0-9-]+/?$"},
     {"organizer": "NDesafios — Natureza e Desafios", "url": "https://ndesafios.pt/",
      "mode": "ndesafios"},
     # Trekking4Life: site Wix oficial sem calendário de saídas parseável.
@@ -985,6 +983,12 @@ def collect_source(source: dict) -> list[dict]:
     return result
 
 
+# Desactivar uma fonte por qualidade de dados; protege também entradas
+# antigas e registos devolvidos por agregadores externos.
+def excluded_organizer(name: str) -> bool:
+    return re.sub(r'[^a-z0-9]', '', folded(str(name or ''))) == 'caminhadassmile'
+
+
 def main() -> int:
     aggregated: dict[str, dict] = {}
     if OUT.exists():
@@ -992,6 +996,9 @@ def main() -> int:
             saved = json.loads(OUT.read_text(encoding="utf-8"))
             if saved.get("mode") != "demo":
                 for item in saved.get("events", []):
+                    if excluded_organizer(item.get('organizer')):
+                        logging.info('A excluir registo antigo da fonte desactivada: %s',item.get('url'))
+                        continue
                     if item.get("organizer") == MONTANHAS_ORG:
                         # Recatalogar EXCLUSIVAMENTE através da página oficial;
                         # entradas antigas contêm datas erradas e tipo mal identificado.
@@ -1017,6 +1024,8 @@ def main() -> int:
             if found:
                 succeeded += 1
             for item in found:
+                if excluded_organizer(item.get('organizer')):
+                    continue
                 if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                     # Não aceitar datas desta empresa reenviadas por agregadores.
                     continue

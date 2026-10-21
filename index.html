@@ -626,7 +626,7 @@ let remoteUpdatedAt=null;
 
 // Fontes monitorizadas; a presença aqui não significa vagas ou eventos confirmados.
 // Trilhário v16 — Trekking4Life e NDesafios no directório; Hike Land já existia.
-const ORGANIZER_DIRECTORY = [{"name": "Hiking Around Adventures","url": "https://www.hikingaround.pt/aventurasnacionais"},{"name": "Mais Trilhos","url": "https://maistrilhos.pt/caminhadas"},{"name": "Indoeu","url": "https://indoeu.pt/caminhadas/"},{"name": "GreenTrekker","url": "https://www.greentrekker.pt/agenda/"},{"name": "Trekking Roots","url": "https://trekkingroots.pt/calendario-caminhadas/"},{"name": "Hike Land","url": "https://www.hikeland.pt/atividades-1-dia/"},{"name": "Montanhas Dentro","url": "https://montanhasdentro.pt/"},{"name": "Trekkin","url": "https://www.trekkin.pt/eventos/"},{"name": "Basto Trekking","url": "https://bastotrekking.pt/"},{"name": "Caminhadas Smile","url": "https://www.caminhadassmile.pt/experiencia/"},{"name": "Montanhas do Norte","url": "https://montanhasdonorte.pt/percursos-1-dia/"},{"name": "RB Hiking & Trekking","url": "https://barbosa-trekking.pt/"},{"name": "DRenergies","url": "https://www.drenergies.com/calendario-inscricoes-caminhadas"},{"name": "Clube de Montanhismo da Guarda","url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/"},{"name": "Amigos da Montanha","url": "https://amigosdamontanha.com/"},{"name": "Caminhando.pt","url": "https://caminhando.pt/agenda-eventos/caminhadas/"},{"name": "Pé no Mundo","url": "https://penomundo.pt/"},{"name": "CAAL — Clube de Actividades de Ar Livre","url": "https://clubearlivre.org/"},{"name": "Trilhos Nocturnos","url": "https://trilhosnocturnos.com/eventos-agenda/"},{"name": "SAL — Sistemas de Ar Livre","url": "https://www.sal.pt/"},{"name": "Associação Geopark Estrela","url": "https://geoparkestrela.pt/atividades"},{"name": "Gerês Viver Turismo","url": "https://geres.pt/programa-anual-de-caminhadas-2026/"},{"name": "Borealis on Trekking","url": "https://borealis.travel/calendario-de-viagens/"},{"name": "Trekking4Life","url": "https://trekking4life.wixsite.com/website-1"},{"name": "NDesafios — Natureza e Desafios","url": "https://ndesafios.pt/"}];
+const ORGANIZER_DIRECTORY = [{"name": "Hiking Around Adventures","url": "https://www.hikingaround.pt/aventurasnacionais"},{"name": "Mais Trilhos","url": "https://maistrilhos.pt/caminhadas"},{"name": "Indoeu","url": "https://indoeu.pt/caminhadas/"},{"name": "GreenTrekker","url": "https://www.greentrekker.pt/agenda/"},{"name": "Trekking Roots","url": "https://trekkingroots.pt/calendario-caminhadas/"},{"name": "Hike Land","url": "https://www.hikeland.pt/atividades-1-dia/"},{"name": "Montanhas Dentro","url": "https://montanhasdentro.pt/"},{"name": "Trekkin","url": "https://www.trekkin.pt/eventos/"},{"name": "Basto Trekking","url": "https://bastotrekking.pt/"},{"name": "Montanhas do Norte","url": "https://montanhasdonorte.pt/percursos-1-dia/"},{"name": "RB Hiking & Trekking","url": "https://barbosa-trekking.pt/"},{"name": "DRenergies","url": "https://www.drenergies.com/calendario-inscricoes-caminhadas"},{"name": "Clube de Montanhismo da Guarda","url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/"},{"name": "Amigos da Montanha","url": "https://amigosdamontanha.com/"},{"name": "Caminhando.pt","url": "https://caminhando.pt/agenda-eventos/caminhadas/"},{"name": "Pé no Mundo","url": "https://penomundo.pt/"},{"name": "CAAL — Clube de Actividades de Ar Livre","url": "https://clubearlivre.org/"},{"name": "Trilhos Nocturnos","url": "https://trilhosnocturnos.com/eventos-agenda/"},{"name": "SAL — Sistemas de Ar Livre","url": "https://www.sal.pt/"},{"name": "Associação Geopark Estrela","url": "https://geoparkestrela.pt/atividades"},{"name": "Gerês Viver Turismo","url": "https://geres.pt/programa-anual-de-caminhadas-2026/"},{"name": "Borealis on Trekking","url": "https://borealis.travel/calendario-de-viagens/"},{"name": "Trekking4Life","url": "https://trekking4life.wixsite.com/website-1"},{"name": "NDesafios — Natureza e Desafios","url": "https://ndesafios.pt/"}];
 const AGGREGATOR_DIRECTORY = [{"name": "Trilhos & Caminhadas", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php"}, {"name": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39"}];
 
 const ORGANIZERS_PAGE_MODE=new URLSearchParams(location.search).has('organizadores');
@@ -704,8 +704,11 @@ function localPartidaLegivel(valor){
  texto=texto.replace(/[\s,;:–—-]+$/g,'').replace(/\(\s*$/,'').trim();
  return texto||'Por confirmar';
 }
+// Fonte desactivada: o catálogo anterior confundiu 'EVENTO FECHADO' com títulos
+// e misturou actividades não pedestres. Nunca apresentar registos desta origem.
+function excludedOrganizer(name){return fold(name).replace(/[^a-z0-9]/g,'')==='caminhadassmile';}
 const allEvents=()=>{
- const catalogue=remoteEvents??SEED;
+ const catalogue=(remoteEvents??SEED).filter(e=>!excludedOrganizer(e.organizer));
  const urls=new Set(catalogue.map(e=>String(e.url||'').replace(/\/$/,'')));
  const today=new Date().toLocaleDateString('sv-SE');
  const existingKeys=new Set(catalogue.map(e=>[e.date,fold(e.organizer),fold(e.title)].join('|')));
@@ -714,7 +717,7 @@ const allEvents=()=>{
    !existingKeys.has([e.date,fold(e.organizer),fold(e.title)].join('|')) &&
    // Vários passeios oficiais podem partilhar página de calendário.
    !(urls.has(e.url)&&specials.filter(y=>y.url===e.url).length===1));
- return catalogue.concat(extras,custom).map(x=>{
+ return catalogue.concat(extras,custom.filter(e=>!excludedOrganizer(e.organizer))).map(x=>{
   const e={...x,...(META[x.id]||{})};
   return {...e,start:localPartidaLegivel(e.start)};
  });
@@ -729,6 +732,7 @@ async function loadEventFeed(){
   const json=await response.json();
   if(!json||!Array.isArray(json.events)||json.events.length>10000)return;
   const events=json.events.filter(e=>e&&typeof e.id==='string'&&typeof e.title==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&typeof e.organizer==='string'
+    && !excludedOrganizer(e.organizer)
     && !(e.organizer==='Montanhas Dentro' && e.date_verified!=='official_detail'))
     .map(e=>({...e,url:(typeof e.url==='string'&&/^https?:\/\//i.test(e.url))?e.url:''}));
   remoteEvents=events;
