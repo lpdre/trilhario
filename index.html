@@ -501,6 +501,40 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 @media(max-width:790px){.org-cards{grid-template-columns:1fr}.org-page-header{padding:17px 18px;margin:0 -18px}.org-intro{padding-top:24px}.org-page-brand{font-size:23px}}
 @media(max-width:540px){.org-page-header{margin:0 -14px}}
 @media(max-width:480px){.org-page-header{margin:0 -12px}.org-card{padding:12px 13px}.org-intro h1{font-size:29px}.org-card h3{font-size:13px}}
+
+/* v19: viagens e comparação */
+.travel-box{border:1px solid #d4decf;background:#f1f4e9;margin:0 0 12px;border-radius:9px;overflow:hidden}
+.travel-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px}
+.travel-heading{display:flex;align-items:center;gap:10px;min-width:0}.travel-symbol{width:31px;height:31px;display:grid;place-items:center;border-radius:50%;background:#e2eadf;color:#315a3a;font-size:19px;font-weight:700;flex-shrink:0}.travel-heading strong{display:block;color:#234532;font-size:12px}.travel-heading span:not(.travel-symbol){display:block;color:#6b7e6a;font-size:10.5px;line-height:1.4;margin-top:2px}
+.travel-toggle{border:1px solid #cad8c7;color:#375a3c;background:#fffdf8;border-radius:5px;padding:7px 10px;cursor:pointer;font-size:10.5px;font-weight:750;white-space:nowrap}.travel-panel{border-top:1px solid #d5dfd0;padding:14px}.travel-panel[hidden]{display:none!important}
+.travel-fields{display:grid;grid-template-columns:minmax(180px,2.2fr) minmax(105px,1fr) minmax(105px,1fr);gap:10px}.travel-fields label{font-size:10.5px;font-weight:750;color:#42634a;display:flex;flex-direction:column;gap:5px}.travel-input{padding:10px 9px;border:1px solid #c8d7c6;border-radius:5px;font-size:13px;color:#203d2c;background:white;min-width:0;width:100%;box-sizing:border-box}
+.travel-panel-bottom{margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.travel-primary{border:0;background:#25523b;color:white;border-radius:5px;padding:9px 13px;font-size:11px;font-weight:750;cursor:pointer}.travel-primary:disabled{opacity:.5;cursor:progress}.travel-panel-bottom span{font-size:10.5px;color:#647962}.travel-caption{font-size:10px;line-height:1.55;color:#718370;margin:10px 0 0}.travel-caption a{color:#365d41;text-underline-offset:2px}
+.travel-sort-wrap{display:flex;align-items:center;gap:7px;justify-content:flex-end;margin:0 1px 9px}.travel-sort-wrap label{font-size:10px;color:#73846f;font-weight:650}.travel-sort-wrap select{background:#fffcf5;border:1px solid #d4dfcd;border-radius:4px;padding:6px;color:#335b3e;font-size:10.5px}
+.walk-trip-line{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e2e7db;background:#f6f7f0;padding:6px 11px 6px 70px;min-width:0}
+.walk-trip-info{font-size:10.5px;color:#536b55;line-height:1.4;min-width:0}.walk-trip-info strong{color:#244c37;font-size:10.5px}.walk-trip-info .trip-missing{color:#88948a}.walk-trip-ctrl{display:flex;align-items:center;gap:7px;flex-shrink:0}.walk-trip-ctrl button{cursor:pointer;font-size:10.5px;border:1px solid #cddac9;border-radius:5px;background:#fffdf7;color:#365a41;padding:5px 8px}.walk-trip-ctrl button:hover{background:#e9f0e6}.walk-trip-ctrl button.is-compared{background:#2f5d44;color:white;border-color:#2f5d44}
+.compare-tray[hidden],.trip-overlay[hidden]{display:none!important}.compare-tray{position:fixed;bottom:0;left:0;right:0;background:#143d2d;color:white;z-index:85;border-top:3px solid #c99c65;box-shadow:0 -3px 20px #0c22145c}.compare-tray-content{max-width:1180px;margin:auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:15px}.compare-tray-content strong{font-size:12px;display:block}.compare-tray-content span{font-size:10.5px;color:#cadccb;display:block;margin-top:3px}.compare-tray-actions{display:flex;align-items:center;gap:9px}.compare-tray-actions button{border:0;background:transparent;color:#d2e1d5;font-size:11px;cursor:pointer}.compare-open{display:block;color:#163c2b;text-decoration:none;background:#f3d19b;padding:8px 13px;border-radius:4px;font-size:11px;font-weight:800;white-space:nowrap}.compare-open.is-disabled{opacity:.5;pointer-events:none}
+body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparison-mode>main,body.comparison-mode>footer,body.comparison-mode>.modal,body.comparison-mode>.org-page,body.comparison-mode>.compare-tray{display:none!important}.comparison-page{display:none;padding-bottom:65px}body.comparison-mode .comparison-page{display:block}.comparison-head{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0a392b;padding:20px 26px;margin:0 -32px}.comparison-brand{color:#fff2db;display:inline-flex;align-items:center;font-weight:750;gap:11px;font-size:25px;text-decoration:none}.comparison-brand::before{content:'';width:26px;height:26px;border:2px solid #dcac72;border-radius:50%;background:linear-gradient(145deg,transparent 50%,#dcac72 51% 55%,transparent 56%)}.comparison-back{color:#f4d6ac;text-decoration:none;font-size:11px}.comparison-intro{margin:29px 0 18px}.comparison-intro h1{font:400 clamp(29px,3.6vw,39px) Georgia,serif;color:#1d442e;margin:5px 0 10px}.comparison-intro p{font-size:12px;color:#677768;line-height:1.6;max-width:720px}.comparison-intro .eyebrow{font-size:10px;color:#90734f;letter-spacing:1.3px}
+.comparison-table-wrap{overflow-x:auto;background:#fffdf8;border:1px solid #cfd9c9;border-radius:8px}.comparison-table{border-collapse:collapse;width:100%;min-width:625px;table-layout:fixed}.comparison-table th,.comparison-table td{border-bottom:1px solid #e4e9e0;text-align:left;padding:13px 14px;vertical-align:top;font-size:12px;color:#2e4d39;overflow-wrap:anywhere}.comparison-table thead th{background:#edf1e7;font-size:13px;color:#214631}.comparison-table tr:last-child td{border-bottom:0}.comparison-table tbody th{background:#f5f7f0;width:155px;font-weight:750;font-size:11px}.comparison-table td small{font-size:10px;color:#738274;display:block;margin-top:3px}.comparison-table a{color:#27583e;text-underline-offset:2px}.comparison-table .total-row th,.comparison-table .total-row td{background:#e9efe3;font-weight:800;color:#235039}.comparison-action{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.comparison-action button{padding:9px 12px;background:#fffdf6;border:1px solid #c8d8c5;border-radius:5px;color:#315c3e;cursor:pointer;font-size:11px}.comparison-note{color:#748372;font-size:11px;line-height:1.65;margin:17px 0}
+.trip-overlay{position:fixed;inset:0;z-index:105;background:#112a1bbb;display:flex;align-items:center;justify-content:center;padding:15px;overflow:auto}.trip-dialog{width:min(510px,100%);background:#fffdf7;box-shadow:0 10px 50px #0c231c62;border-radius:9px;padding:23px;max-height:95vh;overflow-y:auto}.trip-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px}.trip-dialog-header h2{font:400 26px Georgia,serif;color:#234b35;margin:0}.trip-dialog-header button{background:transparent;border:0;font-size:28px;color:#577662;cursor:pointer}.trip-dialog>p{font-size:12px;color:#6f806c;line-height:1.5}.trip-dialog-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.trip-dialog-grid label{display:block;font-size:11px;font-weight:700;color:#42614c}.trip-dialog-grid input{width:100%;box-sizing:border-box;margin-top:6px;background:white;border:1px solid #ccdacb;border-radius:5px;padding:10px;color:#183d28;font-size:14px}.trip-toll-field{grid-column:1/-1}.trip-dialog-help{font-size:10.5px!important}.trip-dialog-actions{margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:9px}.trip-dialog-actions a{font-size:12px;color:#376746}
+@media(max-width:790px){.comparison-head{margin:0 -18px;padding:16px 18px}.travel-fields{grid-template-columns:minmax(100px,2fr) 1fr 1fr}}
+@media(max-width:540px){.comparison-head{margin:0 -14px}.travel-bar{padding:9px 10px}.travel-fields{grid-template-columns:1fr 1fr}.travel-fields label:first-child{grid-column:1/-1}.travel-panel{padding:10px}.walk-trip-line{grid-column:2;grid-row:4;padding:8px 10px 9px;flex-wrap:wrap;gap:8px}.walk-detail-panel{grid-row:5}.walk-trip-ctrl{width:100%;justify-content:flex-end}.walk-trip-info{font-size:10px}.compare-tray-content{padding:9px 11px}.compare-tray-content span{max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.comparison-head{margin:0 -14px}.trip-dialog{padding:18px}.trip-dialog-header h2{font-size:23px}}
+
+
+/* v20 — preço médio DGEG e personalização opcional */
+.travel-fields select.travel-input{appearance:auto;min-width:0;font:inherit;color:#294d35;background:#fffefa}
+.fuel-price-config{margin-top:10px;padding:11px 12px;border:1px solid #d7dfd0;border-radius:7px;background:#fafaf5}
+.fuel-price-main{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.fuel-price-main>label{display:flex;flex-direction:column;gap:5px;font-size:10.5px;font-weight:750;color:#42634a;min-width:150px}
+.fuel-price-main>label input{max-width:180px}
+#tripFuel[readonly]{background:#e9eee6;color:#385c40;cursor:default}
+.fuel-price-aside{display:flex;flex-direction:column;gap:5px;flex:1;min-width:210px}
+.fuel-override-label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#2c573b;cursor:pointer}
+.fuel-override-label input{accent-color:#2e6248;width:15px;height:15px}
+#fuelPriceStatus{font-size:10px;color:#687b68;line-height:1.45}
+.fuel-price-config small{display:block;margin-top:8px;font-size:10px;line-height:1.45;color:#7b8978}
+.fuel-price-config a{color:#315d40;text-underline-offset:2px}
+@media(max-width:540px){.fuel-price-config{padding:10px}.fuel-price-main{gap:8px}.fuel-price-main>label{flex:0 1 150px;min-width:130px}.fuel-price-aside{min-width:170px}}
+
 </style>
 </head>
 <body>
@@ -511,6 +545,17 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 <div class="hero-stats" id="heroStats" aria-live="polite">A carregar caminhadas…</div>
 </div></div></section>
 <main class="shell main">
+<section class="travel-box" aria-label="Deslocações e custos">
+ <div class="travel-bar"><div class="travel-heading"><span class="travel-symbol" aria-hidden="true">↗</span><div><strong>A minha deslocação</strong><span id="travelSub">Define a origem para calcular viagens até às caminhadas.</span></div></div><button class="travel-toggle" id="travelToggle" type="button" aria-controls="travelPanel" aria-expanded="false">Configurar <span aria-hidden="true">⌄</span></button></div>
+ <div class="travel-panel" id="travelPanel" hidden>
+  <div class="travel-fields"><label>Origem<input class="travel-input" id="tripOrigin" placeholder="Ex.: Aveiro" autocomplete="street-address"/></label><label>Consumo · L/100 km<input class="travel-input" id="tripConsumption" type="number" min="1" max="35" step="0.1" inputmode="decimal"/></label><label>Tipo de combustível<select class="travel-input" id="tripFuelKind"><option value="gasoleo">Gasóleo simples</option><option value="gasolina">Gasolina 95 simples</option></select></label></div>
+  <div class="fuel-price-config"><div class="fuel-price-main"><label for="tripFuel">Preço do combustível · €/L<input class="travel-input" id="tripFuel" type="number" min="0.1" max="5" step="0.001" inputmode="decimal" readonly/></label><div class="fuel-price-aside"><label class="fuel-override-label"><input type="checkbox" id="tripFuelOverride"/> Personalizar €/L</label><span id="fuelPriceStatus" role="status" aria-live="polite">A consultar preço médio…</span></div></div><small>Estimativa para Portugal continental. <a href="https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/" target="_blank" rel="noopener noreferrer">Fonte: DGEG ↗</a> · o valor personalizado substitui a média.</small></div>
+  <div class="travel-panel-bottom"><button type="button" class="travel-primary" id="travelApply">Guardar e calcular as primeiras 6 viagens</button><span id="travelProgress" role="status" aria-live="polite"></span></div>
+  <p class="travel-caption">Viagem de ida e volta, por estrada. As portagens são estimadas automaticamente a partir do percurso, usando o serviço da Infraestruturas de Portugal (Classe 1), quando disponível. Se a consulta falhar, podes editar manualmente. Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>.</p>
+ </div>
+</section>
+<div class="travel-sort-wrap"><label for="travelSort">Ordenar:</label><select id="travelSort"><option value="date">Data e hora</option><option value="total">Custo total (com portagens)</option><option value="km">Deslocação · km</option><option value="fuel">Combustível</option></select></div>
+
 <div class="layout">
 <section aria-live="polite" class="results"><div class="content-head"><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
   <div class="filters-content">
@@ -560,6 +605,14 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
   <p class="org-bottom-note">A inclusão neste directório não significa que a agenda de cada entidade já esteja integrada na recolha automática do Trilhário. Consulta o organizador para confirmares datas, preços e disponibilidade.</p>
 </section>
 
+<section class="comparison-page shell" id="comparisonPage">
+ <header class="comparison-head"><a class="brand brand-hero comparison-brand" href="index.html">trilhário<span class="brand-dot">.</span></a><a href="index.html" class="comparison-back">← Voltar à agenda</a></header>
+ <div class="comparison-intro"><span class="eyebrow">ESCOLHER O PRÓXIMO TRILHO</span><h1>Comparar caminhadas</h1><p>Até três caminhadas, lado a lado. Distância a pé, desnível, tempo de carro, combustível, portagens e custo total.</p></div>
+ <div id="comparisonContent" aria-live="polite"></div>
+ <p class="comparison-note">Distâncias e duração rodoviárias estimadas a partir do ponto de partida e da origem definida. O custo total só é apresentado quando existem dados de inscrição e portagens.</p>
+</section>
+<div class="compare-tray" id="compareTray" hidden><div class="compare-tray-content"><div><strong id="compareQty">0 de 3 seleccionadas</strong><span id="compareNames">Selecciona caminhadas para comparar</span></div><div class="compare-tray-actions"><button type="button" id="compareClear">Limpar</button><a id="compareOpen" href="?comparar=1" target="_blank" rel="noopener noreferrer" class="compare-open">Comparar ↗</a></div></div></div>
+<div class="trip-overlay" id="tripOverlay" hidden><div class="trip-dialog" role="dialog" aria-modal="true" aria-labelledby="tripDialogTitle"><div class="trip-dialog-header"><h2 id="tripDialogTitle">Dados da deslocação</h2><button type="button" id="tripClose" aria-label="Fechar">×</button></div><p id="tripDialogSubtitle"></p><div class="trip-dialog-grid"><label>Distância · só ida (km)<input id="tripKmManual" type="number" min="0" max="6000" step="0.1" inputmode="decimal"/></label><label>Tempo · só ida (minutos)<input id="tripMinutesManual" type="number" min="0" max="6000" step="1" inputmode="numeric"/></label><label class="trip-toll-field">Portagens · ida e volta (€)<input id="tripTollManual" type="number" min="0" max="1000" step="0.01" inputmode="decimal" placeholder="Por preencher"/><small id="tripTollSource" aria-live="polite"></small></label></div><p class="trip-dialog-help"><strong>Portagens:</strong> o Trilhário procura calculá-las automaticamente pela Infraestruturas de Portugal para automóvel Classe 1 (ida e volta estimada como duas vezes o trajecto de ida). Podes substituir ou introduzir o valor manualmente. Sem resposta do serviço, as portagens ficam por preencher.</p><div class="trip-dialog-actions"><a href="https://www.viamichelin.pt/itinerarios" rel="noopener noreferrer" target="_blank">Conferir na ViaMichelin ↗</a><button type="button" class="travel-primary" id="tripSave">Guardar deslocação</button></div></div></div>
 <footer class="footer"><div class="shell"><span><strong>trilhário.</strong> Um projecto experimental e independente, sem associação aos organizadores.</span><span>Eventos de demonstração · Outubro 2026 · Feito para caminhar mais, procurar menos.</span></div></footer>
 <div class="modal" hidden="" id="modal"><div aria-labelledby="modalTitle" aria-modal="true" class="dialog" role="dialog"><h2 id="modalTitle">Adicionar caminhada</h2><p>Regista aqui eventos que encontrares. Ficam guardados neste navegador, não são publicados na internet.</p><form id="eventForm"><div class="dialog-grid"><div class="field wide"><label for="fTitle">Nome do percurso *</label><input class="control" id="fTitle" maxlength="100" placeholder="Ex.: Trilho dos Bosques de Outono" required=""/></div><div class="field"><label for="fDate">Data *</label><input class="control" id="fDate" required="" type="date" value="2026-10-24"/></div><div class="field"><label for="fTime">Hora</label><input class="control" id="fTime" type="time" value="09:00"/></div><div class="field"><label for="fTown">Localidade *</label><input class="control" id="fTown" maxlength="70" placeholder="Ex.: Arouca" required=""/></div><div class="field"><label for="fRegion">Região *</label><select class="control" id="fRegion" required=""><option>Norte</option><option>Centro</option><option>Lisboa e Vale do Tejo</option></select></div><div class="field"><label for="fOrg">Organizador *</label><input class="control" id="fOrg" maxlength="70" required=""/></div><div class="field"><label for="fUrl">Link do evento</label><input class="control" id="fUrl" placeholder="https://..." type="url"/></div><div class="field"><label for="fKm">Quilómetros</label><input class="control" id="fKm" max="200" min="0" step="0.1" type="number"/></div><div class="field"><label for="fGain">Desnível positivo (m)</label><input class="control" id="fGain" max="9000" min="0" step="1" type="number"/></div><div class="field"><label for="fPrice">Preço (€)</label><input class="control" id="fPrice" max="10000" min="0" step="0.5" type="number"/></div><div class="field"><label for="fDifficulty">Dificuldade</label><select class="control" id="fDifficulty"><option value="2">Moderada</option><option value="1">Fácil</option><option value="3">Exigente</option><option value="4">Difícil</option><option value="5">Muito difícil</option></select></div><div class="field"><label for="fDuration">Duração (horas)</label><input class="control" id="fDuration" max="72" min="0.5" placeholder="Ex.: 6" step="0.5" type="number"/></div>
 <input id="fMaxParticipants" type="hidden" value=""/>
@@ -623,6 +676,25 @@ const KM_CAP=50, GAIN_CAP=2500;
 let state={day:'all',organizer:'all',difficulty:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,search:'',onlyFavorites:false,view:'list',month:9,year:2026};
 let remoteEvents=null;
 let remoteUpdatedAt=null;
+
+// v20 — médias diárias da DGEG. Guarda a data do preço; não confunde dados antigos com preço de hoje.
+const TRAVEL_PREF_KEY='trilhario_travel_prefs_v19',TRAVEL_ROUTES_KEY='trilhario_routes_v19',TRAVEL_COMPARE_KEY='trilhario_compare_v19',TRAVEL_GEO_KEY='trilhario_geocode_v19';
+const FUEL_CACHE_KEY='trilhario_dgeg_medianas_v20';
+// Valores publicados na página da DGEG para 11-10-2026: recurso inicial, datado, não preço de hoje.
+const FUEL_OFFICIAL_REFERENCE={gasoleo:{value:2.145,date:'2026-10-11',source:'DGEG'},gasolina:{value:2.072,date:'2026-10-11',source:'DGEG'}};
+const FUEL_IDS={gasoleo:2101,gasolina:3201};
+let fuelPrices={...FUEL_OFFICIAL_REFERENCE,...storage(FUEL_CACHE_KEY,{})};
+const _oldTravelPrefs=storage(TRAVEL_PREF_KEY,{origin:'',consumption:5.5,fuel:1.70});
+let travelPrefs={..._oldTravelPrefs,kind:_oldTravelPrefs.kind==='gasolina'?'gasolina':'gasoleo',fuelOverride:
+   _oldTravelPrefs.fuelOverride!=null?_oldTravelPrefs.fuelOverride:
+   (_oldTravelPrefs.kind==null&&_oldTravelPrefs.origin&&Number.isFinite(Number(_oldTravelPrefs.fuel))?Number(_oldTravelPrefs.fuel):null)};
+if(travelPrefs.fuelOverride==null)travelPrefs.fuel=(fuelPrices[travelPrefs.kind]||FUEL_OFFICIAL_REFERENCE.gasoleo).value;
+let travelRoutes=storage(TRAVEL_ROUTES_KEY,{}),travelGeocodes=storage(TRAVEL_GEO_KEY,{});
+let compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));
+let travelBusy=false,travelEditingId='',geoLastRequest=0,roadLastRequest=0;
+const COMPARE_PAGE_MODE=new URLSearchParams(location.search).has('comparar');
+if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.title='Comparar caminhadas — Trilhário';}
+
 
 // Fontes monitorizadas; a presença aqui não significa vagas ou eventos confirmados.
 // Trilhário v16 — Trekking4Life e NDesafios no directório; Hike Land já existia.
@@ -820,6 +892,7 @@ function eventRow(x){
    ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
     <button type="button" class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="false" title="Mostrar detalhes"><span class="btn-label">Detalhes</span><span class="btn-icon" aria-hidden="true">⌄</span></button>
   </div>
+  ${travelRow(x)}
   <div class="walk-detail-panel" id="details-${esc(x.id)}" hidden>
    <div class="walk-detail-copy">
     <p>${esc(x.description||'Descrição disponível junto do organizador.')}</p>
@@ -920,12 +993,12 @@ function changeDual(prefix,which,value){
  else state[maxKey]=Math.max(v,state[minKey]+gap);
  render();
 }
-function render(){const events=selected();
+function render(){const events=sortedWalks(selected());
  const applied=[state.day!=='all',state.organizer!=='all',state.difficulty!=='all',state.kmMin>0||state.kmMax<KM_CAP,state.gainMin>0||state.gainMax<GAIN_CAP,!!state.search,state.onlyFavorites].filter(Boolean).length;
  $('filtersCounterMini').textContent=applied?String(applied):'';$('filtersCounterMini').hidden=!applied;
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
- const activeOrgCount=new Set(events.map(e=>e.organizer)).size; $('heroStats').innerHTML=`${events.length} caminhada${events.length===1?'':'s'} · <a class="org-header-link" href="?organizadores=1" target="_blank" rel="noopener noreferrer" title="Ver todos os organizadores" aria-label="Abrir lista completa de organizadores num novo separador">${activeOrgCount} organizador${activeOrgCount===1?'':'es'} ↗</a>`;renderOrganizersPage();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;}else if(state.view==='calendar')renderCalendar(events);else renderMap(events)}
+ const activeOrgCount=new Set(events.map(e=>e.organizer)).size; $('heroStats').innerHTML=`${events.length} caminhada${events.length===1?'':'s'} · <a class="org-header-link" href="?organizadores=1" target="_blank" rel="noopener noreferrer" title="Ver todos os organizadores" aria-label="Abrir lista completa de organizadores num novo separador">${activeOrgCount} organizador${activeOrgCount===1?'':'es'} ↗</a>`;renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;}else if(state.view==='calendar')renderCalendar(events);else renderMap(events)}
 function renderCalendar(events){const m=state.month,y=state.year,first=new Date(y,m,1),start=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;let html=`<div class="month"><div class="monthbar"><h3>${first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}</h3><div class="arrows"><button onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button><button onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div><div class="calendar-grid">`;['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);for(let i=0;i<len;i++){let day=i-start+1,inMonth=day>=1&&day<=total;const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const today=events.filter(e=>e.date===iso);html+=`<div class="day-cell ${inMonth?'':'outside'} ${state.day===iso?'picked':''}">${inMonth?`<button type="button" class="day-number" onclick="setDay('${iso}')" title="${state.day===iso?'Retirar selecção de':'Filtrar por'} ${iso}" aria-label="${state.day===iso?'Retirar selecção de':'Seleccionar'} ${iso}">${day}</button>${today.slice(0,2).map(x=>`<button title="${esc(x.title)}" class="mini-event" onclick="setDay('${iso}')">${esc(x.title)}</button>`).join('')}${today.length>2?`<button class="mini-more" onclick="setDay('${iso}')">+${today.length-2} mais</button>`:''}`:''}</div>`}html+='</div><div class="legend">Toca numa data para filtrar; remove o dia no filtro acima para voltar a ver todos.</div></div>';$('calendarView').innerHTML=html}
 function shiftMonth(n){state.month+=n;if(state.month<0){state.month=11;state.year--}if(state.month>11){state.month=0;state.year++}render()}
 function clearSelectedDay(){state.day='all';render()}
@@ -949,11 +1022,135 @@ $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;rend
 $('favoritesOnly').addEventListener('change',e=>{state.onlyFavorites=e.target.checked;render()});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{state.view=b.dataset.view;render()}));$('resetBtn').addEventListener('click',resetFilters);
 $('filterToggleBtn').addEventListener('click',()=>{const panel=$('filterPanel');panel.hidden=!panel.hidden;$('filterToggleBtn').setAttribute('aria-expanded',String(!panel.hidden));});
+
+// Apenas chamadas desencadeadas explicitamente pelo utilizador. Servidores públicos
+// OSM/Nominatim/OSRM com limites e sem garantia de disponibilidade.
+function persistTravel(){try{localStorage.setItem(TRAVEL_PREF_KEY,JSON.stringify(travelPrefs));localStorage.setItem(TRAVEL_ROUTES_KEY,JSON.stringify(travelRoutes));localStorage.setItem(TRAVEL_COMPARE_KEY,JSON.stringify([...compared]));}catch{}}
+function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCase()+'|'+e.id;}
+function travelData(e){if(!travelPrefs.origin)return null;const d=travelRoutes[routeCacheKey(e)];return d&&typeof d==='object'?d:null;}
+function travelMoney(v){return Number.isFinite(v)?v.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}):'—';}
+function tripCalc(e){const r=travelData(e);if(!r||!Number.isFinite(r.kmOne)||r.kmOne<0)return null;const km=r.kmOne*2;const fuel=km*(Number(travelPrefs.consumption)/100)*Number(travelPrefs.fuel);const toll=r.tollReturn==null?null:Number(r.tollReturn);const fee=e.price==null?null:Number(e.price);return {km,minutes:r.minutesOne==null?null:r.minutesOne*2,fuel,toll,fee,total:toll==null||fee==null?null:fuel+toll+fee};}
+function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
+function travelRow(e){const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,oneway=travelData(e);
+ const desc=t?`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong> · combustível ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?'':` · <strong>total ${travelMoney(t.total)}</strong>`}`:
+ (hasOrigin?'<span class="trip-missing">Viagem por calcular</span>':'<span class="trip-missing">Define a origem para ver a deslocação</span>');
+ return `<div class="walk-trip-line"><div class="walk-trip-info">${desc}</div><div class="walk-trip-ctrl">${hasOrigin?`<button type="button" onclick="${oneway?`openTripEditor('${esc(e.id)}')`:`calculateOneRoute('${esc(e.id)}')` }" title="${oneway?'Editar viagem e portagens':'Calcular percurso rodoviário'}">${oneway?'Editar viagem':'Calcular'}</button>`:''}<button type="button" class="${compared.has(e.id)?'is-compared':''}" onclick="toggleCompare('${esc(e.id)}')" aria-pressed="${compared.has(e.id)?'true':'false'}">${compared.has(e.id)?'✓ Seleccionado':'+ Comparar'}</button></div></div>`;
+}
+function toggleCompare(id){if(compared.has(id))compared.delete(id);else{if(compared.size>=3){toast('Podes comparar até 3 caminhadas.');return;}compared.add(id);}persistTravel();render();}
+function clearCompare(){compared.clear();persistTravel();render();}
+function renderCompareTray(){const bar=$('compareTray');if(!bar)return;bar.hidden=compared.size===0||COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE;
+ $('compareQty').textContent=compared.size+' de 3 seleccionadas';const items=allEvents().filter(e=>compared.has(e.id));$('compareNames').textContent=items.map(e=>e.title).join(' · ')||'Selecciona caminhadas';
+ $('compareOpen').classList.toggle('is-disabled',compared.size<2);$('compareOpen').setAttribute('aria-disabled',String(compared.size<2));}
+function travelSortVal(e,sort){const t=tripCalc(e);return sort==='km'?t?.km:sort==='fuel'?t?.fuel:t?.total;}
+function sortedWalks(xs){const s=$('travelSort')?.value||'date';if(s==='date')return xs;return xs.sort((a,b)=>{const av=travelSortVal(a,s),bv=travelSortVal(b,s);return av==null?bv==null?0:1:bv==null?-1:av-bv});}
+function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('comparisonContent');if(!target)return;const items=allEvents().filter(e=>compared.has(e.id)).slice(0,3);
+ if(!items.length){target.innerHTML='<div class="org-empty">Ainda não seleccionaste caminhadas. <a href="index.html">Voltar à agenda</a></div>';return;}
+ const head=(e)=>`<th scope="col"><strong>${esc(e.title)}</strong><br><small>${esc(e.organizer)} · ${esc(dateShort(e))}</small></th>`;
+ const cell=(e,key)=>{const t=tripCalc(e),r=travelData(e);switch(key){
+ case 'organizer':return esc(e.organizer);case 'date':return esc(dateShort(e))+' · '+esc(e.time||'—');case 'walk':return e.km==null?'—':fmtN(e.km)+' km';case 'gain':return e.gain==null?'—':fmtN(e.gain)+' m';case 'difficulty':return esc(names[e.difficulty]||'—');case 'price':return fmtP(e.price);
+ case 'location':return esc(e.start||e.town||'—');case 'driveKm':return t?fmtN(t.km)+' km':'—';case 'driveTime':return t?timeStr(t.minutes):'—';case 'fuel':return t?travelMoney(t.fuel):'—';case 'toll':return t&&t.toll!=null?travelMoney(t.toll):'—';case 'total':return t&&t.total!=null?travelMoney(t.total):'—';case 'action':return `<button type="button" onclick="openTripEditor('${esc(e.id)}')">Editar viagem / portagens</button>`;case 'source':return safeExternalUrl(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ver evento ↗</a>`:'—';default:return '—';}};
+ const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Custo total'],['source','Anúncio']];
+ target.innerHTML=`<div class="comparison-action"><button type="button" onclick="calculateVisibleRoutes(true)" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" onclick="renderComparison()">Actualizar tabela</button></div><div class="comparison-table-wrap"><table class="comparison-table"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}"><th scope="row">${label}</th>${items.map(e=>`<td>${cell(e,k)}</td>`).join('')}</tr>`).join('')}<tr><th scope="row">Corrigir dados da viagem</th>${items.map(e=>`<td><button class="compare-edit" onclick="openTripEditor('${esc(e.id)}')">Editar / portagens</button></td>`).join('')}</tr></tbody></table></div>`;
+}
+function openTripEditor(id){const e=allEvents().find(x=>x.id===id);if(!e)return;if(!travelPrefs.origin){openTravelPanel();toast('Define primeiro o local de origem.');return;}travelEditingId=id;
+ const r=travelData(e)||{};$('tripDialogSubtitle').textContent=e.title+' · '+travelPrefs.origin+' → '+(e.start||e.town||'local do trilho');$('tripKmManual').value=r.kmOne==null?'':r.kmOne;$('tripMinutesManual').value=r.minutesOne==null?'':r.minutesOne;$('tripTollManual').value=r.tollReturn==null?'':r.tollReturn;
+ const info=$('tripTollSource');if(info)info.textContent=r.tollSource==='IP'?'Estimativa automática IP · Classe 1 · ida e volta':r.tollReturn!=null?'Valor introduzido manualmente':(r.tollChecked?'O serviço de portagens não respondeu; podes preencher manualmente':'Ainda não calculado');
+ $('tripOverlay').hidden=false;document.body.style.overflow='hidden';}
+function closeTripEditor(){$('tripOverlay').hidden=true;document.body.style.overflow='';}
+function saveTripEditor(){const e=allEvents().find(x=>x.id===travelEditingId);if(!e)return;const read=id=>{const v=$(id).value.trim();return v===''?null:Number(v)};const kmOne=read('tripKmManual'),minutesOne=read('tripMinutesManual'),tollReturn=read('tripTollManual');
+ if([kmOne,minutesOne,tollReturn].some(x=>x!=null&&(!Number.isFinite(x)||x<0))){toast('Introduz valores válidos e positivos.');return;}
+ const old=travelData(e)||{};travelRoutes[routeCacheKey(e)]={...old,kmOne,minutesOne,tollReturn,tollSource:tollReturn==null?null:(old.tollSource==='IP'&&Math.abs(Number(old.tollReturn)-tollReturn)<0.005?'IP':'manual'),updated:Date.now(),manual:true};persistTravel();closeTripEditor();render();toast('Deslocação guardada.');}
+function openTravelPanel(){if(COMPARE_PAGE_MODE){window.open('index.html','_blank','noopener');return;}$('travelPanel').hidden=false;$('travelToggle').setAttribute('aria-expanded','true');$('tripOrigin').focus();}
+function toggleTravelPanel(){const p=$('travelPanel');p.hidden=!p.hidden;$('travelToggle').setAttribute('aria-expanded',String(!p.hidden));}
+function applyTravel(){const origin=$('tripOrigin').value.trim(),consumption=Number($('tripConsumption').value),kind=$('tripFuelKind').value;
+ const override=$('tripFuelOverride').checked,manual=Number($('tripFuel').value);
+ const automatic=fuelPrices[kind]?.value, fuel=override?manual:automatic;
+ if(origin.length<2||!(consumption>0&&consumption<=35)||!(fuel>0&&fuel<5)){toast('Preenche a origem e o consumo. Confirma o preço do combustível.');return;}
+ travelPrefs={origin,consumption,kind,fuelOverride:override?manual:null,fuel};persistTravel();updateTravelHeader();render();calculateVisibleRoutes(false);}
+function fuelKindLabel(kind){return kind==='gasolina'?'gasolina 95':'gasóleo';}
+function prettyFuelDate(date){const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(date||'—');}
+function updateTravelHeader(){if($('travelSub'))$('travelSub').textContent=travelPrefs.origin?`Origem: ${travelPrefs.origin} · ${fuelKindLabel(travelPrefs.kind)} · ${fmtN(travelPrefs.consumption)} L/100 km · ${Number(travelPrefs.fuel).toFixed(3).replace('.',',')} €/L${travelPrefs.fuelOverride!=null?' (manual)':''}`:'Define a origem para calcular viagens até às caminhadas.';}
+function currentFuelPrice(kind){return fuelPrices[kind]||FUEL_OFFICIAL_REFERENCE[kind]||null;}
+function updateFuelInput(){const kind=$('tripFuelKind').value, manual=$('tripFuelOverride').checked,rec=currentFuelPrice(kind),f=$('tripFuel');
+ f.readOnly=!manual;
+ if(!manual)f.value=rec&&rec.value>0?Number(rec.value).toFixed(3):'';
+ const state=$('fuelPriceStatus');
+ if(manual){state.textContent='Valor personalizado; podes regressar à média desmarcando a opção.';return;}
+ state.textContent=rec?`Média diária DGEG de ${prettyFuelDate(rec.date)} · ${Number(rec.value).toFixed(3).replace('.',',')} €/L${rec.date==='2026-10-11'?' · último valor de referência disponível neste ficheiro':''}`:'Preço médio indisponível; podes introduzir manualmente.';
+}
+function parseDgegPrice(s){const n=Number(String(s??'').replace(/[€\s]/g,'').replace(',','.'));return Number.isFinite(n)&&n>0.3&&n<5?n:null;}
+function normalizeFuelDay(s){const text=String(s||'');const iso=text.match(/(\d{4})-(\d{2})-(\d{2})/);if(iso)return `${iso[1]}-${iso[2]}-${iso[3]}`;const pt=text.match(/(\d{2})[\/-](\d{2})[\/-](\d{4})/);return pt?`${pt[3]}-${pt[2]}-${pt[1]}`:null;}
+async function fetchFuelMedian(kind){const id=FUEL_IDS[kind];if(!id)return null;
+ const now=new Date(),past=new Date(now.getTime()-20*86400000),fmt=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+ const url=`https://precoscombustiveis.dgeg.gov.pt/api/PrecoComb/PMD?idsTiposComb=${id}&dataIni=${fmt(past)}&dataFim=${fmt(now)}&qtdPorPagina=1&pagina=1&orderDesc=1`;
+ const resp=await fetch(url,{headers:{Accept:'application/json'},signal:AbortSignal.timeout?AbortSignal.timeout(11000):undefined});
+ if(!resp.ok)throw new Error('DGEG HTTP '+resp.status);
+ const j=await resp.json();if(j.status===false||!Array.isArray(j.resultado))throw new Error('DGEG: resposta inválida');
+ const found=j.resultado.map(x=>({value:parseDgegPrice(x.PrecoMedio),date:normalizeFuelDay(x.Data),source:'DGEG'})).filter(x=>x.value!=null&&x.date&&x.date<=fmt(now)).sort((a,b)=>b.date.localeCompare(a.date));
+ return found[0]||null;}
+async function refreshFuelPrices(){const results=await Promise.allSettled(['gasoleo','gasolina'].map(fetchFuelMedian));let updated=false;
+ for(let i=0;i<2;i++){const kind=['gasoleo','gasolina'][i],item=results[i];if(item.status!=='fulfilled'||!item.value)continue;
+ const fresh=item.value;const prev=currentFuelPrice(kind);
+ if(!prev||fresh.date>=prev.date){fuelPrices[kind]=fresh;updated=true;}}
+ if(updated){try{localStorage.setItem(FUEL_CACHE_KEY,JSON.stringify(fuelPrices))}catch{}
+   if(travelPrefs.fuelOverride==null){travelPrefs.fuel=currentFuelPrice(travelPrefs.kind).value;persistTravel();updateTravelHeader();render();}}
+ if($('tripFuelKind'))updateFuelInput();
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function gapThrottle(type){const key=type==='geo'?'geoLastRequest':'roadLastRequest';const now=Date.now(),last=type==='geo'?geoLastRequest:roadLastRequest;const gap=Math.max(0,1200-(now-last));if(gap)await sleep(gap);if(type==='geo')geoLastRequest=Date.now();else roadLastRequest=Date.now();}
+async function geocodeText(text){const key=String(text||'').trim().toLowerCase();if(!key)return null;if(travelGeocodes[key])return travelGeocodes[key];
+ await gapThrottle('geo');const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=pt&q='+encodeURIComponent(text);const r=await fetch(u,{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Geocodificação indisponível');const j=await r.json();if(!j?.length)return null;const p={lat:Number(j[0].lat),lon:Number(j[0].lon)};travelGeocodes[key]=p;try{localStorage.setItem(TRAVEL_GEO_KEY,JSON.stringify(travelGeocodes))}catch{}return p;}
+function endpointName(e){const town=String(e.town||'').trim(),start=String(e.start||'').trim();if(start&&!/^(por confirmar|a confirmar|desconhecido)/i.test(start)&&!/(local exacto|ponto exacto|referência|coordenadas|às \d)/i.test(start)&&start.length<105)return `${start}, ${town&&town!=='Por confirmar'?town+', ':''}Portugal`;return town&&!/confirmar/i.test(town)?town+', Portugal':null;}
+async function locateEndpoint(e){if(e.verified&&hasCoords(e))return {lat:Number(e.lat),lon:Number(e.lon)};
+ const text=endpointName(e);if(!text)return null;let res=await geocodeText(text);if(!res&&e.town&&!/confirmar/i.test(e.town))res=await geocodeText(e.town+', Portugal');return res;}
+async function roadRoute(p,q){await gapThrottle('road');const u=`https://router.project-osrm.org/route/v1/driving/${p.lon},${p.lat};${q.lon},${q.lat}?overview=full&geometries=geojson&steps=false`;const r=await fetch(u);if(!r.ok)throw new Error('Serviço de rotas indisponível');const j=await r.json();if(j.code!=='Ok'||!j.routes?.[0])throw new Error('Sem rota rodoviária');const route=j.routes[0];return {kmOne:Math.round(route.distance/100)/10,minutesOne:Math.round(route.duration/60),geometry:Array.isArray(route.geometry?.coordinates)?route.geometry.coordinates:[]};}
+// A IP recebe o percurso real e devolve portagem para Classe 1, só ida.
+// Usamos uma função do próprio Netlify para não depender de CORS no navegador.
+let tollEndpointAvailable=true; // Evita chamadas repetidas a um serviço indisponível na mesma sessão.
+async function autoTollsForGeometry(geometry){
+ if(!tollEndpointAvailable||!Array.isArray(geometry)||geometry.length<2)return null;
+ try{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),17000);
+  let response;
+  try{response=await fetch('/.netlify/functions/portagens',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({coordinates:geometry}),signal:controller.signal});}finally{clearTimeout(timer);}
+  if(!response.ok){if(response.status===404||response.status>=500)tollEndpointAvailable=false;return null;}
+  const result=await response.json();
+  return result?.source==='IP'&&result?.class===1&&Number.isFinite(result.oneWay)&&result.oneWay>=0?Math.round(result.oneWay*200)/100:null;
+ }catch(error){tollEndpointAvailable=false;console.info('Portagens automáticas indisponíveis:',error.message);return null;}
+}
+let singleTargetId='';
+function calculateOneRoute(id){singleTargetId=id;return calculateVisibleRoutes(false);}
+async function calculateVisibleRoutes(onlyCompared=false){if(travelBusy)return;if(!travelPrefs.origin){if(COMPARE_PAGE_MODE){alert('Define primeiro a origem na agenda do Trilhário.');return;}openTravelPanel();return;}
+ const one=singleTargetId;singleTargetId='';const all=one?allEvents().filter(e=>e.id===one):onlyCompared?allEvents().filter(e=>compared.has(e.id)):selected().slice(0,6);const pending=all.filter(e=>{const t=travelData(e);return !t||!Number.isFinite(t.kmOne)||(t.tollReturn==null&&!t.tollChecked)});
+ if(!pending.length){if(!COMPARE_PAGE_MODE)toast('As deslocações escolhidas já estão calculadas.');return;}
+ travelBusy=true;if($('travelApply'))$('travelApply').disabled=true;let success=0,failed=0;
+ try{const p=await geocodeText(travelPrefs.origin+', Portugal');if(!p)throw new Error('Origem não encontrada. Experimenta uma cidade ou localidade.');for(let i=0;i<pending.length;i++){
+ if($('travelProgress'))$('travelProgress').textContent='A calcular '+(i+1)+' de '+pending.length+' viagens…';const e=pending[i];try{const q=await locateEndpoint(e);if(!q){failed++;continue;}const r=await roadRoute(p,q);const previous=travelData(e)||{};
+ const estimate=previous.tollSource==='manual'?null:await autoTollsForGeometry(r.geometry);
+ const {geometry,...routeValues}=r;
+ travelRoutes[routeCacheKey(e)]={...previous,...routeValues,
+ tollReturn:previous.tollSource==='manual'?previous.tollReturn:(estimate!=null?estimate:previous.tollReturn??null),
+ tollSource:previous.tollSource==='manual'?'manual':(estimate!=null?'IP':previous.tollSource??null),
+ tollChecked:Date.now(),updated:Date.now()};persistTravel();success++;render();}catch(err){failed++;console.info('Rota indisponível para',e.id,err.message);}}
+ if($('travelProgress'))$('travelProgress').textContent=`${success} calculadas${failed?' · '+failed+' sem rota':''}. Portagens automáticas, quando disponíveis, ou edição manual.`;
+ }catch(err){if($('travelProgress'))$('travelProgress').textContent=err.message;toast(err.message);}finally{travelBusy=false;if($('travelApply'))$('travelApply').disabled=false;render();}}
+$('tripOrigin').value=travelPrefs.origin||'';$('tripConsumption').value=travelPrefs.consumption;
+$('tripFuelKind').value=travelPrefs.kind;$('tripFuelOverride').checked=travelPrefs.fuelOverride!=null;
+if(travelPrefs.fuelOverride!=null)$('tripFuel').value=Number(travelPrefs.fuelOverride).toFixed(3);
+updateFuelInput();updateTravelHeader();
+$('tripFuelKind').addEventListener('change',()=>{if(!$('tripFuelOverride').checked)updateFuelInput();else $('fuelPriceStatus').textContent='Valor personalizado; muda para a média desmarcando «Personalizar €/L».';});
+$('tripFuelOverride').addEventListener('change',()=>{if($('tripFuelOverride').checked)$('tripFuel').value=Number(travelPrefs.fuel||currentFuelPrice($('tripFuelKind').value)?.value||0).toFixed(3);updateFuelInput();});
+$('travelToggle').addEventListener('click',toggleTravelPanel);$('travelApply').addEventListener('click',applyTravel);$('travelSort').addEventListener('change',render);
+$('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(compared.size<2)e.preventDefault();});
+$('tripClose').addEventListener('click',closeTripEditor);$('tripSave').addEventListener('click',saveTripEditor);$('tripOverlay').addEventListener('click',e=>{if(e.target===$('tripOverlay'))closeTripEditor();});
+window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_COMPARE_KEY){compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}});
+
 renderSourcesDirectory();
 $('orgPageSearch').addEventListener('input',renderOrganizersPage);
 populateOrganizers();
 $('heroStats').innerHTML='<strong>'+allEvents().length+' eventos na agenda</strong><span>Agenda local e fontes acompanhadas</span>';
 render();
 loadEventFeed();
+refreshFuelPrices().catch(()=>{if($('tripFuelKind'))updateFuelInput();});
 </script>
 </body></html>
