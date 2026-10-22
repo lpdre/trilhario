@@ -1,9 +1,10 @@
-name: Procurar caminhadas
+name: Procurar e validar caminhadas
 
 on:
   schedule:
-    # Segunda e quinta às 08:20 UTC (09:20 em Portugal durante hora de Verão)
-    - cron: '20 8 * * 1,4'
+    # Todos os dias às 06:05 em Portugal, incluindo a mudança de hora.
+    - cron: '5 6 * * *'
+      timezone: 'Europe/Lisbon'
   workflow_dispatch:
 
 permissions:
@@ -31,26 +32,25 @@ jobs:
         run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
       - name: Procurar eventos
         run: python recolher.py
+      - name: Corrigir dados e validar catálogo
+        run: python normalizar_eventos.py
       - name: Publicar catálogo se existirem alterações
         id: publicar
         shell: bash
         run: |
-          if [ ! -f eventos.json ]; then
-            echo "Sem catálogo validado nesta execução."
-            exit 0
-          fi
           if [ -z "$(git status --porcelain -- eventos.json)" ]; then
-            echo "Sem alterações."
+            echo "Sem alterações no catálogo."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add eventos.json
-          git commit -m "Actualizar agenda de caminhadas"
+          git commit -m "Actualizar e validar agenda de caminhadas"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
-      - name: Pedir nova publicação do GitHub Pages
+      - name: Pedir nova publicação do GitHub Pages (se activado)
         if: steps.publicar.outputs.changed == 'true'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
