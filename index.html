@@ -590,6 +590,13 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .view-switch button{font-size:9.5px;padding:8px 0}
  .toolbar-sort{width:35px;flex-basis:35px}
 }
+
+/* v28 — miniatura editorial opcional na lista. Nunca carrega fotos no mapa/calendário/comparação. */
+.walk-photo{float:right;width:96px;height:72px;max-width:30%;object-fit:cover;
+ object-position:center;border-radius:5px;margin:1px 0 7px 12px;
+ background:#e6e8df;border:1px solid #e0e5db;display:block}
+@media(max-width:780px){.walk-photo{width:84px;height:64px;margin:0 0 6px 10px;max-width:27%}}
+@media(max-width:390px){.walk-photo{width:76px;height:58px;margin-left:8px}}
 </style>
 </head>
 <body>
@@ -1022,8 +1029,15 @@ const TRILHARIO_ACTION_ICONS={
  heart:'<svg viewBox="0 0 24 24" aria-hidden="true" class="icon-heart" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.3 5.3 0 0 0-7.5 0L12 6.9l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 22l8.8-8.9a5.3 5.3 0 0 0 0-7.5Z"/></svg>',
  trash:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>'
 };
+function eventPhotoUrl(e){
+ const val=e&&e.image;
+ if(typeof val!=='string'||!/^https:\/\/[^/]+/i.test(val))return '';
+ try{const u=new URL(val);return u.protocol==='https:'&&!!u.hostname&&u.username===''&&u.password===''?u.href:''}
+ catch{return ''}
+}
 function eventRow(x){
  const fav=favorites.has(x.id),spot=displayDeparture(x),verified=!!x.verified;
+ const photoUrl=eventPhotoUrl(x);
   const organizerUrl=organizerHomepage(x),mapsUrl=isPlacePlaceholder(spot)?null:googleMapsDeparture(x,spot);
  const dt=new Date(x.date+'T12:00:00');
  const month=dt.toLocaleDateString('pt-PT',{month:'short'}).replace('.','').toUpperCase();
@@ -1045,6 +1059,7 @@ function eventRow(x){
  return `<article class="walk-row" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
+   ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="96" height="72" onerror="this.remove()">`:''}
    <h3>${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="Abrir evento no site do organizador">${esc(x.title)}</a>`:esc(x.title)}${x.status?`<span class="walk-closed">${esc(x.status)}</span>`:''}</h3>
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
