@@ -704,11 +704,12 @@ let travelRoutes=storage(TRAVEL_ROUTES_KEY,{}),travelGeocodes=storage(TRAVEL_GEO
 let compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));
 let travelBusy=false,travelEditingId='',geoLastRequest=0,roadLastRequest=0;
 let expandedRows=new Set();
-// v22: fila única de cálculo, prioridade manual, blocos de 10 e cache por origem/evento.
+// v23: partida GPS validada, geocodificação progressiva e lotes de 10.
 const TRAVEL_BATCH_SIZE=10;
 let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
 let tripFilterSignature='',tripBatchObserver=null,tripScheduling=false,tripWorking=false;
 let tollJobs=[],tollWorking=false;
+const GEOCODER_VERSION=23,geoMisses=new Set();
 
 const COMPARE_PAGE_MODE=new URLSearchParams(location.search).has('comparar');
 if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.title='Comparar caminhadas — Trilhário';}
@@ -809,7 +810,11 @@ const allEvents=()=>{
    !(urls.has(e.url)&&specials.filter(y=>y.url===e.url).length===1));
  return catalogue.concat(extras,custom.filter(e=>!excludedOrganizer(e.organizer))).map(x=>{
   const e={...x,...(META[x.id]||{})};
-  return {...e,start:localPartidaLegivel(e.start)};
+  // Algumas fontes publicam GPS em graus/minutos/segundos dentro da morada.
+  // Só recuperar o par se latitude E longitude estiverem completas e forem plausíveis.
+  const publishedGps=!(e.verified&&hasCoords(e))?parsePublishedGps(e.start):null;
+  return {...e,...(publishedGps||{}),verified:!!e.verified||!!publishedGps,
+          start:localPartidaLegivel(e.start)};
  });
 };
 // Num alojamento web, o catálogo actualizado pode ser publicado como eventos.json.
@@ -836,7 +841,35 @@ async function loadEventFeed(){
 }
 
 const fold=t=>String(t??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-const hasCoords=x=>Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lon))&&x.lat!=null&&x.lon!=null;
+// Portugal continental e arquipélagos; rejeitar 0,0, pares incompletos e valores fora da área.
+const hasCoords=x=>{
+ if(x?.lat==null||x?.lon==null||String(x.lat).trim()===''||String(x.lon).trim()==='')return false;
+ const lat=Number(x.lat),lon=Number(x.lon);
+ if(!Number.isFinite(lat)||!Number.isFinite(lon))return false;
+ return (lat>=36&&lat<=43&&lon>=-10&&lon<=-6)|| // continental
+        (lat>=31.8&&lat<=33.6&&lon>=-18&&lon<=-15.5)|| // Madeira
+        (lat>=36.5&&lat<=40.1&&lon>=-32&&lon<=-24); // Açores
+};
+function parsePublishedGps(raw){
+ const text=String(raw||'');
+ // Ex.: «Lat: N 39° 21' 9.5\" Long: W 9° 9' 29.4\"» ou «Lat: 39,580825 Long: -8,327668».
+ const m=text.match(/\bLat(?:itude)?\s*:\s*([\s\S]*?)\bLong(?:itude)?\s*:\s*([\s\S]*)/i);
+ if(!m)return null;
+ const coord=(s,isLongitude)=>{
+   const fragment=s.split(/\b(?:Hora|Fim|Início|Inicio|Mapa|Ponto|GPS)\b/i)[0].trim();
+   const nums=(fragment.match(/-?\d+(?:[.,]\d+)?/g)||[]).slice(0,3).map(v=>Number(v.replace(',','.')));
+   if(!nums.length)return null;
+   const direction=(fragment.match(/^[\s]*([NSEW])/i)||[])[1]?.toUpperCase()||'';
+   // Uma coordenada apenas em graus inteiros não é informação bastante.
+   let absolute;
+   if(nums.length===1){if(!/[.,]\d{3,}/.test(fragment))return null;absolute=Math.abs(nums[0]);}
+   else {if(nums[1]<0||nums[1]>=60||nums.length===3&&(nums[2]<0||nums[2]>=60))return null;
+     absolute=Math.abs(nums[0])+nums[1]/60+(nums[2]||0)/3600;}
+   return (direction==='W'||direction==='S'||nums[0]<0?-1:1)*absolute;
+ };
+ const lat=coord(m[1],false),lon=coord(m[2],true);
+ const p={lat,lon};return hasCoords(p)?{...p,verified:true,gpsFromAnnouncement:true}:null;
+}
 const dur=x=>Number.isFinite(Number(x.duration))&&x.duration!=null&&x.duration!==''?fmtN(x.duration):'—';
 const cap=x=>x.capacity!=null&&x.capacity!==''?Number(x.capacity).toLocaleString('pt-PT'):'—';
 function populateOrganizers(){
@@ -1056,9 +1089,9 @@ function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(m
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,oneway=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key),queued=tripJobsSet.has(key)||tripActiveKey===key;
- const unavailable=!(e.verified&&hasCoords(e))&&!endpointName(e);
+ const unavailable=!departureCandidates(e).length;
  let desc;
- if(t)desc=`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong> · combustível ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?'':` · <strong>total ${travelMoney(t.total)}</strong>`}`;
+ if(t)desc=`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong>${oneway?.precision&&oneway.precision!=='gps'?' <span class="trip-missing" title="Destino estimado: '+esc(oneway.destinationLabel||'localidade')+'">(partida aprox.)</span>':''} · combustível ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?'':` · <strong>total ${travelMoney(t.total)}</strong>`}`;
  else if(!hasOrigin)desc='<span class="trip-missing">Define a origem para ver os custos</span>';
  else if(unavailable)desc='<span class="trip-missing">—</span>';
  else if(tripOriginProblem)desc=`<span class="trip-error">${esc(tripOriginProblem)}</span>`;
@@ -1134,11 +1167,86 @@ async function refreshFuelPrices(){const results=await Promise.allSettled(['gaso
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function gapThrottle(type){const key=type==='geo'?'geoLastRequest':'roadLastRequest';const now=Date.now(),last=type==='geo'?geoLastRequest:roadLastRequest;const gap=Math.max(0,1200-(now-last));if(gap)await sleep(gap);if(type==='geo')geoLastRequest=Date.now();else roadLastRequest=Date.now();}
-async function geocodeText(text){const key=String(text||'').trim().toLowerCase();if(!key)return null;if(travelGeocodes[key])return travelGeocodes[key];
- await gapThrottle('geo');const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=pt&q='+encodeURIComponent(text);const r=await fetch(u,{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Geocodificação indisponível');const j=await r.json();if(!j?.length)return null;const p={lat:Number(j[0].lat),lon:Number(j[0].lon)};travelGeocodes[key]=p;try{localStorage.setItem(TRAVEL_GEO_KEY,JSON.stringify(travelGeocodes))}catch{}return p;}
-function endpointName(e){const town=String(e.town||'').trim(),start=String(e.start||'').trim();if(start&&!/^(por confirmar|a confirmar|desconhecido)/i.test(start)&&!/(local exacto|ponto exacto|referência|coordenadas|às \d)/i.test(start)&&start.length<105)return `${start}, ${town&&town!=='Por confirmar'?town+', ':''}Portugal`;return town&&!/confirmar/i.test(town)?town+', Portugal':null;}
-async function locateEndpoint(e){if(e.verified&&hasCoords(e))return {lat:Number(e.lat),lon:Number(e.lon)};
- const text=endpointName(e);if(!text)return null;let res=await geocodeText(text);if(!res&&e.town&&!/confirmar/i.test(e.town))res=await geocodeText(e.town+', Portugal');return res;}
+async function geocodeText(text){
+ const key=String(text||'').trim().toLowerCase();if(!key||geoMisses.has(key))return null;
+ const cached=travelGeocodes[key];if(cached&&hasCoords(cached))return cached;
+ // Nominatim público: pedidos sequenciais, no máximo um por ~1,2 s; nunca tentar em paralelo.
+ await gapThrottle('geo');
+ const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=pt&q='+encodeURIComponent(text);
+ const r=await fetch(u,{headers:{Accept:'application/json'}});
+ if(!r.ok)throw new Error('Geocodificação indisponível');
+ const j=await r.json();
+ const p=j?.length?{lat:Number(j[0].lat),lon:Number(j[0].lon)}:null;
+ if(!p||!hasCoords(p)){geoMisses.add(key);return null;}
+ travelGeocodes[key]=p;try{localStorage.setItem(TRAVEL_GEO_KEY,JSON.stringify(travelGeocodes))}catch{}
+ return p;
+}
+// Remover notas logísticas, mas conservar a localidade real anunciada.
+function cleanLocationHint(s){
+ return String(s||'').replace(/\bCoordenadas(?:\s+GPS)?\b[\s\S]*$/i,'')
+  .replace(/\bHora\s+de\s+(?:Fim|Início|Inicio)\b[\s\S]*$/i,'')
+  .replace(/\s*\([^)]*\b(?:a confirmar|local exacto|ponto exacto)\b[^)]*\)/gi,'')
+  .replace(/\s+/g,' ').replace(/[\s.\-–—,;]+$/,'').trim();
+}
+function isUsablePlace(s){
+ const value=cleanLocationHint(s);
+ return value.length>=3&&value.length<=135&&!/^(?:por confirmar|a confirmar|desconhecido|local a definir|por definir|não definido)$/i.test(value)
+  &&!/^\d{1,2}h\d{0,2}\s/i.test(value);
+}
+// Começar pelo ponto anunciado; se for demasiado detalhado, recuar para aldeia/localidade/concelho.
+// Nunca assumir que o nome do trilho é o local de partida.
+function departureCandidates(e){
+ if(e.verified&&hasCoords(e))return [{coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'gps',label:'GPS do organizador'}];
+ const start=cleanLocationHint(e.start),town=cleanLocationHint(e.town);
+ const candidates=[],seen=new Set();
+ const add=(place,precision)=>{
+  let p=cleanLocationHint(place);
+  if(!isUsablePlace(p))return;
+  p=p.replace(/\s*,?\s*Portugal\s*$/i,'').trim();
+  const key=fold(p).replace(/[^a-z0-9]/g,'');if(!key||seen.has(key))return;
+  seen.add(key);candidates.push({query:p+', Portugal',precision,label:p});
+ };
+ const townOK=isUsablePlace(town);
+ if(isUsablePlace(start)){
+  const startHasTown=townOK&&fold(start).includes(fold(town));
+  add(!startHasTown&&townOK&&town!==start?start+', '+town:start,'descricao');
+  // Uma indicação «à entrada da aldeia de Regoufe, Arouca» pode falhar como morada.
+  const locality=start.match(/\b(?:aldeia|localidade|vila|freguesia|povoação|povoacao)\s+d[aeo]s?\s+([^,.;()]+)/i);
+  if(locality){
+   const after=start.slice(locality.index+locality[0].length).match(/^\s*,\s*([^,.;()]{3,55})/);
+   const district=after?after[1]:townOK?town:'';
+   add(locality[1]+(district?', '+district:''),'localidade');
+  }
+  // Código postal acompanhado pela povoação: «4960-095 Castro Laboreiro».
+  const postal=start.match(/\b\d{4}-\d{3}\s+([^,.;()]{3,55})/);
+  if(postal)add(postal[1],'localidade');
+  const parts=start.split(',').map(v=>v.trim()).filter(Boolean);
+  if(parts.length>=2){
+   // Primeiro usar as duas últimas partes curtas (e não textos como «junto ao café»).
+   const geographical=parts.filter(p=>p.length<=50&&!/^(?:junto|frente|perto|ao lado|ponto de encontro|barco|entrada|hora|concentração)/i.test(p));
+   if(geographical.length>=2)add(geographical.slice(-2).join(', '),'localidade');
+   if(geographical.length)add(geographical[geographical.length-1],'localidade');
+   add(parts[0],'localidade');
+  }
+  const de=start.match(/\b(?:em|na|no)\s+(?:aldeia\s+de\s+)?([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç-]+(?:\s+d[aeo]s?\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç-]+)?)/);
+  if(de)add(de[1],'localidade');
+ }
+ if(townOK)add(town,'concelho');
+ // Um GPS aproximado já presente no catálogo serve de recurso final.
+ if(hasCoords(e))candidates.push({coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'aproximado',label:'ponto de referência'});
+ return candidates.slice(0,6); // Limitar consultas por evento.
+}
+function endpointFingerprint(e){return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified].join('|');}
+function endpointName(e){return departureCandidates(e)[0]?.query||null;}
+async function locateEndpoint(e){
+ const candidates=departureCandidates(e);
+ for(const item of candidates){
+  if(item.coords)return {...item.coords,precision:item.precision,label:item.label};
+  const p=await geocodeText(item.query);
+  if(p)return {...p,precision:item.precision,label:item.label};
+ }
+ return null;
+}
 async function roadRoute(p,q){await gapThrottle('road');const u=`https://router.project-osrm.org/route/v1/driving/${p.lon},${p.lat};${q.lon},${q.lat}?overview=full&geometries=geojson&steps=false`;const r=await fetch(u);if(!r.ok)throw new Error('Serviço de rotas indisponível');const j=await r.json();if(j.code!=='Ok'||!j.routes?.[0])throw new Error('Sem rota rodoviária');const route=j.routes[0];return {kmOne:Math.round(route.distance/100)/10,minutesOne:Math.round(route.duration/60),geometry:Array.isArray(route.geometry?.coordinates)?route.geometry.coordinates:[]};}
 // A IP recebe o percurso real e devolve portagem para Classe 1, só ida.
 // Usamos uma função do próprio Netlify para não depender de CORS no navegador.
@@ -1157,7 +1265,7 @@ async function autoTollsForGeometry(geometry){
 // Primeiras 10 caminhadas ao definir a origem; mais 10 quando se aproximam do ecrã.
 function scheduleTravelBatches(events){
  if(COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE||state.view!=='list'||!travelPrefs.origin)return;
- const signature=travelPrefs.origin.trim().toLowerCase()+'|'+events.map(e=>e.id).sort().join(',');
+ const signature=travelPrefs.origin.trim().toLowerCase()+'|'+events.map(e=>e.id).join(',');
  if(signature!==tripFilterSignature){
   tripFilterSignature=signature;
   // Filtragem nova tem prioridade sobre cálculos automáticos do filtro anterior.
@@ -1184,14 +1292,16 @@ function scheduleTravelBatches(events){
 }
 function tripNeedsRoute(e,force=false){
  const r=travelData(e),key=routeCacheKey(e);
- return (force||!r||!Number.isFinite(r.kmOne))&&(!tripProblems.has(key)||force);
+ return (force||!r||!Number.isFinite(r.kmOne)||
+   (!r.manual&&(r.geocoderVersion!==GEOCODER_VERSION||r.destinationFingerprint!==endpointFingerprint(e))))
+   &&(!tripProblems.has(key)||force);
 }
 function queueTrips(events,manual=false){
  if(!travelPrefs.origin||tripOriginProblem&&!manual)return;
  const accepted=[];
  for(const e of events){
   if(!e||!tripNeedsRoute(e,manual))continue;
-  if(!(e.verified&&hasCoords(e))&&!endpointName(e)){if(manual)tripProblems.set(routeCacheKey(e),'Não foi possível localizar o ponto de partida.');continue;}
+  if(!departureCandidates(e).length){if(manual)tripProblems.set(routeCacheKey(e),'Não foi possível localizar o ponto de partida.');continue;}
   const key=routeCacheKey(e);
   if(manual)tripProblems.delete(key);
   if(tripActiveKey===key)continue;
@@ -1213,7 +1323,7 @@ function renderTravelProgress(){
 function calculateOneRoute(id){
  const e=allEvents().find(x=>x.id===id);if(!e)return;
  if(!travelPrefs.origin){openTravelPanel();toast('Define primeiro a origem.');return;}
- tripOriginProblem='';tripProblems.delete(routeCacheKey(e));
+ tripOriginProblem='';tripProblems.delete(routeCacheKey(e));geoMisses.clear();
  // Pedido manual não pode ficar atrás dos restantes cálculos.
  queueTrips([e],true);render();
 }
@@ -1250,10 +1360,14 @@ async function processTripQueue(){
    if(!q)throw new Error('Local de partida não localizado.');
    const r=await roadRoute(p,q),previous=travelRoutes[job.key]||{};
    const {geometry,...data}=r;
-   travelRoutes[job.key]={...previous,...data,updated:Date.now()};
+   const sameDestination=previous.destinationFingerprint===endpointFingerprint(e);
+   const kept={...previous};
+   // Uma mudança real de local implica rever as portagens automáticas anteriores.
+   if(!sameDestination&&kept.tollSource!=='manual'){delete kept.tollReturn;delete kept.tollSource;delete kept.tollChecked;}
+   travelRoutes[job.key]={...kept,...data,precision:q.precision,destinationLabel:q.label,destinationFingerprint:endpointFingerprint(e),geocoderVersion:GEOCODER_VERSION,updated:Date.now()};
    tripProblems.delete(job.key);persistTravel();
    // A consulta de portagens corre separadamente: nunca bloqueia distância/tempo.
-   if(previous.tollReturn==null&&!previous.tollChecked&&Array.isArray(geometry)&&geometry.length>1&&tollEndpointAvailable){
+   if(kept.tollReturn==null&&!kept.tollChecked&&Array.isArray(geometry)&&geometry.length>1&&tollEndpointAvailable){
     tollJobs.push({key:job.key,geometry});runTollQueue();
    }
   }catch(err){
