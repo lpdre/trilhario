@@ -546,6 +546,51 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 @media(max-width:480px){.walk-actions{gap:5px;justify-content:flex-end;padding:5px 9px 9px}.walk-actions .walk-compare,.walk-open,.walk-expand{font-size:9.5px;padding:0 6px;letter-spacing:0}.walk-trip-line{gap:5px}}
 
 @media(max-width:780px){.walk-trip-line{grid-column:2;grid-row:4}.walk-detail-panel{grid-column:1/-1;grid-row:5}}
+
+/* v24 — ordenação por ícone na barra de vistas; acções dos eventos sem painel Detalhes. */
+.switches{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0}
+.toolbar-sort{position:relative;display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border:1px solid #b9cbbb;border-radius:5px;background:#f8f8ef;color:#31543c;box-sizing:border-box;cursor:pointer}
+.toolbar-sort:hover,.toolbar-sort:focus-within{background:#e5eddf;border-color:#8baa91}
+.toolbar-sort:focus-within{outline:2px solid #b49a70;outline-offset:2px}
+.toolbar-sort svg{pointer-events:none}
+.toolbar-sort select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;appearance:none;-webkit-appearance:none;z-index:1}
+.toolbar-sort select option{color:#264939;font-size:13px;background:#fffdf7}
+.walk-main h3 .walk-title-link{color:inherit;text-decoration:none}
+.walk-main h3 .walk-title-link:hover,.walk-main h3 .walk-title-link:focus-visible{color:#1d6846;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+@media(min-width:781px){.walk-row{grid-template-columns:58px minmax(200px,1fr) minmax(205px,285px) minmax(250px,286px)}}
+@media(min-width:781px) and (max-width:1060px){.walk-row{grid-template-columns:54px minmax(190px,1fr) minmax(190px,235px) minmax(250px,286px)}}
+.walk-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:5px 7px;padding:7px 8px;min-width:0}
+.walk-action-main,.walk-action-quick{display:inline-flex;align-items:center;gap:4px;min-width:0}
+.walk-actions .walk-open,.walk-actions .walk-compare{height:29px;min-height:29px;box-sizing:border-box;font-size:10px;line-height:1;padding:0 7px;border-radius:4px}
+.walk-actions .walk-icon-btn{height:29px;width:29px;min-width:29px;padding:5px;display:grid;place-items:center;background:#fffdf7;border:1px solid #cbd9ce;border-radius:4px;color:#375b42;cursor:pointer}
+.walk-actions .walk-icon-btn:hover,.walk-actions .walk-icon-btn:focus-visible{background:#e4ecdd;border-color:#96b19a}
+.walk-actions .walk-icon-btn svg{display:block;height:16px;width:16px;pointer-events:none}
+.walk-actions .walk-save.is-saved{background:#e2eee0;border-color:#90b299;color:#b1644b}
+.walk-actions .walk-save.is-saved .icon-heart{fill:currentColor}
+.walk-actions .walk-delete{color:#9b554a}
+@media(max-width:780px){
+ .walk-row{grid-template-rows:auto auto auto auto}
+ .walk-date{grid-row:1/4}
+ .walk-actions{grid-column:2;grid-row:3;position:static;inset:auto;justify-content:flex-start;gap:6px 7px;padding:6px 10px 10px;border-top:0}
+ .walk-trip-line{grid-column:2;grid-row:4}
+ .walk-main h3{padding-right:0}
+}
+@media(max-width:540px){
+ .switches{gap:5px;width:100%}
+ .toolbar-filter{padding:8px 7px;min-height:39px;gap:4px}
+ .view-switch{flex:1;min-width:0;gap:2px}
+ .view-switch button{min-width:0;flex:1;padding:9px 2px;font-size:10.5px}
+ .toolbar-sort{flex-basis:37px;width:37px;height:39px}
+ .walk-actions{gap:5px 6px;padding:6px 8px 10px}
+ .walk-action-main,.walk-action-quick{gap:3px}
+ .walk-actions .walk-open,.walk-actions .walk-compare{padding:0 6px;font-size:9.5px}
+ .walk-actions .walk-icon-btn{width:28px;min-width:28px;height:29px;padding:4px}
+}
+@media(max-width:350px){
+ .toolbar-filter{padding:7px 5px;font-size:10px}
+ .view-switch button{font-size:9.5px;padding:8px 0}
+ .toolbar-sort{width:35px;flex-basis:35px}
+}
 </style>
 </head>
 <body>
@@ -565,10 +610,13 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
   <p class="travel-caption">Viagem de ida e volta, por estrada. As portagens são estimadas automaticamente a partir do percurso, usando o serviço da Infraestruturas de Portugal (Classe 1), quando disponível. Se a consulta falhar, podes editar manualmente. Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>.</p>
  </div>
 </section>
-<div class="travel-sort-wrap"><label for="travelSort">Ordenar:</label><select id="travelSort"><option value="date">Data e hora</option><option value="total">Custo total (com portagens)</option><option value="km">Deslocação · km</option><option value="fuel">Combustível</option></select></div>
+
 
 <div class="layout">
-<section aria-live="polite" class="results"><div class="content-head"><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
+<section aria-live="polite" class="results"><div class="content-head"><div class="switches"><button type="button" class="toolbar-filter" id="filterToggleBtn" aria-controls="filterPanel" aria-expanded="false" title="Mostrar filtros"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span>Filtros</span><span class="toolbar-count" id="filtersCounterMini" hidden></span></button><div aria-label="Escolher vista" class="view-switch" role="group"><button class="active" data-view="list">☷ Lista</button><button data-view="calendar">▦ Calendário</button><button data-view="map">⌖ Mapa</button></div><div class="toolbar-sort" title="Ordenar caminhadas por data e hora">
+ <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13M4 12h9M4 17h5M19 10v10m-4-4 4 4 4-4"/></svg>
+ <select id="travelSort" aria-label="Ordenar caminhadas" title="Ordenar caminhadas"><option value="date">Data e hora</option><option value="total">Custo total (com portagens)</option><option value="km">Deslocação · km</option><option value="fuel">Combustível</option></select>
+ </div></div></div><div class="filters" id="filterPanel" hidden aria-label="Filtros de caminhadas">
   <div class="filters-content">
     <div class="filter-grid">
       <div class="field filter-search"><label for="search">Pesquisar</label><input class="control" id="search" placeholder="Serra, trilho, organizador..." type="search"/></div>
@@ -703,7 +751,6 @@ if(travelPrefs.fuelOverride==null)travelPrefs.fuel=(fuelPrices[travelPrefs.kind]
 let travelRoutes=storage(TRAVEL_ROUTES_KEY,{}),travelGeocodes=storage(TRAVEL_GEO_KEY,{});
 let compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));
 let travelBusy=false,travelEditingId='',geoLastRequest=0,roadLastRequest=0;
-let expandedRows=new Set();
 // v23: partida GPS validada, geocodificação progressiva e lotes de 10.
 const TRAVEL_BATCH_SIZE=10;
 let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
@@ -905,6 +952,13 @@ function googleMapsDeparture(x,spot){
     x.town&&fold(text).includes(fold(x.town))?'':x.town,'Portugal'].filter(Boolean).join(', ');
  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
 }
+const TRILHARIO_ACTION_ICONS={
+ map:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+ weather:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 16.5H6a4 4 0 0 1 0-8 6.5 6.5 0 0 1 12.3-1.7A5 5 0 0 1 19 16.5h-1"/><path d="M9 20v-5m-2 2h4m6 3v-5m-2 2h4"/></svg>',
+ calendar:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg>',
+ heart:'<svg viewBox="0 0 24 24" aria-hidden="true" class="icon-heart" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.3 5.3 0 0 0-7.5 0L12 6.9l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 22l8.8-8.9a5.3 5.3 0 0 0 0-7.5Z"/></svg>',
+ trash:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>'
+};
 function eventRow(x){
  const fav=favorites.has(x.id),spot=x.start||x.town||'Por confirmar',verified=!!x.verified;
   const organizerUrl=organizerHomepage(x),mapsUrl=googleMapsDeparture(x,spot);
@@ -928,7 +982,7 @@ function eventRow(x){
  return `<article class="walk-row" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
-   <h3><button class="walk-title-button" onclick="toggleRow('${esc(x.id)}')" aria-label="Ver detalhes de ${esc(x.title)}">${esc(x.title)}</button>${x.status?`<span class="walk-closed">${esc(x.status)}</span>`:''}</h3>
+   <h3>${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="Abrir evento no site do organizador">${esc(x.title)}</a>`:esc(x.title)}${x.status?`<span class="walk-closed">${esc(x.status)}</span>`:''}</h3>
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':' <span class="walk-unconfirmed">(a confirmar)</span>'}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
@@ -939,36 +993,21 @@ function eventRow(x){
    <span><small>Horas</small><b>${duration}</b></span>
    <span><small>Preço</small><b>${fmtP(x.price)}</b></span>
   </div>
-  <div class="walk-actions">
-   ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
-    <button type="button" class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="${expandedRows.has(x.id)?'true':'false'}" title="${expandedRows.has(x.id)?'Recolher detalhes':'Mostrar detalhes'}"><span class="btn-label">${expandedRows.has(x.id)?'Fechar':'Detalhes'}</span><span class="btn-icon" aria-hidden="true">${expandedRows.has(x.id)?'⌃':'⌄'}</span></button>
-    <button type="button" class="walk-compare ${compared.has(x.id)?'is-compared':''}" onclick="toggleCompare('${esc(x.id)}')" aria-pressed="${compared.has(x.id)?'true':'false'}" title="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}">${compared.has(x.id)?'✓ Comparar':'+ Comparar'}</button>
+  <div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
+   <div class="walk-action-main">
+    ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
+    <button type="button" class="walk-compare ${compared.has(x.id)?'is-compared':''}" onclick="toggleCompare('${esc(x.id)}')" aria-label="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}" aria-pressed="${compared.has(x.id)?'true':'false'}" title="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}">${compared.has(x.id)?'✓ Comparar':'+ Comparar'}</button>
+   </div>
+   <div class="walk-action-quick">
+    <button type="button" class="walk-icon-btn" onclick="focusEvent('${esc(x.id)}')" aria-label="Ver no mapa: ${esc(x.title)}" title="Ver no mapa">${TRILHARIO_ACTION_ICONS.map}</button>
+    <button type="button" class="walk-icon-btn" onclick="focusEvent('${esc(x.id)}',true)" aria-label="Ver previsão meteorológica: ${esc(x.title)}" title="Previsão meteorológica">${TRILHARIO_ACTION_ICONS.weather}</button>
+    <button type="button" class="walk-icon-btn" onclick="downloadIcs('${esc(x.id)}')" aria-label="Adicionar à agenda: ${esc(x.title)}" title="Adicionar à agenda">${TRILHARIO_ACTION_ICONS.calendar}</button>
+    <button type="button" class="walk-icon-btn walk-save ${fav?'is-saved':''}" onclick="toggleFav('${esc(x.id)}')" aria-label="${fav?'Retirar dos guardados':'Guardar caminhada'}: ${esc(x.title)}" aria-pressed="${fav?'true':'false'}" title="${fav?'Retirar dos guardados':'Guardar caminhada'}">${TRILHARIO_ACTION_ICONS.heart}</button>
+    ${x.userAdded?`<button type="button" class="walk-icon-btn walk-delete" onclick="removeEvent('${esc(x.id)}')" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_ACTION_ICONS.trash}</button>`:''}
+   </div>
   </div>
   ${travelRow(x)}
-  <div class="walk-detail-panel" id="details-${esc(x.id)}" ${expandedRows.has(x.id)?'':'hidden'}>
-   <div class="walk-detail-copy">
-    <p>${esc(x.description||'Descrição disponível junto do organizador.')}</p>
-    <p><b>Local de partida:</b> ${esc(spot)}${verified?' (confirmado)':' (localidade de referência; confirmar com o organizador)'}</p>
-    <p><b>Dificuldade:</b> ${esc(names[x.difficulty]||'Por confirmar')}</p>
-   </div>
-   <div class="walk-inline-actions" role="group" aria-label="Acções de ${esc(x.title)}">
-   <button type="button" class="detail-action" onclick="focusEvent('${esc(x.id)}')"><span class="detail-icon" aria-hidden="true">⌖</span> Mapa</button>
-   <button type="button" class="detail-action" onclick="focusEvent('${esc(x.id)}',true)"><span class="detail-icon" aria-hidden="true">☁</span> Previsão</button>
-   <button type="button" class="detail-action" onclick="downloadIcs('${esc(x.id)}')"><span class="detail-icon" aria-hidden="true">▦</span> Agenda</button>
-   <button type="button" class="detail-action detail-favorite mobile-favorite ${fav?'is-saved':''}" onclick="toggleFav('${esc(x.id)}')" aria-pressed="${fav?'true':'false'}"><span class="detail-icon" aria-hidden="true">${fav?'♥':'♡'}</span> ${fav?'Guardado':'Guardar'}</button>
-   ${x.userAdded?`<button type="button" class="detail-action detail-danger" onclick="removeEvent('${esc(x.id)}')">Eliminar</button>`:''}
-   </div>
-  </div>
  </article>`;
-}
-function toggleRow(id){
- const row=[...document.querySelectorAll('.walk-row')].find(el=>el.dataset.eid===id);
- if(!row)return;
- const panel=row.querySelector('.walk-detail-panel'),btn=row.querySelector('.walk-expand');
- if(!panel)return;
- panel.hidden=!panel.hidden;
- if(panel.hidden)expandedRows.delete(id);else expandedRows.add(id);
- if(btn){btn.setAttribute('aria-expanded',String(!panel.hidden));btn.classList.toggle('selected',!panel.hidden);btn.querySelector('.btn-icon').textContent=panel.hidden?'⌄':'⌃';btn.querySelector('.btn-label').textContent=panel.hidden?'Detalhes':'Fechar';btn.title=panel.hidden?'Mostrar detalhes':'Recolher detalhes';}
 }
 function chips(){let xs=[];
  if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" onclick="clearSelectedDay()" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
@@ -1380,13 +1419,19 @@ async function processTripQueue(){
    console.info('Deslocação indisponível:',e.title,reason);
   }finally{tripActiveKey='';renderTravelProgress();render();}
  }}finally{tripWorking=false;travelBusy=false;renderTravelProgress();}}
+function updateSortLabel(){
+ const select=$('travelSort'),container=select.closest('.toolbar-sort');
+ const label='Ordenar: '+select.options[select.selectedIndex].textContent;
+ container.title=label;select.title=label;
+}
+updateSortLabel();
 $('tripOrigin').value=travelPrefs.origin||'';$('tripConsumption').value=travelPrefs.consumption;
 $('tripFuelKind').value=travelPrefs.kind;$('tripFuelOverride').checked=travelPrefs.fuelOverride!=null;
 if(travelPrefs.fuelOverride!=null)$('tripFuel').value=Number(travelPrefs.fuelOverride).toFixed(3);
 updateFuelInput();updateTravelHeader();
 $('tripFuelKind').addEventListener('change',()=>{if(!$('tripFuelOverride').checked)updateFuelInput();else $('fuelPriceStatus').textContent='Valor personalizado; muda para a média desmarcando «Personalizar €/L».';});
 $('tripFuelOverride').addEventListener('change',()=>{if($('tripFuelOverride').checked)$('tripFuel').value=Number(travelPrefs.fuel||currentFuelPrice($('tripFuelKind').value)?.value||0).toFixed(3);updateFuelInput();});
-$('travelToggle').addEventListener('click',toggleTravelPanel);$('travelApply').addEventListener('click',applyTravel);$('travelSort').addEventListener('change',render);
+$('travelToggle').addEventListener('click',toggleTravelPanel);$('travelApply').addEventListener('click',applyTravel);$('travelSort').addEventListener('change',()=>{updateSortLabel();render();});
 $('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(compared.size<2)e.preventDefault();});
 $('tripClose').addEventListener('click',closeTripEditor);$('tripSave').addEventListener('click',saveTripEditor);$('tripOverlay').addEventListener('click',e=>{if(e.target===$('tripOverlay'))closeTripEditor();});
 window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_COMPARE_KEY){compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}});
