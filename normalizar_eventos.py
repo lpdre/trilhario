@@ -94,6 +94,7 @@ def tidy_meeting(value):
     t=' '.join(str(value or '').split())
     t=re.split(r'\s+Tipo\s+Evento\s*:',t,maxsplit=1,flags=re.I)[0]
     t=re.split(r'\s+(?:Hor[aá]rio|Detalhes do Evento|Descri[cç][aã]o do Evento)\b',t,maxsplit=1,flags=re.I)[0]
+    t=re.sub(r'\s+\.\s+', ', ', t)
     t=t.strip(' .,:;-')
     return t if 5<=len(t)<=180 and not t.endswith(('...', '…')) else None
 
@@ -114,8 +115,21 @@ def parse_caminhando_card(title):
     if duration is not None:out['duration']=duration
     place=tidy_meeting(m['place'])
     # Alguns cartões são cortados exactamente aos 140 caracteres.
-    if place and 'Tipo Evento' in raw:out['start']=place
+    if place and ('Tipo Evento' in raw or re.search(r'\)\s*$',place)):
+        out['start']=place
     return out
+
+def caminhar_dms_coordinate(text, label):
+    """Lê DMS com os hemisférios N/S/E/W, devolvendo um número ou None."""
+    q=re.search(r'\b'+label+r'\s*:\s*(.{1,90})',text,re.I)
+    if not q:return None
+    m=re.search(r'(\d{1,3})\s*[º°]\s*(\d{1,2})\s*[’′\x27]\s*'
+                r'(\d{1,2}(?:[.,]\d+)?)\s*[″”"\x27]?\s*([NSEW])\b',q[1],re.I)
+    if not m:return None
+    deg,minutes,seconds=int(m[1]),int(m[2]),float(m[3].replace(',','.'))
+    if minutes>=60 or seconds>=60:return None
+    val=deg+minutes/60+seconds/3600
+    return -val if m[4].upper() in ('S','W') else val
 
 def parse_caminhando_detail(html,url):
     """Extrai os campos publicados na página individual do Caminhando.pt.
@@ -143,6 +157,12 @@ def parse_caminhando_detail(html,url):
         if duration is not None:out['duration']=duration
         place=tidy_meeting(match['place'])
         if place:out['start']=place
+    # Algumas páginas oficiais publicam coordenadas GPS completas na secção
+    # «Localização». Validar ambos os valores antes de assinalar confirmado.
+    lat=caminhar_dms_coordinate(head,'Latitude')
+    lon=caminhar_dms_coordinate(head,'Longitude')
+    if lat is not None and lon is not None and 36<=lat<=43 and -10<=lon<=-6:
+        out.update(lat=round(lat,8),lon=round(lon,8),verified=True)
     # O H1 contém exclusivamente o nome, ao contrário da âncora do calendário.
     h1=main.find('h1') or soup.find('h1')
     if h1:
@@ -161,8 +181,18 @@ def repair_caminhando(event, old):
     cached=parse_caminhando_card(raw_title)
     # Correcção sem pedidos HTTP se o título continha os dados completos.
     out=dict(cached)
+    # Evitar novos pedidos quando uma execução anterior já publicou todos os campos.
+    if (not cached and meaningful(event.get('start')) and clock_valid(event.get('time'))
+        and clock_valid(event.get('endTime')) and not re.match(r'^\s*\d{1,2}:\d{2}\b', raw_title)):
+        return {}
+    # Também corrigir anúncios que já chegam limpos do colector.
+    # O cartão antigo pode perder o local ao ser limitado a 140 caracteres:
+    # nesse caso tenta a página oficial, sem inventar uma morada.
+    has_coords = all(isinstance((event.get(k) if event.get(k) is not None else old.get(k)),(float,int))
+                     for k in ('lat','lon'))
     need_detail=(not cached.get('start') or not cached.get('title') or
-                 not cached.get('time') or not cached.get('endTime'))
+                 not cached.get('time') or not cached.get('endTime') or
+                 (not has_coords and not old.get('gps_checked_at')))
     if need_detail:
         try:
             import requests
@@ -170,10 +200,40 @@ def repair_caminhando(event, old):
             resp.raise_for_status()
             if (resp.url.startswith(('https://caminhando.pt/eventos/','https://www.caminhando.pt/eventos/'))
                     and 'text/html' in resp.headers.get('Content-Type','text/html').lower()):
-                out.update(parse_caminhando_detail(resp.text,resp.url))
+                details=parse_caminhando_detail(resp.text,resp.url)
+                # Um cabeçalho genérico de uma página alterada não deve substituir
+                # um nome completo e coerente que o próprio cartão publicou.
+                if cached.get('title') and details.get('title'):
+                    old_words=set(re.findall(r'[a-z]{4,}',folded(cached['title'])))
+                    new_words=set(re.findall(r'[a-z]{4,}',folded(details['title'])))
+                    if old_words and len(old_words & new_words)/len(old_words)<0.55:
+                        details.pop('title',None)
+                out.update(details)
+                out['gps_checked_at']=date.today().isoformat()
         except Exception as exc:
             print('Caminhando.pt: não foi possível consultar',url,type(exc).__name__)
     return out
+
+# O Trilhário apresenta caminhadas de um só dia. Alguns anúncios têm
+# também a categoria Caminhada mas descrevem um pacote de vários dias.
+# Não basta testar a categoria: evitar fins-de-semana, viagens e programas
+# explicitamente assinalados como multidiários pelo organizador.
+CAMINHANDO_MULTIDAY_URL = re.compile(
+    r'(?:^|/)(?:fim-de-semana|viagem|escapadinha|expedicao)(?:-|/|$)', re.I)
+CAMINHANDO_MULTIDAY_TITLE = re.compile(
+    r'\b(?:fim[ -]de[ -]semana|viagem\s+(?:a|ao|pela|pelos|de)|'
+    r'escapadinha|expedi[cç][aã]o|\d+\s*(?:dias|noites))\b',re.I)
+CAMINHANDO_MULTIDAY_DATES = re.compile(
+    r'^\s*\(\s*[a-z]{3,4}\s+\d{1,2}\)\s*\d{1,2}:\d{2}\s+'
+    r'\d{1,2}\s*\(\s*[a-z]{3,4}\s+\d{1,2}\)', re.I)
+
+def is_caminhando_multiday(event):
+    if event.get('organizer') != 'Caminhando.pt':return False
+    title=' '.join(str(event.get('title') or '').split())
+    path=urlsplit(str(event.get('url') or '')).path.lower()
+    return bool(CAMINHANDO_MULTIDAY_URL.search(path)
+                or CAMINHANDO_MULTIDAY_TITLE.search(title)
+                or CAMINHANDO_MULTIDAY_DATES.search(title))
 
 def git_previous():
     try:
@@ -435,6 +495,11 @@ def main():
     no_gps = 0
     truncated = 0
     seen = set()
+    removed_multiday = [e for e in events if isinstance(e, dict) and is_caminhando_multiday(e)]
+    if removed_multiday:
+        # Retirar antes de validar/publicar e sem perturbar os IDs dos outros eventos.
+        events[:] = [e for e in events if not (isinstance(e, dict) and is_caminhando_multiday(e))]
+        print('Caminhando.pt: {} excursões de vários dias retiradas da agenda'.format(len(removed_multiday)))
     # Dar prioridade aos pontos de encontro em falta na Mais Trilhos.
     # A verificação normal tinha um orçamento global de 35 consultas e podia
     # gastá-lo antes de chegar às caminhadas de Novembro e Dezembro.
@@ -498,7 +563,7 @@ def main():
             elif e.get('time')=='00:00':
                 e['time']='';changed+=1
         # Uma nova recolha incompleta não deve apagar informação publicada anteriormente.
-        for field in ('start', 'town', 'time', 'endTime', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'status', 'image', 'image_checked_at'):
+        for field in ('start', 'town', 'time', 'endTime', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'verified', 'gps_checked_at', 'status', 'image', 'image_checked_at'):
             if not meaningful(e.get(field)) and meaningful(old.get(field)):
                 e[field] = old[field]
                 changed += 1
@@ -578,7 +643,8 @@ def main():
             changed+=1
     if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
-    lines = [f'Fotografias: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN})',
+    lines = [f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
+             f'Fotografias: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN})',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',
              f'{truncated} locais aparentemente truncados; {generic} títulos genéricos por resolver']
