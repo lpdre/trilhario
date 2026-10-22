@@ -14,7 +14,7 @@ import sys
 import unicodedata
 from datetime import date, datetime, timezone
 from pathlib import Path
-from urllib.parse import urlsplit, unquote
+from urllib.parse import urlsplit, unquote, urljoin
 import time
 
 ROOT = Path(__file__).resolve().parent
@@ -198,6 +198,113 @@ def enrich_official(e, previous):
         return {}
 
 
+
+
+# As imagens são referenciadas a partir do anúncio original (sem copiar ficheiros
+# de terceiros para o GitHub). Alguns organizadores impedem hotlink: nesse caso
+# a foto é omitida pelo browser e o cartão permanece utilizável.
+PHOTO_VISITS_PER_RUN = 24
+PHOTO_RETRY_DAYS = 28
+PHOTO_MAX_HTML_BYTES = 800_000
+PHOTO_AGENT = {'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)',
+               'Accept-Language':'pt-PT,pt;q=0.9'}
+
+
+def valid_event_image(image_url, page_url):
+    """URL http(s) de imagem, externa ou CDN, sem credenciais e sem esquemas activos."""
+    try:
+        from urllib.parse import urljoin, urlsplit, urlunsplit
+        raw=str(image_url or '').strip()
+        if not raw or raw.startswith(('data:', 'blob:', 'javascript:')):
+            return None
+        url=urljoin(page_url,raw)
+        parts=urlsplit(url)
+        hostname=(parts.hostname or '').lower()
+        if parts.scheme!='https' or not hostname or parts.username or parts.password:
+            return None
+        if hostname in {'localhost','127.0.0.1','0.0.0.0'} or hostname.endswith(('.local','.internal','.test','.invalid')):
+            return None
+        try:
+            from ipaddress import ip_address
+            if not ip_address(hostname).is_global:return None
+        except ValueError:pass
+        if re.search(r'\.(?:svg|gif|pdf|ico)(?:$|[?#])',parts.path,re.I):
+            return None
+        # Evitar marcas gráficas e imagens partilhadas por todos os anúncios.
+        if re.search(r'(?:^|[\/_.-])(?:logo|favicon|avatar|placeholder|default-image|no-photo)(?:[\/_.-]|$)',parts.path,re.I):
+            return None
+        return urlunsplit((parts.scheme,parts.netloc,parts.path,parts.query,''))
+    except (ValueError, UnicodeError):
+        return None
+
+
+def extract_event_image(html, source_url):
+    """Escolhe uma única foto do anúncio oficial, preferindo metadados sociais."""
+    from bs4 import BeautifulSoup
+    import json as _json
+    soup=BeautifulSoup(html,'html.parser')
+    image_candidates=[]
+    for prop in ('og:image:secure_url','og:image','twitter:image','twitter:image:src'):
+        tag=soup.find('meta',attrs={'property':prop}) or soup.find('meta',attrs={'name':prop})
+        if tag and tag.get('content'):
+            image_candidates.append(tag['content'])
+    # JSON-LD também publica a fotografia do evento sem depender dos selectores visuais.
+    for tag in soup.select('script[type="application/ld+json"]')[:10]:
+        try: root=_json.loads(tag.string or tag.get_text())
+        except (ValueError,TypeError):continue
+        queue=[root]
+        while queue:
+            node=queue.pop()
+            if isinstance(node,list):queue.extend(node);continue
+            if not isinstance(node,dict):continue
+            graph=node.get('@graph')
+            if graph:queue.append(graph)
+            typ=node.get('@type')
+            if isinstance(typ,str):typ=[typ]
+            if any(str(t).endswith('Event') for t in (typ or [])):
+                val=node.get('image')
+                if isinstance(val,list):image_candidates.extend(val)
+                elif val:image_candidates.append(val)
+    # Não procurar imagens aleatórias no rodapé, anúncios de outros eventos ou logótipos.
+    for cand in image_candidates:
+        if isinstance(cand,dict):cand=cand.get('url') or cand.get('contentUrl')
+        url=valid_event_image(cand,source_url)
+        if url:return url
+    return None
+
+
+def read_official_photo(event):
+    """Consultar só o site original do evento (nunca descarregar a imagem)."""
+    import requests
+    try:
+        target=str(event.get('url') or '')
+        parts=urlsplit(target)
+        if parts.scheme!='https' or not parts.hostname:
+            return None
+        # Evitar sondar páginas não-oficiais ou endereços introduzidos livremente.
+        allowed=('greentrekker.pt','maistrilhos.pt','hikeland.pt','indoeu.pt',
+                 'montanhasdentro.pt','trekkingroots.pt','trekkin.pt','bastotrekking.pt',
+                 'hikingaround.pt','ndesafios.pt','montanhasdonorte.pt',
+                 'montanhismo-guarda.pt','amigosdamontanha.com','caminhando.pt',
+                 'penomundo.pt','clubearlivre.org','trilhosnocturnos.com',
+                 'geoparkestrela.pt','drenergies.com','sal.pt','geres.pt',
+                 'trilhosecaminhadas.pt')
+        domain=parts.hostname.lower().removeprefix('www.')
+        if domain not in allowed:
+            return None
+        with requests.get(target,timeout=(4,8),headers=PHOTO_AGENT,stream=True) as resp:
+            resp.raise_for_status()
+            if 'text/html' not in resp.headers.get('content-type','text/html').lower():
+                return None
+            buf=bytearray()
+            for chunk in resp.iter_content(chunk_size=32_768):
+                buf.extend(chunk)
+                if len(buf)>PHOTO_MAX_HTML_BYTES:break
+            encoding=resp.encoding or 'utf-8'
+            return extract_event_image(bytes(buf).decode(encoding,errors='replace'),resp.url)
+    except requests.RequestException:
+        return None
+
 def main():
     if not CATALOG.is_file():
         print('ERRO: catálogo inexistente', file=sys.stderr)
@@ -240,7 +347,7 @@ def main():
                     e[field]=value;changed+=1
         old = by_id.get(ident, {})
         # Uma nova recolha incompleta não deve apagar informação publicada anteriormente.
-        for field in ('start', 'town', 'time', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'status'):
+        for field in ('start', 'town', 'time', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'status', 'image', 'image_checked_at'):
             if not meaningful(e.get(field)) and meaningful(old.get(field)):
                 e[field] = old[field]
                 changed += 1
@@ -280,9 +387,35 @@ def main():
                 missing_departure += 1
         elif re.search(r'[,\s]+[A-Za-zÀ-ÿ]{1,2}$', start) or start.endswith('('):
             truncated += 1
+
+    # Uma miniatura por evento, procurada automaticamente a cada execução diária.
+    # Visitas limitadas; próximos dias têm prioridade. Ao fim de algumas execuções,
+    # o catálogo fica preenchido sem exigir intervenção manual.
+    image_visits=0
+    image_added=0
+    today=date.today()
+    for e in sorted((e for e in events if isinstance(e,dict)),key=lambda e:(str(e.get('date','9999')), str(e.get('title','')))):
+        if meaningful(e.get('image')):
+            if not valid_event_image(e.get('image'),e.get('url','')):
+                e.pop('image',None)
+            else:
+                continue
+        checked=str(e.get('image_checked_at') or '')
+        try: recently_checked=(today-date.fromisoformat(checked)).days < PHOTO_RETRY_DAYS
+        except ValueError:recently_checked=False
+        if recently_checked or image_visits>=PHOTO_VISITS_PER_RUN:
+            continue
+        image_visits+=1
+        photo=read_official_photo(e)
+        e['image_checked_at']=today.isoformat()
+        if photo:
+            e['image']=photo
+            image_added+=1
+            changed+=1
     if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
-    lines = [f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
+    lines = [f'Fotografias: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN})',
+             f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',
              f'{truncated} locais aparentemente truncados; {generic} títulos genéricos por resolver']
     if errors:
