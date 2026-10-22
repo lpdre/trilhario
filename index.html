@@ -665,9 +665,9 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 
 <section class="comparison-page shell" id="comparisonPage">
  <header class="comparison-head"><a class="brand brand-hero comparison-brand" href="index.html">trilhário<span class="brand-dot">.</span></a><a href="index.html" class="comparison-back">← Voltar à agenda</a></header>
- <div class="comparison-intro"><span class="eyebrow">ESCOLHER O PRÓXIMO TRILHO</span><h1>Comparar caminhadas</h1><p>Até três caminhadas, lado a lado. Distância a pé, desnível, tempo de carro, combustível, portagens e custo total.</p></div>
+ <div class="comparison-intro"><span class="eyebrow">ESCOLHER O PRÓXIMO TRILHO</span><h1>Comparar caminhadas</h1><p>Até três caminhadas, lado a lado. Distância a pé, desnível, tempo de carro, combustível, portagens e custo total da viagem.</p></div>
  <div id="comparisonContent" aria-live="polite"></div>
- <p class="comparison-note">Distâncias e duração rodoviárias estimadas a partir do ponto de partida e da origem definida. O custo total só é apresentado quando existem dados de inscrição e portagens.</p>
+ <p class="comparison-note">Distâncias e duração rodoviárias estimadas a partir do ponto de partida e da origem definida. O custo total da viagem corresponde a combustível e portagens (ida e volta), sem incluir a inscrição na caminhada. Sem portagens calculadas não é apresentado um total incompleto.</p>
 </section>
 <div class="compare-tray" id="compareTray" hidden><div class="compare-tray-content"><div><strong id="compareQty">0 de 3 seleccionadas</strong><span id="compareNames">Selecciona caminhadas para comparar</span></div><div class="compare-tray-actions"><button type="button" id="compareClear">Limpar</button><a id="compareOpen" href="?comparar=1" target="_blank" rel="noopener noreferrer" class="compare-open">Comparar ↗</a></div></div></div>
 <footer class="footer"><div class="shell"><span><strong>trilhário.</strong> Um projecto experimental e independente, sem associação aos organizadores.</span><span>Eventos de demonstração · Outubro 2026 · Feito para caminhar mais, procurar menos.</span></div></footer>
@@ -853,10 +853,21 @@ const VERIFIED_EVENT_CORRECTIONS={
   gain:350,duration:4,price:12,difficulty:2
  }
 };
+// Correcções pontuais verificadas nos anúncios oficiais em 22-10-2026.
+// Limitadas à data da edição: não são propagadas para futuras edições do percurso.
+const VERIFIED_OCTOBER_CORRECTIONS={
+ 'caminhada-de-lua-cheia-em-sintras-12':{title:'Caminhada de Lua Cheia em Sintra',start:'Lavadouro Público (Escola Primária), Malveira da Serra, Cascais',town:'Malveira da Serra, Cascais',time:'19:00',duration:4.5,km:11,price:15,difficulty:2},
+ 'grande-rota-da-montanha-das-bruxas':{title:'Grande Travessia da Montanha das Bruxas',start:'Associação Recreativa, Cultural e Desportiva da Mendiga, Rua Principal 110, 2480-215 Mendiga',town:'Mendiga, Porto de Mós',lat:39.49602778,lon:-8.85566667,verified:true,time:'10:00',duration:7,km:21,gain:500,price:20,difficulty:3},
+ 'aldeias-serranas-de-fafe':{title:'Aldeias Serranas de Fafe',start:'Santuário Nossa Senhora das Neves, Fafe',town:'Lagoa, Fafe',time:'09:00',duration:9,km:20,gain:700,price:20,difficulty:4},
+ 'vale-da-candeeira-208':{title:'Vale da Candeeira',start:'Covão da Ametade, Manteigas',town:'Manteigas',time:'10:00',duration:7,km:11,gain:800,price:15,difficulty:5}
+};
 function eventCorrection(e){
- if(e.organizer!=='Hike Land'||e.date!=='2026-10-25')return null;
  const slug=String(e.url||'').split('?')[0].replace(/\/$/,'').split('/').pop();
- return VERIFIED_EVENT_CORRECTIONS[slug]||null;
+ if(e.date==='2026-10-25'){
+  if(e.organizer==='Hike Land')return VERIFIED_EVENT_CORRECTIONS[slug]||null;
+  if(e.organizer==='GreenTrekker'||e.organizer==='Mais Trilhos')return VERIFIED_OCTOBER_CORRECTIONS[slug]||null;
+ }
+ return null;
 }
 
 // As coordenadas ficam exclusivamente para o mapa, nunca no texto do local de partida.
@@ -880,6 +891,7 @@ function legibleEventTitle(e){
 }
 function displayDeparture(e){
  const start=localPartidaLegivel(e.start),town=localPartidaLegivel(e.town);
+ if(/ponto de encontro\s*2/i.test(start)&&/barco|transtejo/i.test(start))return 'Estação Fluvial de Belém (barco) · segundo ponto de encontro no anúncio';
  // O colector da Hike Land preenche por vezes apenas town com o ponto de encontro.
  if(!isPlacePlaceholder(start))return start;
  return !isPlacePlaceholder(town)?town:'Por confirmar';
@@ -1035,7 +1047,7 @@ function eventRow(x){
   <div class="walk-main">
    <h3>${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="Abrir evento no site do organizador">${esc(x.title)}</a>`:esc(x.title)}${x.status?`<span class="walk-closed">${esc(x.status)}</span>`:''}</h3>
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}</p>
-   <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?' <span class="walk-unconfirmed">(a confirmar)</span>':''}</p>
+   <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
   </div>
   <div class="walk-metrics">
@@ -1174,14 +1186,14 @@ function persistTravel(){try{localStorage.setItem(TRAVEL_PREF_KEY,JSON.stringify
 function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCase()+'|'+e.id;}
 function travelData(e){if(!travelPrefs.origin)return null;const d=travelRoutes[routeCacheKey(e)];return d&&typeof d==='object'?d:null;}
 function travelMoney(v){return Number.isFinite(v)?v.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}):'—';}
-function tripCalc(e){const r=travelData(e);if(!r||r.manual||r.geocoderVersion!==GEOCODER_VERSION||r.destinationFingerprint!==endpointFingerprint(e)||!Number.isFinite(r.kmOne)||r.kmOne<0)return null;const km=r.kmOne*2;const fuel=km*(Number(travelPrefs.consumption)/100)*Number(travelPrefs.fuel);const toll=r.tollReturn==null?null:Number(r.tollReturn);const fee=e.price==null?null:Number(e.price);return {km,minutes:r.minutesOne==null?null:r.minutesOne*2,fuel,toll,fee,total:toll==null||fee==null?null:fuel+toll+fee};}
+function tripCalc(e){if(/ponto de encontro\s*2/i.test(String(e.start||''))&&/barco|transtejo/i.test(String(e.start||'')))return null;const r=travelData(e);if(!r||r.manual||r.geocoderVersion!==GEOCODER_VERSION||r.destinationFingerprint!==endpointFingerprint(e)||!Number.isFinite(r.kmOne)||r.kmOne<0)return null;const km=r.kmOne*2;const fuel=km*(Number(travelPrefs.consumption)/100)*Number(travelPrefs.fuel);const toll=r.tollReturn==null?null:Number(r.tollReturn);const fee=e.price==null?null:Number(e.price);return {km,minutes:r.minutesOne==null?null:r.minutesOne*2,fuel,toll,fee,total:toll==null?null:fuel+toll};}
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,oneway=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key),queued=tripJobsSet.has(key)||tripActiveKey===key;
  const unavailable=!departureCandidates(e).length;
  let desc;
- if(t)desc=`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong>${oneway?.precision&&oneway.precision!=='gps'?' <span class="trip-missing" title="Destino estimado: '+esc(oneway.destinationLabel||'localidade')+'">(partida aprox.)</span>':''} · combustível ≈ ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':'≈ '+travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?'':` · <strong>total ≈ ${travelMoney(t.total)}</strong>`}`;
+ if(t)desc=`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong>${oneway?.precision&&oneway.precision!=='gps'?' <span class="trip-missing" title="Destino estimado: '+esc(oneway.destinationLabel||'localidade')+'">(partida aprox.)</span>':''} · combustível ≈ ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':'≈ '+travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?' · <span class="trip-missing">total da viagem: portagens por calcular</span>':` · <strong>total viagem ≈ ${travelMoney(t.total)}</strong>`}`;
  else if(!hasOrigin)desc='<span class="trip-missing">Define a origem para ver os custos</span>';
  else if(unavailable)desc='<span class="trip-missing">Local de partida por confirmar · sem cálculo</span>';
  else if(tripOriginProblem)desc=`<span class="trip-error">${esc(tripOriginProblem)}</span>`;
@@ -1204,7 +1216,7 @@ function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('compari
  const cell=(e,key)=>{const t=tripCalc(e),r=travelData(e);switch(key){
  case 'organizer':return esc(e.organizer);case 'date':return esc(dateShort(e))+' · '+esc(e.time||'—');case 'walk':return e.km==null?'—':fmtN(e.km)+' km';case 'gain':return e.gain==null?'—':fmtN(e.gain)+' m';case 'difficulty':return esc(names[e.difficulty]||'—');case 'price':return fmtP(e.price);
  case 'location':return esc(displayDeparture(e)||'Por confirmar');case 'driveKm':return t?fmtN(t.km)+' km':'—';case 'driveTime':return t?timeStr(t.minutes):'—';case 'fuel':return t?travelMoney(t.fuel):'—';case 'toll':return t&&t.toll!=null?travelMoney(t.toll):'—';case 'total':return t&&t.total!=null?travelMoney(t.total):'—';case 'source':return safeExternalUrl(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ver evento ↗</a>`:'—';default:return '—';}};
- const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Custo total'],['source','Anúncio']];
+ const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Total viagem (combustível + portagens)'],['source','Anúncio']];
  target.innerHTML=`<div class="comparison-action"><button type="button" onclick="calculateVisibleRoutes(true)" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" onclick="renderComparison()">Actualizar tabela</button></div><div class="comparison-table-wrap"><table class="comparison-table"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}"><th scope="row">${label}</th>${items.map(e=>`<td>${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 function openTravelPanel(){if(COMPARE_PAGE_MODE){window.open('index.html','_blank','noopener');return;}$('travelPanel').hidden=false;$('travelToggle').setAttribute('aria-expanded','true');$('tripOrigin').focus();}
@@ -1278,6 +1290,8 @@ function isUsablePlace(s){
 // Começar pelo ponto anunciado; se for demasiado detalhado, recuar para aldeia/localidade/concelho.
 // Nunca assumir que o nome do trilho é o local de partida.
 function departureCandidates(e){
+ // Um anúncio com vários pontos de encontro e transferência por barco não pode ser tratado como rota de carro.
+ if(/ponto de encontro\s*2/i.test(String(e.start||''))&&/barco|transtejo/i.test(String(e.start||'')))return [];
  if(e.verified&&hasCoords(e))return [{coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'gps',label:'GPS do organizador'}];
  const start=cleanLocationHint(displayDeparture(e)),town=cleanLocationHint(e.town);
  const candidates=[],seen=new Set();
@@ -1307,6 +1321,12 @@ function departureCandidates(e){
   if(postal)add(postal[1],'localidade');
   // Alguns pontos de encontro são instalações conhecidas, não ruas numeradas.
   if(/\bpeninha\b/i.test(start)){add('Santuário da Peninha, Sintra');add('Peninha, Sintra');}
+  if(/Malveira da Serra/i.test(start))add('Malveira da Serra, Cascais','localidade');
+  if(/Nossa Senhora das Neves/i.test(start)&&/Fafe/i.test(start))add('Santuário Nossa Senhora das Neves, Fafe','descricao');
+  if(/Covão da Ametade/i.test(start))add('Covão da Ametade, Manteigas','descricao');
+  if(/Pousadas Vedras/i.test(start))add('Pousadas Vedras, Redinha, Pombal','localidade');
+  if(/Fraguinha/i.test(start))add('Retiro da Fraguinha, Candal, São Pedro do Sul','localidade');
+  if(/Covas de Ferro/i.test(start))add('Covas de Ferro, Almargem do Bispo, Sintra','localidade');
   const railway=start.match(/\b(?:estação(?:\s+de\s+(?:comboio|comboios))?\s+de)\s+([A-Za-zÀ-ÿ ]{4,65})/i);
   if(railway){let place=railway[1].split(/\bCoordenadas\b/i)[0].trim();add('Estação ferroviária de '+place);add(place);}
   const parish=start.match(/\b(?:Igreja Paroquial|Igreja Matriz)\s+de\s+([A-Za-zÀ-ÿ]{3,40})/i);
@@ -1333,7 +1353,7 @@ function departureCandidates(e){
  if(hasCoords(e))candidates.push({coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'aproximado',label:'ponto de referência'});
  return candidates.slice(0,5); // Máximo de cinco tentativas de geocodificação por caminhada.
 }
-function endpointFingerprint(e){return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified].join('|');}
+function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade/i.test(String(e.start||''))?'geo-refinado-v27':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
 function endpointName(e){return departureCandidates(e)[0]?.query||null;}
 async function locateEndpoint(e){
  const candidates=departureCandidates(e);
