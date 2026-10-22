@@ -535,6 +535,17 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 .fuel-price-config a{color:#315d40;text-underline-offset:2px}
 @media(max-width:540px){.fuel-price-config{padding:10px}.fuel-price-main{gap:8px}.fuel-price-main>label{flex:0 1 150px;min-width:130px}.fuel-price-aside{min-width:170px}}
 
+
+/* v22 — comparar junto dos detalhes e estado de viagem legível. */
+@media(min-width:781px){.walk-row{grid-template-columns:58px minmax(220px,1fr) minmax(230px,300px) 210px}}
+@media(min-width:781px) and (max-width:1060px){.walk-row{grid-template-columns:54px minmax(190px,1fr) minmax(185px,240px) 197px}}
+.walk-actions .walk-compare{display:inline-flex;align-items:center;justify-content:center;height:28px;min-height:28px;min-width:0;white-space:nowrap;cursor:pointer;border:1px solid #cbd9ce;border-radius:4px;background:#fffdf7;color:#31533a;padding:0 7px;font-size:10px;font-weight:650;line-height:1}
+.walk-actions .walk-compare:hover{background:#e6eee1}
+.walk-actions .walk-compare.is-compared{background:#315f47;color:white;border-color:#315f47}
+.trip-loading{color:#436e50;font-weight:650}.trip-error{color:#926047}
+@media(max-width:480px){.walk-actions{gap:5px;justify-content:flex-end;padding:5px 9px 9px}.walk-actions .walk-compare,.walk-open,.walk-expand{font-size:9.5px;padding:0 6px;letter-spacing:0}.walk-trip-line{gap:5px}}
+
+@media(max-width:780px){.walk-trip-line{grid-column:2;grid-row:4}.walk-detail-panel{grid-column:1/-1;grid-row:5}}
 </style>
 </head>
 <body>
@@ -550,7 +561,7 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  <div class="travel-panel" id="travelPanel" hidden>
   <div class="travel-fields"><label>Origem<input class="travel-input" id="tripOrigin" placeholder="Ex.: Aveiro" autocomplete="street-address"/></label><label>Consumo · L/100 km<input class="travel-input" id="tripConsumption" type="number" min="1" max="35" step="0.1" inputmode="decimal"/></label><label>Tipo de combustível<select class="travel-input" id="tripFuelKind"><option value="gasoleo">Gasóleo simples</option><option value="gasolina">Gasolina 95 simples</option></select></label></div>
   <div class="fuel-price-config"><div class="fuel-price-main"><label for="tripFuel">Preço do combustível · €/L<input class="travel-input" id="tripFuel" type="number" min="0.1" max="5" step="0.001" inputmode="decimal" readonly/></label><div class="fuel-price-aside"><label class="fuel-override-label"><input type="checkbox" id="tripFuelOverride"/> Personalizar €/L</label><span id="fuelPriceStatus" role="status" aria-live="polite">A consultar preço médio…</span></div></div><small>Estimativa para Portugal continental. <a href="https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/" target="_blank" rel="noopener noreferrer">Fonte: DGEG ↗</a> · o valor personalizado substitui a média.</small></div>
-  <div class="travel-panel-bottom"><button type="button" class="travel-primary" id="travelApply">Guardar e calcular as primeiras 6 viagens</button><span id="travelProgress" role="status" aria-live="polite"></span></div>
+  <div class="travel-panel-bottom"><button type="button" class="travel-primary" id="travelApply">Guardar e calcular deslocações</button><span id="travelProgress" role="status" aria-live="polite"></span></div>
   <p class="travel-caption">Viagem de ida e volta, por estrada. As portagens são estimadas automaticamente a partir do percurso, usando o serviço da Infraestruturas de Portugal (Classe 1), quando disponível. Se a consulta falhar, podes editar manualmente. Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>.</p>
  </div>
 </section>
@@ -692,6 +703,13 @@ if(travelPrefs.fuelOverride==null)travelPrefs.fuel=(fuelPrices[travelPrefs.kind]
 let travelRoutes=storage(TRAVEL_ROUTES_KEY,{}),travelGeocodes=storage(TRAVEL_GEO_KEY,{});
 let compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));
 let travelBusy=false,travelEditingId='',geoLastRequest=0,roadLastRequest=0;
+let expandedRows=new Set();
+// v22: fila única de cálculo, prioridade manual, blocos de 10 e cache por origem/evento.
+const TRAVEL_BATCH_SIZE=10;
+let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
+let tripFilterSignature='',tripBatchObserver=null,tripScheduling=false,tripWorking=false;
+let tollJobs=[],tollWorking=false;
+
 const COMPARE_PAGE_MODE=new URLSearchParams(location.search).has('comparar');
 if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.title='Comparar caminhadas — Trilhário';}
 
@@ -890,10 +908,11 @@ function eventRow(x){
   </div>
   <div class="walk-actions">
    ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
-    <button type="button" class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="false" title="Mostrar detalhes"><span class="btn-label">Detalhes</span><span class="btn-icon" aria-hidden="true">⌄</span></button>
+    <button type="button" class="walk-expand" onclick="toggleRow('${esc(x.id)}')" aria-controls="details-${esc(x.id)}" aria-expanded="${expandedRows.has(x.id)?'true':'false'}" title="${expandedRows.has(x.id)?'Recolher detalhes':'Mostrar detalhes'}"><span class="btn-label">${expandedRows.has(x.id)?'Fechar':'Detalhes'}</span><span class="btn-icon" aria-hidden="true">${expandedRows.has(x.id)?'⌃':'⌄'}</span></button>
+    <button type="button" class="walk-compare ${compared.has(x.id)?'is-compared':''}" onclick="toggleCompare('${esc(x.id)}')" aria-pressed="${compared.has(x.id)?'true':'false'}" title="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}">${compared.has(x.id)?'✓ Comparar':'+ Comparar'}</button>
   </div>
   ${travelRow(x)}
-  <div class="walk-detail-panel" id="details-${esc(x.id)}" hidden>
+  <div class="walk-detail-panel" id="details-${esc(x.id)}" ${expandedRows.has(x.id)?'':'hidden'}>
    <div class="walk-detail-copy">
     <p>${esc(x.description||'Descrição disponível junto do organizador.')}</p>
     <p><b>Local de partida:</b> ${esc(spot)}${verified?' (confirmado)':' (localidade de referência; confirmar com o organizador)'}</p>
@@ -915,6 +934,7 @@ function toggleRow(id){
  const panel=row.querySelector('.walk-detail-panel'),btn=row.querySelector('.walk-expand');
  if(!panel)return;
  panel.hidden=!panel.hidden;
+ if(panel.hidden)expandedRows.delete(id);else expandedRows.add(id);
  if(btn){btn.setAttribute('aria-expanded',String(!panel.hidden));btn.classList.toggle('selected',!panel.hidden);btn.querySelector('.btn-icon').textContent=panel.hidden?'⌄':'⌃';btn.querySelector('.btn-label').textContent=panel.hidden?'Detalhes':'Fechar';btn.title=panel.hidden?'Mostrar detalhes':'Recolher detalhes';}
 }
 function chips(){let xs=[];
@@ -998,12 +1018,14 @@ function render(){const events=sortedWalks(selected());
  $('filtersCounterMini').textContent=applied?String(applied):'';$('filtersCounterMini').hidden=!applied;
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
- const activeOrgCount=new Set(events.map(e=>e.organizer)).size; $('heroStats').innerHTML=`${events.length} caminhada${events.length===1?'':'s'} · <a class="org-header-link" href="?organizadores=1" target="_blank" rel="noopener noreferrer" title="Ver todos os organizadores" aria-label="Abrir lista completa de organizadores num novo separador">${activeOrgCount} organizador${activeOrgCount===1?'':'es'} ↗</a>`;renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;}else if(state.view==='calendar')renderCalendar(events);else renderMap(events)}
+ const activeOrgCount=new Set(events.map(e=>e.organizer)).size; $('heroStats').innerHTML=`${events.length} caminhada${events.length===1?'':'s'} · <a class="org-header-link" href="?organizadores=1" target="_blank" rel="noopener noreferrer" title="Ver todos os organizadores" aria-label="Abrir lista completa de organizadores num novo separador">${activeOrgCount} organizador${activeOrgCount===1?'':'es'} ↗</a>`;renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){$('listView').innerHTML=events.length?events.map(eventRow).join(''):`<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>`;
+   scheduleTravelBatches(events);
+ }else{if(tripBatchObserver){tripBatchObserver.disconnect();tripBatchObserver=null;}if(state.view==='calendar')renderCalendar(events);else renderMap(events)}}
 function renderCalendar(events){const m=state.month,y=state.year,first=new Date(y,m,1),start=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;let html=`<div class="month"><div class="monthbar"><h3>${first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}</h3><div class="arrows"><button onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button><button onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div><div class="calendar-grid">`;['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);for(let i=0;i<len;i++){let day=i-start+1,inMonth=day>=1&&day<=total;const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const today=events.filter(e=>e.date===iso);html+=`<div class="day-cell ${inMonth?'':'outside'} ${state.day===iso?'picked':''}">${inMonth?`<button type="button" class="day-number" onclick="setDay('${iso}')" title="${state.day===iso?'Retirar selecção de':'Filtrar por'} ${iso}" aria-label="${state.day===iso?'Retirar selecção de':'Seleccionar'} ${iso}">${day}</button>${today.slice(0,2).map(x=>`<button title="${esc(x.title)}" class="mini-event" onclick="setDay('${iso}')">${esc(x.title)}</button>`).join('')}${today.length>2?`<button class="mini-more" onclick="setDay('${iso}')">+${today.length-2} mais</button>`:''}`:''}</div>`}html+='</div><div class="legend">Toca numa data para filtrar; remove o dia no filtro acima para voltar a ver todos.</div></div>';$('calendarView').innerHTML=html}
 function shiftMonth(n){state.month+=n;if(state.month<0){state.month=11;state.year--}if(state.month>11){state.month=0;state.year++}render()}
 function clearSelectedDay(){state.day='all';render()}
 function setDay(d){if(state.day===d){clearSelectedDay();return;}state.day=d;state.view='list';render();document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'})}
-function toggleFav(id){favorites.has(id)?favorites.delete(id):favorites.add(id);try{localStorage.setItem('trilhario_fav_v1',JSON.stringify([...favorites]))}catch{}render();if(document.querySelector('.walk-row[data-eid="'+CSS.escape(id)+'"] .walk-detail-panel'))toggleRow(id)}
+function toggleFav(id){favorites.has(id)?favorites.delete(id):favorites.add(id);try{localStorage.setItem('trilhario_fav_v1',JSON.stringify([...favorites]))}catch{}render()}
 function resetFilters(){Object.assign(state,{day:'all',organizer:'all',difficulty:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,search:'',onlyFavorites:false});$('search').value='';$('organizer').value='all';$('difficulty').value='all';$('favoritesOnly').checked=false;render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
@@ -1023,18 +1045,28 @@ $('favoritesOnly').addEventListener('change',e=>{state.onlyFavorites=e.target.ch
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{state.view=b.dataset.view;render()}));$('resetBtn').addEventListener('click',resetFilters);
 $('filterToggleBtn').addEventListener('click',()=>{const panel=$('filterPanel');panel.hidden=!panel.hidden;$('filterToggleBtn').setAttribute('aria-expanded',String(!panel.hidden));});
 
-// Apenas chamadas desencadeadas explicitamente pelo utilizador. Servidores públicos
-// OSM/Nominatim/OSRM com limites e sem garantia de disponibilidade.
+// v22: pedidos progressivos, uma rota de cada vez, limitados ao bloco visível.
+// OSM/Nominatim/OSRM são serviços experimentais sujeitos a limites de utilização.
 function persistTravel(){try{localStorage.setItem(TRAVEL_PREF_KEY,JSON.stringify(travelPrefs));localStorage.setItem(TRAVEL_ROUTES_KEY,JSON.stringify(travelRoutes));localStorage.setItem(TRAVEL_COMPARE_KEY,JSON.stringify([...compared]));}catch{}}
 function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCase()+'|'+e.id;}
 function travelData(e){if(!travelPrefs.origin)return null;const d=travelRoutes[routeCacheKey(e)];return d&&typeof d==='object'?d:null;}
 function travelMoney(v){return Number.isFinite(v)?v.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}):'—';}
 function tripCalc(e){const r=travelData(e);if(!r||!Number.isFinite(r.kmOne)||r.kmOne<0)return null;const km=r.kmOne*2;const fuel=km*(Number(travelPrefs.consumption)/100)*Number(travelPrefs.fuel);const toll=r.tollReturn==null?null:Number(r.tollReturn);const fee=e.price==null?null:Number(e.price);return {km,minutes:r.minutesOne==null?null:r.minutesOne*2,fuel,toll,fee,total:toll==null||fee==null?null:fuel+toll+fee};}
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
-function travelRow(e){const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,oneway=travelData(e);
- const desc=t?`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong> · combustível ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?'':` · <strong>total ${travelMoney(t.total)}</strong>`}`:
- (hasOrigin?'<span class="trip-missing">Viagem por calcular</span>':'<span class="trip-missing">Define a origem para ver a deslocação</span>');
- return `<div class="walk-trip-line"><div class="walk-trip-info">${desc}</div><div class="walk-trip-ctrl">${hasOrigin?`<button type="button" onclick="${oneway?`openTripEditor('${esc(e.id)}')`:`calculateOneRoute('${esc(e.id)}')` }" title="${oneway?'Editar viagem e portagens':'Calcular percurso rodoviário'}">${oneway?'Editar viagem':'Calcular'}</button>`:''}<button type="button" class="${compared.has(e.id)?'is-compared':''}" onclick="toggleCompare('${esc(e.id)}')" aria-pressed="${compared.has(e.id)?'true':'false'}">${compared.has(e.id)?'✓ Seleccionado':'+ Comparar'}</button></div></div>`;
+function travelRow(e){
+ const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,oneway=travelData(e);
+ const key=routeCacheKey(e),error=tripProblems.get(key),queued=tripJobsSet.has(key)||tripActiveKey===key;
+ const unavailable=!(e.verified&&hasCoords(e))&&!endpointName(e);
+ let desc;
+ if(t)desc=`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong> · combustível ${travelMoney(t.fuel)} · portagens ${t.toll==null?'—':travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática pela IP, Classe 1">(IP)</span>':'')}${t.total==null?'':` · <strong>total ${travelMoney(t.total)}</strong>`}`;
+ else if(!hasOrigin)desc='<span class="trip-missing">Define a origem para ver os custos</span>';
+ else if(unavailable)desc='<span class="trip-missing">—</span>';
+ else if(tripOriginProblem)desc=`<span class="trip-error">${esc(tripOriginProblem)}</span>`;
+ else if(error)desc=`<span class="trip-error">${esc(error)}</span>`;
+ else if(queued)desc='<span class="trip-loading">A calcular percurso…</span>';
+ else desc='<span class="trip-missing">Por calcular</span>';
+ const action=hasOrigin&&!unavailable?`<button type="button" onclick="${oneway?`openTripEditor('${esc(e.id)}')`:`calculateOneRoute('${esc(e.id)}')`}" title="${oneway?'Editar viagem e portagens':'Dar prioridade a este percurso'}">${oneway?'Editar viagem':queued?'Prioridade':error||tripOriginProblem?'Tentar novamente':'Calcular'}</button>`:'';
+ return `<div class="walk-trip-line"><div class="walk-trip-info">${desc}</div><div class="walk-trip-ctrl">${action}</div></div>`;
 }
 function toggleCompare(id){if(compared.has(id))compared.delete(id);else{if(compared.size>=3){toast('Podes comparar até 3 caminhadas.');return;}compared.add(id);}persistTravel();render();}
 function clearCompare(){compared.clear();persistTravel();render();}
@@ -1066,7 +1098,11 @@ function applyTravel(){const origin=$('tripOrigin').value.trim(),consumption=Num
  const override=$('tripFuelOverride').checked,manual=Number($('tripFuel').value);
  const automatic=fuelPrices[kind]?.value, fuel=override?manual:automatic;
  if(origin.length<2||!(consumption>0&&consumption<=35)||!(fuel>0&&fuel<5)){toast('Preenche a origem e o consumo. Confirma o preço do combustível.');return;}
- travelPrefs={origin,consumption,kind,fuelOverride:override?manual:null,fuel};persistTravel();updateTravelHeader();render();calculateVisibleRoutes(false);}
+ const changed=travelPrefs.origin.trim().toLowerCase()!==origin.toLowerCase();
+ travelPrefs={origin,consumption,kind,fuelOverride:override?manual:null,fuel};
+ if(changed){tripJobs=[];tripJobsSet.clear();tripFilterSignature='';tripOriginProblem='';}
+ else tripOriginProblem='';
+ persistTravel();updateTravelHeader();render();renderTravelProgress();}
 function fuelKindLabel(kind){return kind==='gasolina'?'gasolina 95':'gasóleo';}
 function prettyFuelDate(date){const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(date||'—');}
 function updateTravelHeader(){if($('travelSub'))$('travelSub').textContent=travelPrefs.origin?`Origem: ${travelPrefs.origin} · ${fuelKindLabel(travelPrefs.kind)} · ${fmtN(travelPrefs.consumption)} L/100 km · ${Number(travelPrefs.fuel).toFixed(3).replace('.',',')} €/L${travelPrefs.fuelOverride!=null?' (manual)':''}`:'Define a origem para calcular viagens até às caminhadas.';}
@@ -1118,22 +1154,118 @@ async function autoTollsForGeometry(geometry){
   return result?.source==='IP'&&result?.class===1&&Number.isFinite(result.oneWay)&&result.oneWay>=0?Math.round(result.oneWay*200)/100:null;
  }catch(error){tollEndpointAvailable=false;console.info('Portagens automáticas indisponíveis:',error.message);return null;}
 }
-let singleTargetId='';
-function calculateOneRoute(id){singleTargetId=id;return calculateVisibleRoutes(false);}
-async function calculateVisibleRoutes(onlyCompared=false){if(travelBusy)return;if(!travelPrefs.origin){if(COMPARE_PAGE_MODE){alert('Define primeiro a origem na agenda do Trilhário.');return;}openTravelPanel();return;}
- const one=singleTargetId;singleTargetId='';const all=one?allEvents().filter(e=>e.id===one):onlyCompared?allEvents().filter(e=>compared.has(e.id)):selected().slice(0,6);const pending=all.filter(e=>{const t=travelData(e);return !t||!Number.isFinite(t.kmOne)||(t.tollReturn==null&&!t.tollChecked)});
- if(!pending.length){if(!COMPARE_PAGE_MODE)toast('As deslocações escolhidas já estão calculadas.');return;}
- travelBusy=true;if($('travelApply'))$('travelApply').disabled=true;let success=0,failed=0;
- try{const p=await geocodeText(travelPrefs.origin+', Portugal');if(!p)throw new Error('Origem não encontrada. Experimenta uma cidade ou localidade.');for(let i=0;i<pending.length;i++){
- if($('travelProgress'))$('travelProgress').textContent='A calcular '+(i+1)+' de '+pending.length+' viagens…';const e=pending[i];try{const q=await locateEndpoint(e);if(!q){failed++;continue;}const r=await roadRoute(p,q);const previous=travelData(e)||{};
- const estimate=previous.tollSource==='manual'?null:await autoTollsForGeometry(r.geometry);
- const {geometry,...routeValues}=r;
- travelRoutes[routeCacheKey(e)]={...previous,...routeValues,
- tollReturn:previous.tollSource==='manual'?previous.tollReturn:(estimate!=null?estimate:previous.tollReturn??null),
- tollSource:previous.tollSource==='manual'?'manual':(estimate!=null?'IP':previous.tollSource??null),
- tollChecked:Date.now(),updated:Date.now()};persistTravel();success++;render();}catch(err){failed++;console.info('Rota indisponível para',e.id,err.message);}}
- if($('travelProgress'))$('travelProgress').textContent=`${success} calculadas${failed?' · '+failed+' sem rota':''}. Portagens automáticas, quando disponíveis, ou edição manual.`;
- }catch(err){if($('travelProgress'))$('travelProgress').textContent=err.message;toast(err.message);}finally{travelBusy=false;if($('travelApply'))$('travelApply').disabled=false;render();}}
+// Primeiras 10 caminhadas ao definir a origem; mais 10 quando se aproximam do ecrã.
+function scheduleTravelBatches(events){
+ if(COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE||state.view!=='list'||!travelPrefs.origin)return;
+ const signature=travelPrefs.origin.trim().toLowerCase()+'|'+events.map(e=>e.id).sort().join(',');
+ if(signature!==tripFilterSignature){
+  tripFilterSignature=signature;
+  // Filtragem nova tem prioridade sobre cálculos automáticos do filtro anterior.
+  tripJobs=tripJobs.filter(job=>job.manual);
+  tripJobsSet=new Set(tripJobs.map(job=>job.key));
+ }
+ queueTrips(events.slice(0,TRAVEL_BATCH_SIZE),false);
+ if(tripBatchObserver)tripBatchObserver.disconnect();
+ if(typeof IntersectionObserver!=='function')return;
+ tripBatchObserver=new IntersectionObserver(entries=>{
+  for(const entry of entries){if(!entry.isIntersecting)continue;
+   const batch=Number(entry.target.dataset.travelBatch);
+   if(!Number.isInteger(batch)||batch<1)continue;
+   tripBatchObserver.unobserve(entry.target);
+   // Carrega apenas os 10 resultados seguintes ao bloco que entrou na proximidade do ecrã.
+   queueTrips(events.slice(batch*TRAVEL_BATCH_SIZE,(batch+1)*TRAVEL_BATCH_SIZE),false);
+  }
+ },{root:null,rootMargin:'300px 0px',threshold:0});
+ const cards=$('listView').querySelectorAll('.walk-row');
+ for(let index=TRAVEL_BATCH_SIZE;index<cards.length;index+=TRAVEL_BATCH_SIZE){
+  const card=cards[index];card.dataset.travelBatch=String(index/TRAVEL_BATCH_SIZE);
+  tripBatchObserver.observe(card);
+ }
+}
+function tripNeedsRoute(e,force=false){
+ const r=travelData(e),key=routeCacheKey(e);
+ return (force||!r||!Number.isFinite(r.kmOne))&&(!tripProblems.has(key)||force);
+}
+function queueTrips(events,manual=false){
+ if(!travelPrefs.origin||tripOriginProblem&&!manual)return;
+ const accepted=[];
+ for(const e of events){
+  if(!e||!tripNeedsRoute(e,manual))continue;
+  if(!(e.verified&&hasCoords(e))&&!endpointName(e)){if(manual)tripProblems.set(routeCacheKey(e),'Não foi possível localizar o ponto de partida.');continue;}
+  const key=routeCacheKey(e);
+  if(manual)tripProblems.delete(key);
+  if(tripActiveKey===key)continue;
+  if(tripJobsSet.has(key)){
+   if(manual){const job=tripJobs.find(j=>j.key===key);if(job){tripJobs=tripJobs.filter(j=>j.key!==key);job.manual=true;accepted.push(job);}}
+   continue;
+  }
+  const job={id:e.id,key,origin:travelPrefs.origin,manual};
+  tripJobsSet.add(key);accepted.push(job);
+ }
+ if(manual)tripJobs.unshift(...accepted);else tripJobs.push(...accepted);
+ if(accepted.length)requestAnimationFrame(()=>{renderTravelProgress();processTripQueue();});
+}
+function renderTravelProgress(){
+ const n=tripJobs.length+(tripActiveKey?1:0),status=$('travelProgress');
+ if(!status)return;
+ status.textContent=tripOriginProblem?tripOriginProblem:n?`${n} deslocaç${n===1?'ão':'ões'} na fila de cálculo…`:'Distâncias e combustível calculados quando existe localização. Portagens disponíveis quando o serviço responde.';
+}
+function calculateOneRoute(id){
+ const e=allEvents().find(x=>x.id===id);if(!e)return;
+ if(!travelPrefs.origin){openTravelPanel();toast('Define primeiro a origem.');return;}
+ tripOriginProblem='';tripProblems.delete(routeCacheKey(e));
+ // Pedido manual não pode ficar atrás dos restantes cálculos.
+ queueTrips([e],true);render();
+}
+function calculateVisibleRoutes(onlyCompared=false){
+ if(!travelPrefs.origin){openTravelPanel();return;}
+ tripOriginProblem='';
+ const events=onlyCompared?allEvents().filter(e=>compared.has(e.id)):selected().slice(0,TRAVEL_BATCH_SIZE);
+ queueTrips(events,true);render();
+}
+function runTollQueue(){
+ if(tollWorking)return;
+ tollWorking=true;
+ (async()=>{try{while(tollJobs.length&&tollEndpointAvailable){
+  const j=tollJobs.shift(),r=travelRoutes[j.key];if(!r||r.tollSource==='manual'||r.tollReturn!=null)continue;
+  const estimate=await autoTollsForGeometry(j.geometry);
+  // Guardar apenas no percurso original, sem sobrepor alterações manuais entretanto feitas.
+  const newer=travelRoutes[j.key];if(!newer||newer.tollSource==='manual')continue;
+  newer.tollChecked=Date.now();if(estimate!=null){newer.tollReturn=estimate;newer.tollSource='IP';}
+  persistTravel();render();
+ }}finally{tollWorking=false;tollJobs=[];}})();
+}
+async function processTripQueue(){
+ if(tripWorking)return;
+ tripWorking=true;travelBusy=true;
+ try{while(tripJobs.length){
+  const job=tripJobs.shift();tripJobsSet.delete(job.key);
+  const e=allEvents().find(x=>x.id===job.id);
+  if(!e||job.key!==routeCacheKey(e)||!tripNeedsRoute(e,job.manual))continue;
+  tripActiveKey=job.key;render();
+  try{
+   let p=await geocodeText(job.origin.replace(/,?\s*Portugal\s*$/i,'')+', Portugal');
+   if(!p){tripOriginProblem='Origem não localizada. Verifica a localidade.';throw new Error(tripOriginProblem);}
+   const q=await locateEndpoint(e);
+   if(!q)throw new Error('Local de partida não localizado.');
+   const r=await roadRoute(p,q),previous=travelRoutes[job.key]||{};
+   const {geometry,...data}=r;
+   travelRoutes[job.key]={...previous,...data,updated:Date.now()};
+   tripProblems.delete(job.key);persistTravel();
+   // A consulta de portagens corre separadamente: nunca bloqueia distância/tempo.
+   if(previous.tollReturn==null&&!previous.tollChecked&&Array.isArray(geometry)&&geometry.length>1&&tollEndpointAvailable){
+    tollJobs.push({key:job.key,geometry});runTollQueue();
+   }
+  }catch(err){
+   const reason=err?.message||'Serviço de rotas indisponível';
+   tripProblems.set(job.key,reason);
+   if(reason==='Origem não localizada. Verifica a localidade.'||/Geocodificação indisponível/.test(reason)&&!travelGeocodes[(job.origin+', Portugal').toLowerCase()]){
+    tripOriginProblem=reason==='Origem não localizada. Verifica a localidade.'?reason:'Serviço de localização indisponível. Tenta novamente.';
+    tripJobs=[];tripJobsSet.clear();
+   }
+   console.info('Deslocação indisponível:',e.title,reason);
+  }finally{tripActiveKey='';renderTravelProgress();render();}
+ }}finally{tripWorking=false;travelBusy=false;renderTravelProgress();}}
 $('tripOrigin').value=travelPrefs.origin||'';$('tripConsumption').value=travelPrefs.consumption;
 $('tripFuelKind').value=travelPrefs.kind;$('tripFuelOverride').checked=travelPrefs.fuelOverride!=null;
 if(travelPrefs.fuelOverride!=null)$('tripFuel').value=Number(travelPrefs.fuelOverride).toFixed(3);
@@ -1150,6 +1282,7 @@ $('orgPageSearch').addEventListener('input',renderOrganizersPage);
 populateOrganizers();
 $('heroStats').innerHTML='<strong>'+allEvents().length+' eventos na agenda</strong><span>Agenda local e fontes acompanhadas</span>';
 render();
+renderTravelProgress();
 loadEventFeed();
 refreshFuelPrices().catch(()=>{if($('tripFuelKind'))updateFuelInput();});
 </script>
