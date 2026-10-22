@@ -255,26 +255,35 @@ def report(lines):
 
 # Valores confirmados em 22-10-2026 nas páginas oficiais indicadas. Aplicados
 # apenas a estas edições para evitar usar preços/horários antigos em anos futuros.
-VERIFIED_2026_OCT25 = {
-    ('GreenTrekker', 'caminhada-de-lua-cheia-em-sintras-12'): {
+VERIFIED_2026_EVENTS = {
+    ('GreenTrekker', 'caminhada-de-lua-cheia-em-sintras-12', '2026-10-25'): {
         'title':'Caminhada de Lua Cheia em Sintra',
         'start':'Lavadouro Público (Escola Primária), Malveira da Serra, Cascais',
         'town':'Malveira da Serra, Cascais', 'time':'19:00', 'duration':4.5,
         'km':11, 'price':15, 'difficulty':2},
-    ('GreenTrekker', 'grande-rota-da-montanha-das-bruxas'): {
+    ('GreenTrekker', 'grande-rota-da-montanha-das-bruxas', '2026-10-25'): {
         'title':'Grande Travessia da Montanha das Bruxas',
         'start':'Associação Recreativa, Cultural e Desportiva da Mendiga, Rua Principal 110, 2480-215 Mendiga',
         'town':'Mendiga, Porto de Mós', 'time':'10:00', 'duration':7,
         'km':21,'gain':500,'price':20,'difficulty':3,
         'lat':39.49602778,'lon':-8.85566667,'verified':True},
-    ('Mais Trilhos', 'aldeias-serranas-de-fafe'): {
+    ('Mais Trilhos', 'aldeias-serranas-de-fafe', '2026-10-25'): {
         'title':'Aldeias Serranas de Fafe', 'start':'Santuário Nossa Senhora das Neves, Fafe',
         'town':'Lagoa, Fafe', 'time':'09:00', 'duration':9,
         'km':20,'gain':700,'price':20,'difficulty':4},
-    ('Mais Trilhos', 'vale-da-candeeira-208'): {
+    ('Mais Trilhos', 'vale-da-candeeira-208', '2026-10-25'): {
         'title':'Vale da Candeeira', 'start':'Covão da Ametade, Manteigas',
         'town':'Manteigas','time':'10:00','duration':7,
         'km':11,'gain':800,'price':15,'difficulty':5},
+    # Mais Trilhos — edições de Dezembro de 2026, verificadas nos anúncios oficiais.
+    ('Mais Trilhos', 'ascensao-as-gralheiras', '2026-12-13'): {
+        'start': 'Estacionamento da Rua das Chães, Pitões das Júnias',
+        'town': 'Pitões das Júnias, Montalegre', 'time': '10:00',
+        'km': 17, 'duration': 6, 'gain': 650, 'price': 20, 'difficulty': 4},
+    ('Mais Trilhos', 'a-magia-do-natal-na-serra-da-estrela-219', '2026-12-19'): {
+        'start': 'Junto ao Café Império, Loriga', 'town': 'Loriga, Seia',
+        'time': '10:00', 'km': 16, 'duration': 5, 'gain': 600,
+        'price': 15, 'difficulty': 3},
 }
 
 OFFICIAL_DOMAINS = {'greentrekker.pt':'GreenTrekker',
@@ -302,13 +311,22 @@ def parse_official_listing(organizer, html, url):
         # Ancorar no bloco 'Hora de encontro HH:MM -> Ponto de encontro -> Distância'
         # evita consumir o rótulo do título e descartar o valor correcto.
         meeting = re.search(
-            r'\bHora de encontro\s+([01]?\d|2[0-3]):([0-5]\d)\s+'
-            r'Ponto de encontro\s+(.{4,175}?)\s+Dist[âa]ncia\b', txt, re.I)
-        if meeting:
-            candidate = meeting[3].strip(' .,:;')
-            if (4 <= len(candidate) <= 145 and
-                not re.search(r'\b(?:iframe|Ponto de encontro|Hora de encontro|Data)\b', candidate, re.I)):
-                found['start'] = candidate
+            r'\bHora de encontro\s*[:–—-]?\s*([01]?\d|2[0-3]):([0-5]\d)\s+'
+            r'Ponto de encontro\s*[:–—-]?\s*(.{4,175}?)\s+'
+            r'(?:Dist[âa]ncia|Dura[cç][aã]o|Desn[ií]vel|Grau de dificuldade|Guia|Pre[cç]o por participante)\b',
+            txt, re.I)
+        # Fallback if the hour is not in the usual location. The first
+        # 'Ponto de encontro' is a heading, often followed by an iframe.
+        # The last properly bounded *field* contains the actual place.
+        places = [m.group(1).strip(' .,:;') for m in re.finditer(
+            r'\bPonto de encontro\s*[:–—-]?\s*(.{4,175}?)\s+'
+            r'(?:Dist[âa]ncia|Dura[cç][aã]o|Desn[ií]vel|Grau de dificuldade|Guia|Pre[cç]o por participante)\b',
+            txt, re.I)]
+        candidate = meeting[3].strip(' .,:;') if meeting else (places[-1] if places else '')
+        if (4 <= len(candidate) <= 145 and
+            not re.search(r'\b(?:iframe|Ponto de encontro|Hora de encontro|Data)\b', candidate, re.I)):
+            found['start'] = candidate
+            if meeting:
                 found['time'] = f'{int(meeting[1]):02d}:{meeting[2]}'
         m=re.search(r'Hora de encontro\s+(\d{1,2}):(\d{2})\b',txt,re.I)
         if m and int(m[1])<24 and int(m[2])<60:found['time']=f'{int(m[1]):02d}:{m[2]}'
@@ -477,6 +495,52 @@ def read_official_photo(event):
     except requests.RequestException:
         return None
 
+def tidy_aggregator_fields(event):
+    """Limpa rótulos do agregador que não fazem parte do organizador/morada."""
+    org=str(event.get('organizer') or '')
+    org=re.sub(r'\s+Contacto\s*:\s*.*$', '',org,flags=re.I).strip()
+    if org: event['organizer']=org
+    for field in ('start','town'):
+        raw=str(event.get(field) or '')
+        fixed=re.sub(r'\s*\(\s*Ver\s+no\s+Google\s+Maps\s*\)', '',raw,flags=re.I)
+        fixed=re.sub(r'\s+Ver\s+no\s+Google\s+Maps\b.*$', '',fixed,flags=re.I)
+        fixed=re.sub(r'\bVila[\s-]*real\b','Vila Real',fixed,flags=re.I)
+        fixed=re.sub(r'\bCastelo[\s-]*branco\b','Castelo Branco',fixed,flags=re.I)
+        fixed=re.sub(r'\bFundao\b','Fundão',fixed,flags=re.I)
+        fixed=fixed.strip(' \t.,;–-')
+        if fixed: event[field]=fixed
+    # Aspas de cp1252 tratadas como caracteres de controlo por alguns agregadores.
+    title=str(event.get('title') or '')
+    event['title']=title.replace('\u0093','“').replace('\u0094','”').replace('\u0096','–')
+    return event
+
+
+def remove_aggregator_duplicates(events):
+    """Um evento/dia/promotor, preferindo a ficha original ao agregador."""
+    by_key={}
+    for entry in events:
+        if not isinstance(entry,dict):continue
+        key=(str(entry.get('date') or ''),
+             re.sub(r'[^a-z0-9]','',folded(entry.get('organizer'))),
+             re.sub(r'[^a-z0-9]','',folded(entry.get('title'))))
+        old=by_key.get(key)
+        if old is None:
+            by_key[key]=entry
+            continue
+        agg=lambda x:(urlsplit(str(x.get('url') or '')).hostname or '').removeprefix('www.')=='trilhosecaminhadas.pt'
+        if (agg(old) and not agg(entry)) or (agg(old)==agg(entry) and not old.get('verified') and entry.get('verified')):
+            by_key[key]=entry
+    return list(by_key.values())
+
+
+def suppress_non_walks(event):
+    """Apenas exclusões verificadas: não apagar caminhadas por terem oficinas no programa."""
+    return (event.get('date')=='2026-10-24'
+            and urlsplit(str(event.get('url') or '')).path=='/percursos/evento_info.php'
+            and 'id=555' in str(event.get('url') or '')
+            and 'vamos ao barro e a azeitona' in folded(event.get('title')))
+
+
 def main():
     if not CATALOG.is_file():
         print('ERRO: catálogo inexistente', file=sys.stderr)
@@ -486,6 +550,13 @@ def main():
     if not isinstance(events, list) or not events:
         print('ERRO: catálogo sem eventos', file=sys.stderr)
         return 1
+    # Aplicar à lista nova em cada execução, inclusive quando os anúncios
+    # chegam repetidos ou a fonte tem rótulos extra.
+    for item in events:
+        if isinstance(item,dict): tidy_aggregator_fields(item)
+    initial_count=len(events)
+    events[:]=remove_aggregator_duplicates([e for e in events if not (isinstance(e,dict) and suppress_non_walks(e))])
+    removed_aggregator=initial_count-len(events)
     previous = git_previous()
     by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
     errors = []
@@ -532,7 +603,7 @@ def main():
         if not e.get('url', '').startswith(('https://', 'http://')):
             errors.append('Ligação inválida: '+str(ident))
         official_key=(e.get('organizer'), urlsplit(str(e.get('url') or '')).path.rstrip('/').split('/')[-1])
-        verified=(VERIFIED_2026_OCT25.get(official_key) if e.get('date')=='2026-10-25' else None)
+        verified=VERIFIED_2026_EVENTS.get((*official_key, str(e.get('date') or '')))
         if verified:
             for field,value in verified.items():
                 if e.get(field)!=value:
@@ -643,7 +714,8 @@ def main():
             changed+=1
     if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
-    lines = [f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
+    lines = [f'Agregador: {removed_aggregator} duplicados/não caminhadas retirados',
+             f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
              f'Fotografias: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN})',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',
