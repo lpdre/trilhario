@@ -1,0 +1,301 @@
+#!/usr/bin/env python3
+"""Pós-processamento conservador e auditoria do catálogo recolhido pelo Trilhário.
+
+Só reconstitui títulos oficiais a partir da ligação original, conserva valores
+anteriores válidos quando uma nova recolha omitiu um campo e rejeita catálogos
+claramente danificados. Não inventa coordenadas, horários, preços ou lugares.
+"""
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+import unicodedata
+from datetime import date, datetime, timezone
+from pathlib import Path
+from urllib.parse import urlsplit, unquote
+import time
+
+ROOT = Path(__file__).resolve().parent
+CATALOG = ROOT / 'eventos.json'
+PLACEHOLDERS = {'', 'por confirmar', 'a confirmar', 'por definir', 'desconhecido'}
+GENERIC_TITLE = re.compile(r'^(?:f[aá]cil|moderad[oa]|desafiante|dif[ií]cil|exigente)\s+\d{1,2}/\d{1,2}/20\d{2}\b', re.I)
+JOINERS = {'da', 'de', 'do', 'das', 'dos', 'e', 'a', 'o', 'ao', 'em', 'na', 'no', 'nas', 'nos', 'por', 'pelo', 'pelos', 'entre'}
+
+
+def folded(value):
+    return ''.join(c for c in unicodedata.normalize('NFD', str(value or '')) if unicodedata.category(c) != 'Mn').casefold().strip()
+
+
+def meaningful(value):
+    return value is not None and (not isinstance(value, str) or folded(value) not in PLACEHOLDERS)
+
+
+def title_from_official_url(url):
+    """Só recuperar título se o URL fornecer um nome de percurso inteligível."""
+    try:
+        parsed = urlsplit(url)
+        if not parsed.hostname or parsed.hostname not in {'hikeland.pt', 'www.hikeland.pt'}:
+            return None
+        slug = unquote(parsed.path.rstrip('/').split('/')[-1])
+        slug = re.sub(r'-\d+$', '', slug)
+        if len(slug) < 15 or '-' not in slug:
+            return None
+        words = slug.split('-')
+        return ' '.join(w if i and w in JOINERS else w[:1].upper()+w[1:] for i,w in enumerate(words))[:140]
+    except (ValueError, UnicodeError):
+        return None
+
+
+def official_hikeland_title(url):
+    """Preferir o título visível no anúncio oficial ao resumo imperfeito do cartão."""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        page = requests.get(url, timeout=12, headers={'User-Agent': 'TrilharioAgenda/0.1'})
+        page.raise_for_status()
+        scope = BeautifulSoup(page.text, 'html.parser')
+        head = (scope.find('main') or scope).find('h1')
+        if not head:
+            return None
+        title = ' '.join(head.get_text(' ', strip=True).split())[:140]
+        path = urlsplit(url).path.rstrip('/').split('/')[-1]
+        important = [word for word in re.split(r'[^a-z0-9]+', folded(path)) if len(word) >= 5]
+        matches = sum(w in folded(title) for w in important)
+        return title if 12 <= len(title) <= 140 and matches >= 2 and not GENERIC_TITLE.match(title) else None
+    except Exception:
+        return None
+
+
+def git_previous():
+    try:
+        raw = subprocess.check_output(['git', 'show', 'HEAD:eventos.json'], cwd=ROOT, stderr=subprocess.DEVNULL)
+        return json.loads(raw).get('events', [])
+    except (OSError, subprocess.CalledProcessError, ValueError):
+        return []
+
+
+def report(lines):
+    print('\n'.join(lines))
+    summary = __import__('os').environ.get('GITHUB_STEP_SUMMARY')
+    if summary:
+        with open(summary, 'a', encoding='utf-8') as f:
+            f.write('\n### Auditoria automática do Trilhário\n\n')
+            f.write('\n'.join('- '+line for line in lines)+'\n')
+
+
+
+# Valores confirmados em 22-10-2026 nas páginas oficiais indicadas. Aplicados
+# apenas a estas edições para evitar usar preços/horários antigos em anos futuros.
+VERIFIED_2026_OCT25 = {
+    ('GreenTrekker', 'caminhada-de-lua-cheia-em-sintras-12'): {
+        'title':'Caminhada de Lua Cheia em Sintra',
+        'start':'Lavadouro Público (Escola Primária), Malveira da Serra, Cascais',
+        'town':'Malveira da Serra, Cascais', 'time':'19:00', 'duration':4.5,
+        'km':11, 'price':15, 'difficulty':2},
+    ('GreenTrekker', 'grande-rota-da-montanha-das-bruxas'): {
+        'title':'Grande Travessia da Montanha das Bruxas',
+        'start':'Associação Recreativa, Cultural e Desportiva da Mendiga, Rua Principal 110, 2480-215 Mendiga',
+        'town':'Mendiga, Porto de Mós', 'time':'10:00', 'duration':7,
+        'km':21,'gain':500,'price':20,'difficulty':3,
+        'lat':39.49602778,'lon':-8.85566667,'verified':True},
+    ('Mais Trilhos', 'aldeias-serranas-de-fafe'): {
+        'title':'Aldeias Serranas de Fafe', 'start':'Santuário Nossa Senhora das Neves, Fafe',
+        'town':'Lagoa, Fafe', 'time':'09:00', 'duration':9,
+        'km':20,'gain':700,'price':20,'difficulty':4},
+    ('Mais Trilhos', 'vale-da-candeeira-208'): {
+        'title':'Vale da Candeeira', 'start':'Covão da Ametade, Manteigas',
+        'town':'Manteigas','time':'10:00','duration':7,
+        'km':11,'gain':800,'price':15,'difficulty':5},
+}
+
+OFFICIAL_DOMAINS = {'greentrekker.pt':'GreenTrekker',
+                    'maistrilhos.pt':'Mais Trilhos',
+                    'hikeland.pt':'Hike Land'}
+
+def number(text):
+    try:
+        return float(text.replace(',','.'))
+    except (AttributeError,ValueError):
+        return None
+
+
+def parse_official_listing(organizer, html, url):
+    """Extrai campos dos detalhes, não do cartão de navegação da agenda.
+    Não confunde a hora da caminhada com o tempo de condução.
+    """
+    from bs4 import BeautifulSoup
+    soup=BeautifulSoup(html,'html.parser')
+    main=soup.find('main') or soup.find('article') or soup
+    txt=' '.join(main.get_text(' ',strip=True).split())
+    found={}
+    if organizer=='Mais Trilhos':
+        # A página repete 'Ponto de encontro': só a segunda ocorrência
+        # contém o local, entre os rótulos 'Hora de encontro' e 'Distância'.
+        matches=re.findall(r'Ponto de encontro\s+(?!Data\b|Hora de encontro\b|Distância\b)(.{4,160}?)(?=\s+(?:Distância|Dura[cç][aã]o|Desnível)\b)',txt,re.I)
+        for cand in reversed(matches):
+            cand=cand.strip(' .,:;')
+            if 5<=len(cand)<=120 and not re.search(r'\b(?:Data|Hora de encontro|iframe)\b',cand,re.I):
+                found['start']=cand;break
+        m=re.search(r'Hora de encontro\s+(\d{1,2}):(\d{2})\b',txt,re.I)
+        if m and int(m[1])<24 and int(m[2])<60:found['time']=f'{int(m[1]):02d}:{m[2]}'
+        m=re.search(r'\bDura[cç][aã]o\s+(\d{1,2}):(\d{2})\b',txt,re.I)
+        if m and 0<int(m[1])<=14 and int(m[2])<60:found['duration']=int(m[1])+int(m[2])/60
+        m=re.search(r'\bDesn[ií]vel\s+(\d{2,4})\s*m\b',txt,re.I)
+        if m:found['gain']=int(m[1])
+        m=re.search(r'\bDist[aâ]ncia\s+(\d{1,2}(?:[.,]\d+)?)\s*km\b',txt,re.I)
+        if m:found['km']=number(m[1])
+        m=re.search(r'Pre[cç]o por participante\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',txt,re.I)
+        if m:found['price']=number(m[1])
+        m=re.search(r'Grau de dificuldade\s+Dificuldade\s+(\d)\b',txt,re.I)
+        if m:found['difficulty']=int(m[1])
+    elif organizer=='GreenTrekker':
+        m=re.search(r'Ponto de encontro\s*:\s*(.{5,185}?)(?=\s+(?:Coordenadas GPS|Hora de Fim|Abrir mapa|Percurso|\d{1,2}\s+Out)\b)',txt,re.I)
+        if m:
+            v=m[1].strip(' ,.');
+            if len(v)<145:found['start']=v
+        m=re.search(r'\bLocaliza[cç][aã]o\s+\d{1,2}\s+[A-Za-zçãéú]+\s+-\s+(\d{1,2}:\d{2})\s+Ponto de encontro',txt,re.I)
+        if m:found['time']=m[1]
+        m=re.search(r'\bDura[cç][aã]o\s+(\d{1,2})\s*h(?:\s*(\d{1,2})\s*m)?\b',txt,re.I)
+        if m and 0<int(m[1])<=14:found['duration']=int(m[1])+(int(m[2]) if m[2] else 0)/60
+        m=re.search(r'\bDist[aâ]ncia\s+(\d{1,2}(?:[.,]\d+)?)\s*Km\b',txt,re.I)
+        if m:found['km']=number(m[1])
+        m=re.search(r'\bDesn[ií]vel\s+(\d{2,4})\s*m\b',txt,re.I)
+        if m:found['gain']=int(m[1])
+        m=re.search(r'Fa[cç]a J[aá] A Sua Reserva\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',txt,re.I)
+        if m:found['price']=number(m[1])
+        # O formato GPS tem dois valores completos: nunca usar apenas latitude.
+        dms=re.search(r'Lat:\s*N\s*(\d{1,2})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]\s*Long:\s*W\s*(\d{1,3})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]',txt,re.I)
+        if dms:
+            lat=int(dms[1])+int(dms[2])/60+number(dms[3])/3600
+            lon=-(int(dms[4])+int(dms[5])/60+number(dms[6])/3600)
+            if 36<=lat<=43 and -10<=lon<=-6:
+                found.update(lat=round(lat,8),lon=round(lon,8),verified=True)
+    return found
+
+
+def enrich_official(e, previous):
+    """Códigos e limites defensivos para páginas oficiais com formatos conhecidos."""
+    try:
+        parsed=urlsplit(str(e.get('url') or ''))
+        host=(parsed.hostname or '').removeprefix('www.')
+        if host not in OFFICIAL_DOMAINS or OFFICIAL_DOMAINS[host]!=e.get('organizer'):
+            return {}
+        # Só verificar campos cuja extracção ainda está incompleta, para reduzir consultas.
+        required=('start','km','gain','duration','price','time')
+        if (all(meaningful(e.get(k)) for k in required)
+            and not GENERIC_TITLE.match(str(e.get('title') or ''))):
+            return {}
+        import requests
+        response=requests.get(e['url'],timeout=9,headers={'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)'})
+        response.raise_for_status()
+        if 'text/html' not in response.headers.get('Content-Type','text/html'):
+            return {}
+        return parse_official_listing(e['organizer'],response.text,e['url'])
+    except Exception as exc:
+        print('Página oficial não verificada:',e.get('url'),type(exc).__name__)
+        return {}
+
+
+def main():
+    if not CATALOG.is_file():
+        print('ERRO: catálogo inexistente', file=sys.stderr)
+        return 1
+    data = json.loads(CATALOG.read_text(encoding='utf-8'))
+    events = data.get('events')
+    if not isinstance(events, list) or not events:
+        print('ERRO: catálogo sem eventos', file=sys.stderr)
+        return 1
+    previous = git_previous()
+    by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
+    errors = []
+    changed = 0
+    generic = 0
+    missing_departure = 0
+    no_gps = 0
+    truncated = 0
+    seen = set()
+    network_lookups = 0
+    for e in events:
+        if not isinstance(e, dict):
+            errors.append('Evento sem estrutura JSON válida')
+            continue
+        ident = e.get('id')
+        if not ident or ident in seen:
+            errors.append('ID vazio ou duplicado')
+        seen.add(ident)
+        try:
+            if date.fromisoformat(e['date']) < datetime.now(timezone.utc).date():
+                errors.append('Evento com data no passado: '+str(ident))
+        except (ValueError, TypeError, KeyError):
+            errors.append('Data inválida: '+str(ident))
+        if not e.get('url', '').startswith(('https://', 'http://')):
+            errors.append('Ligação inválida: '+str(ident))
+        official_key=(e.get('organizer'), urlsplit(str(e.get('url') or '')).path.rstrip('/').split('/')[-1])
+        verified=(VERIFIED_2026_OCT25.get(official_key) if e.get('date')=='2026-10-25' else None)
+        if verified:
+            for field,value in verified.items():
+                if e.get(field)!=value:
+                    e[field]=value;changed+=1
+        old = by_id.get(ident, {})
+        # Uma nova recolha incompleta não deve apagar informação publicada anteriormente.
+        for field in ('start', 'town', 'time', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'status'):
+            if not meaningful(e.get(field)) and meaningful(old.get(field)):
+                e[field] = old[field]
+                changed += 1
+        # Verificação nas páginas originais para os eventos que têm informação em falta.
+        # Limite global de visitas controlado por main() para não bloquear o workflow.
+        if network_lookups < 35 and not verified:
+            if e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land'):
+                network_lookups += 1
+            fetched=enrich_official(e, old)
+            if fetched:
+                for field,value in fetched.items():
+                    if value is not None and (not meaningful(e.get(field)) or (field=='start' and (folded(str(e.get(field))) in PLACEHOLDERS or (len(str(e.get('start') or ''))>=80 and len(str(value))>len(str(e.get('start') or '')) and str(value).startswith(str(e.get('start') or '')[:60]))))):
+                        e[field]=value;changed+=1
+        if e.get('lat') is not None and e.get('lon') is not None:
+            if not (-90 <= float(e['lat']) <= 90 and -180 <= float(e['lon']) <= 180):
+                # Coordenadas geograficamente impossíveis não são consideradas válidas.
+                errors.append('Coordenadas GPS inválidas: '+str(ident))
+        else:
+            no_gps += 1
+        title = str(e.get('title') or '')
+        if GENERIC_TITLE.match(title):
+            older_title = str(old.get('title') or '')
+            alternative = older_title if older_title and not GENERIC_TITLE.match(older_title) else (official_hikeland_title(e.get('url', '')) or title_from_official_url(e.get('url', '')))
+            if alternative and alternative != title:
+                e['title'] = alternative
+                changed += 1
+            else:
+                generic += 1
+        start = str(e.get('start') or '')
+        if folded(start) in PLACEHOLDERS:
+            town = str(e.get('town') or '')
+            # Localidade claramente legível, mesmo quando o colector a guardou em town.
+            if meaningful(town) and len(town) <= 65 and not re.search(r'[,:-]\s*[A-Za-zÀ-ÿ]{1,2}$', town):
+                e['start'] = town
+                changed += 1
+            else:
+                missing_departure += 1
+        elif re.search(r'[,\s]+[A-Za-zÀ-ÿ]{1,2}$', start) or start.endswith('('):
+            truncated += 1
+    if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
+        errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
+    lines = [f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
+             f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',
+             f'{truncated} locais aparentemente truncados; {generic} títulos genéricos por resolver']
+    if errors:
+        report(lines + ['ERROS: '+ '; '.join(errors[:12])])
+        print('Recusada publicação por inconsistência grave.', file=sys.stderr)
+        return 1
+    # Não actualizar metadata em execuções sem alterações de conteúdo.
+    before = json.loads(CATALOG.read_text(encoding='utf-8'))
+    if events != before['events']:
+        data['events'] = events
+        CATALOG.write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    report(lines)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
