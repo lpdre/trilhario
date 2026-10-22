@@ -68,6 +68,113 @@ def official_hikeland_title(url):
         return None
 
 
+
+
+# Caminhando.pt usa cartões cujo texto reúne duas cópias do horário, o nome do
+# evento e o ponto de encontro. O extractor da listagem conservava tudo no título.
+# Esta leitura dos cartões antigos permite corrigi-los sem depender da rede.
+CAMINHANDO_CARD = re.compile(
+    r"^\s*(?P<begin>(?:[01]?\d|2[0-3]):[0-5]\d)\s+"
+    r"(?P<end>(?:[01]?\d|2[0-3]):[0-5]\d)\s+"
+    r"(?P<title>.+?)\s+(?P=begin)\s*[-–—]\s*(?P=end)\s+"
+    r"(?P<place>.*)$", re.I)
+
+def clock_valid(value):
+    return isinstance(value,str) and re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d',value) is not None
+
+def hours_between(begin,end):
+    if not (clock_valid(begin) and clock_valid(end)):
+        return None
+    h1,m1=map(int,begin.split(':'));h2,m2=map(int,end.split(':'))
+    d=(h2*60+m2)-(h1*60+m1)
+    # Não inferir duração quando a hora pertence ao dia seguinte ou está errada.
+    return round(d/60,4) if 15 <= d <= 14*60 else None
+
+def tidy_meeting(value):
+    t=' '.join(str(value or '').split())
+    t=re.split(r'\s+Tipo\s+Evento\s*:',t,maxsplit=1,flags=re.I)[0]
+    t=re.split(r'\s+(?:Hor[aá]rio|Detalhes do Evento|Descri[cç][aã]o do Evento)\b',t,maxsplit=1,flags=re.I)[0]
+    t=t.strip(' .,:;-')
+    return t if 5<=len(t)<=180 and not t.endswith(('...', '…')) else None
+
+def parse_caminhando_card(title):
+    """Extrai título, hora e local de anúncio já guardado no JSON.
+
+    Se o cartão truncou o ponto de encontro, não o publica como morada válida;
+    nesse caso o extractor da página oficial completa-o.
+    """
+    raw=' '.join(str(title or '').split())
+    m=CAMINHANDO_CARD.match(raw)
+    if not m:return {}
+    name=m['title'].strip(' -–,')
+    if not 8<=len(name)<=140:return {}
+    begin,end=m['begin'].zfill(5),m['end'].zfill(5)
+    out={'title':name,'time':begin,'endTime':end}
+    duration=hours_between(begin,end)
+    if duration is not None:out['duration']=duration
+    place=tidy_meeting(m['place'])
+    # Alguns cartões são cortados exactamente aos 140 caracteres.
+    if place and 'Tipo Evento' in raw:out['start']=place
+    return out
+
+def parse_caminhando_detail(html,url):
+    """Extrai os campos publicados na página individual do Caminhando.pt.
+
+    Processa apenas o cabeçalho do evento, antes do bloco de descrição;
+    assim não confunde horas e moradas das caminhadas relacionadas.
+    """
+    from bs4 import BeautifulSoup
+    soup=BeautifulSoup(html,'html.parser')
+    main=soup.find('main') or soup.find('article') or soup
+    txt=' '.join(main.get_text(' ',strip=True).split())
+    # O site imprime "Horário (Domingo) 9:20 - 14:00 Ponto de Encontro ...".
+    head=txt[:13000]
+    match=re.search(
+        r'\bHor[aá]rio\s+(?:\([^)]{2,30}\)\s*)?'
+        r'(?P<begin>(?:[01]?\d|2[0-3]):[0-5]\d)\s*[-–—]\s*'
+        r'(?P<end>(?:[01]?\d|2[0-3]):[0-5]\d)\s+'
+        r'Ponto de Encontro\s+(?P<place>.+?)\s+'
+        r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',head,re.I)
+    out={}
+    if match:
+        begin,end=match['begin'].zfill(5),match['end'].zfill(5)
+        out.update(time=begin,endTime=end)
+        duration=hours_between(begin,end)
+        if duration is not None:out['duration']=duration
+        place=tidy_meeting(match['place'])
+        if place:out['start']=place
+    # O H1 contém exclusivamente o nome, ao contrário da âncora do calendário.
+    h1=main.find('h1') or soup.find('h1')
+    if h1:
+        title=' '.join(h1.get_text(' ',strip=True).split())
+        if 7<=len(title)<=140 and not re.search(r'\b(?:agenda|eventos|pesquisa livre)\b',title,re.I):
+            out['title']=title
+    return out
+
+def repair_caminhando(event, old):
+    """Normaliza o Caminhando.pt e recupera campos na fonte, quando necessário."""
+    if event.get('organizer')!='Caminhando.pt':return {}
+    url=str(event.get('url') or '')
+    if urlsplit(url).hostname not in {'caminhando.pt','www.caminhando.pt'}:
+        return {}
+    raw_title=str(event.get('title') or '')
+    cached=parse_caminhando_card(raw_title)
+    # Correcção sem pedidos HTTP se o título continha os dados completos.
+    out=dict(cached)
+    need_detail=(not cached.get('start') or not cached.get('title') or
+                 not cached.get('time') or not cached.get('endTime'))
+    if need_detail:
+        try:
+            import requests
+            resp=requests.get(url,timeout=(4,9),headers={'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)'},allow_redirects=True)
+            resp.raise_for_status()
+            if (resp.url.startswith(('https://caminhando.pt/eventos/','https://www.caminhando.pt/eventos/'))
+                    and 'text/html' in resp.headers.get('Content-Type','text/html').lower()):
+                out.update(parse_caminhando_detail(resp.text,resp.url))
+        except Exception as exc:
+            print('Caminhando.pt: não foi possível consultar',url,type(exc).__name__)
+    return out
+
 def git_previous():
     try:
         raw = subprocess.check_output(['git', 'show', 'HEAD:eventos.json'], cwd=ROOT, stderr=subprocess.DEVNULL)
@@ -131,13 +238,18 @@ def parse_official_listing(organizer, html, url):
     txt=' '.join(main.get_text(' ',strip=True).split())
     found={}
     if organizer=='Mais Trilhos':
-        # A página repete 'Ponto de encontro': só a segunda ocorrência
-        # contém o local, entre os rótulos 'Hora de encontro' e 'Distância'.
-        matches=re.findall(r'Ponto de encontro\s+(?!Data\b|Hora de encontro\b|Distância\b)(.{4,160}?)(?=\s+(?:Distância|Dura[cç][aã]o|Desnível)\b)',txt,re.I)
-        for cand in reversed(matches):
-            cand=cand.strip(' .,:;')
-            if 5<=len(cand)<=120 and not re.search(r'\b(?:Data|Hora de encontro|iframe)\b',cand,re.I):
-                found['start']=cand;break
+        # Há dois rótulos iguais: título da secção (com iframe) e campo real.
+        # Ancorar no bloco 'Hora de encontro HH:MM -> Ponto de encontro -> Distância'
+        # evita consumir o rótulo do título e descartar o valor correcto.
+        meeting = re.search(
+            r'\bHora de encontro\s+([01]?\d|2[0-3]):([0-5]\d)\s+'
+            r'Ponto de encontro\s+(.{4,175}?)\s+Dist[âa]ncia\b', txt, re.I)
+        if meeting:
+            candidate = meeting[3].strip(' .,:;')
+            if (4 <= len(candidate) <= 145 and
+                not re.search(r'\b(?:iframe|Ponto de encontro|Hora de encontro|Data)\b', candidate, re.I)):
+                found['start'] = candidate
+                found['time'] = f'{int(meeting[1]):02d}:{meeting[2]}'
         m=re.search(r'Hora de encontro\s+(\d{1,2}):(\d{2})\b',txt,re.I)
         if m and int(m[1])<24 and int(m[2])<60:found['time']=f'{int(m[1]):02d}:{m[2]}'
         m=re.search(r'\bDura[cç][aã]o\s+(\d{1,2}):(\d{2})\b',txt,re.I)
@@ -323,6 +435,21 @@ def main():
     no_gps = 0
     truncated = 0
     seen = set()
+    # Dar prioridade aos pontos de encontro em falta na Mais Trilhos.
+    # A verificação normal tinha um orçamento global de 35 consultas e podia
+    # gastá-lo antes de chegar às caminhadas de Novembro e Dezembro.
+    prioritized = {}
+    prioritized_attempted = set()
+    for entry in sorted((x for x in events if isinstance(x,dict)), key=lambda x: str(x.get('date',''))):
+        if len(prioritized_attempted) >= 15:
+            break
+        if (entry.get('organizer') == 'Mais Trilhos'
+            and folded(entry.get('start')) in PLACEHOLDERS
+            and str(entry.get('url') or '').startswith('https://maistrilhos.pt/caminhadas/')
+            and str(entry.get('date') or '') >= datetime.now(timezone.utc).date().isoformat()):
+            ident = entry.get('id')
+            prioritized_attempted.add(ident)
+            prioritized[ident] = enrich_official(entry, {})
     network_lookups = 0
     for e in events:
         if not isinstance(e, dict):
@@ -346,21 +473,58 @@ def main():
                 if e.get(field)!=value:
                     e[field]=value;changed+=1
         old = by_id.get(ident, {})
+        # Caminhando.pt: corrigir título poluído, horas e encontro a partir do
+        # próprio cartão e, quando preciso, da página original da actividade.
+        if e.get('organizer') == 'Caminhando.pt':
+            repaired=repair_caminhando(e,old)
+            for field,value in repaired.items():
+                # O título do calendário é claramente inválido quando contém
+                # repetição de horas e o local no meio.
+                if value is not None and e.get(field)!=value:
+                    if field=='title' or not meaningful(e.get(field)) or field in ('start','time','endTime','duration'):
+                        e[field]=value;changed+=1
+            # Não reproduzir o texto "00:00" em anúncios sem hora publicada.
+            if e.get('time')=='00:00' and e.get('endTime') is None:
+                e['time']='';changed+=1
+        # Eventos de dia inteiro do calendário Tribe podem ter 00:00, que não
+        # é a hora real da caminhada. Só apresentar se existir hora publicada.
+        if e.get('organizer') == 'Clube de Montanhismo da Guarda':
+            if (e.get('date')=='2026-10-25' and
+                urlsplit(str(e.get('url') or '')).path.rstrip('/').endswith('/marcha-outubro-2026')):
+                for field,value in {'start':'Largo da Igreja, Prados, Celorico da Beira',
+                                    'town':'Prados, Celorico da Beira',
+                                    'time':'09:00','endTime':'12:45','duration':4}.items():
+                    if e.get(field)!=value:e[field]=value;changed+=1
+            elif e.get('time')=='00:00':
+                e['time']='';changed+=1
         # Uma nova recolha incompleta não deve apagar informação publicada anteriormente.
-        for field in ('start', 'town', 'time', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'status', 'image', 'image_checked_at'):
+        for field in ('start', 'town', 'time', 'endTime', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'status', 'image', 'image_checked_at'):
             if not meaningful(e.get(field)) and meaningful(old.get(field)):
                 e[field] = old[field]
                 changed += 1
         # Verificação nas páginas originais para os eventos que têm informação em falta.
         # Limite global de visitas controlado por main() para não bloquear o workflow.
-        if network_lookups < 35 and not verified:
-            if e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land'):
-                network_lookups += 1
-            fetched=enrich_official(e, old)
+        if not verified and (ident in prioritized_attempted or network_lookups < 35):
+            if ident in prioritized_attempted:
+                fetched = prioritized.get(ident) or {}
+            else:
+                if e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land'):
+                    network_lookups += 1
+                fetched = enrich_official(e, old)
             if fetched:
                 for field,value in fetched.items():
-                    if value is not None and (not meaningful(e.get(field)) or (field=='start' and (folded(str(e.get(field))) in PLACEHOLDERS or (len(str(e.get('start') or ''))>=80 and len(str(value))>len(str(e.get('start') or '')) and str(value).startswith(str(e.get('start') or '')[:60]))))):
-                        e[field]=value;changed+=1
+                    from_official_meeting = (e.get('organizer') == 'Mais Trilhos'
+                                             and field == 'start' and meaningful(value)
+                                             and value != e.get('start'))
+                    was_missing = not meaningful(e.get(field))
+                    more_complete = (field == 'start' and len(str(e.get('start') or '')) >= 80
+                                     and len(str(value)) > len(str(e.get('start') or ''))
+                                     and str(value).startswith(str(e.get('start') or '')[:60]))
+                    if value is not None and (was_missing or more_complete or from_official_meeting):
+                        e[field] = value
+                        changed += 1
+        if e.get('organizer')=='Clube de Montanhismo da Guarda' and e.get('time')=='00:00':
+            e['time']='';changed+=1
         if e.get('lat') is not None and e.get('lon') is not None:
             if not (-90 <= float(e['lat']) <= 90 and -180 <= float(e['lon']) <= 180):
                 # Coordenadas geograficamente impossíveis não são consideradas válidas.
