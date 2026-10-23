@@ -393,7 +393,8 @@ def enrich_official(e, previous):
 # As imagens são referenciadas a partir do anúncio original (sem copiar ficheiros
 # de terceiros para o GitHub). Alguns organizadores impedem hotlink: nesse caso
 # a foto é omitida pelo browser e o cartão permanece utilizável.
-PHOTO_VISITS_PER_RUN = 24
+PHOTO_FIRST_EVENTS = 50  # Primeiro grupo de caminhadas futuras por data
+PHOTO_VISITS_PER_RUN = 50  # Máximo de novas consultas por execução
 PHOTO_RETRY_DAYS = 28
 PHOTO_MAX_HTML_BYTES = 800_000
 PHOTO_AGENT = {'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)',
@@ -688,13 +689,16 @@ def main():
         elif re.search(r'[,\s]+[A-Za-zÀ-ÿ]{1,2}$', start) or start.endswith('('):
             truncated += 1
 
-    # Uma miniatura por evento, procurada automaticamente a cada execução diária.
-    # Visitas limitadas; próximos dias têm prioridade. Ao fim de algumas execuções,
-    # o catálogo fica preenchido sem exigir intervenção manual.
+    # Dar prioridade às primeiras 50 caminhadas futuras. Fotografias válidas
+    # guardadas no eventos.json nunca são procuradas novamente. Preservar
+    # igualmente fotografias de eventos fora deste grupo.
     image_visits=0
     image_added=0
     today=date.today()
-    for e in sorted((e for e in events if isinstance(e,dict)),key=lambda e:(str(e.get('date','9999')), str(e.get('title','')))):
+    future_events = sorted(
+        (e for e in events if isinstance(e, dict) and str(e.get('date', '')) >= today.isoformat()),
+        key=lambda e: (str(e.get('date', '9999')), str(e.get('time', '')), str(e.get('title', ''))))
+    for e in future_events[:PHOTO_FIRST_EVENTS]:
         if meaningful(e.get('image')):
             if not valid_event_image(e.get('image'),e.get('url','')):
                 e.pop('image',None)
@@ -716,7 +720,7 @@ def main():
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
     lines = [f'Agregador: {removed_aggregator} duplicados/não caminhadas retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
-             f'Fotografias: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN})',
+             f'Fotografias nos primeiros {PHOTO_FIRST_EVENTS} eventos futuros: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',
              f'{truncated} locais aparentemente truncados; {generic} títulos genéricos por resolver']

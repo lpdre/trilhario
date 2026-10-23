@@ -591,6 +591,24 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .toolbar-sort{width:35px;flex-basis:35px}
 }
 
+/* v34 — Comparação sem limite fixo; critérios sempre visíveis durante scroll horizontal. */
+.comparison-table-wrap{overscroll-behavior-x:contain;scrollbar-gutter:stable;max-width:100%}
+.comparison-table{table-layout:fixed}
+.comparison-table thead th:first-child,.comparison-table tbody th{
+ position:sticky;left:0;z-index:2;width:155px;min-width:155px;max-width:155px;
+ box-shadow:2px 0 0 #d9e2d5}
+.comparison-table thead th:first-child{z-index:3;background:#edf1e7}
+.comparison-table tbody th{background:#f5f7f0}
+.comparison-table .total-row th{background:#e9efe3}
+.comparison-swipe-hint{font-size:12px;color:#526d56;margin:8px 0}
+.comparison-table .compare-remove{display:block;margin-top:8px;padding:4px 8px;
+ border:1px solid #bed1be;border-radius:4px;background:#f9fbf5;color:#375841;
+ font-size:11px;cursor:pointer}
+.comparison-table .compare-remove:hover{background:#e5eee1}
+@media(max-width:540px){.comparison-table thead th:first-child,.comparison-table tbody th{
+ width:130px;min-width:130px;max-width:130px;padding:11px 8px}
+ .comparison-table th,.comparison-table td{padding:10px 11px}}
+
 /* v28 — miniatura editorial opcional na lista. Nunca carrega fotos no mapa/calendário/comparação. */
 .walk-photo{float:right;width:96px;height:72px;max-width:30%;object-fit:cover;
  object-position:center;border-radius:5px;margin:1px 0 7px 12px;
@@ -686,7 +704,7 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  <ol class="intro-guide-steps">
   <li class="intro-guide-step"><span class="intro-step-number" aria-hidden="true">1</span><span class="intro-step-copy"><strong>Escolhe o dia</strong><span>Procura caminhadas na Lista ou no Calendário.</span></span></li>
   <li class="intro-guide-step"><span class="intro-step-number" aria-hidden="true">2</span><span class="intro-step-copy"><strong>Calcula a viagem</strong><span>Indica de onde partes para veres distância, tempo e custos.</span></span></li>
-  <li class="intro-guide-step"><span class="intro-step-number" aria-hidden="true">3</span><span class="intro-step-copy"><strong>Compara trilhos</strong><span>Selecciona até 3 caminhadas com «Comparar».</span></span></li>
+  <li class="intro-guide-step"><span class="intro-step-number" aria-hidden="true">3</span><span class="intro-step-copy"><strong>Compara trilhos</strong><span>Selecciona os trilhos que quiseres com «Comparar».</span></span></li>
   <li class="intro-guide-step"><span class="intro-step-number" aria-hidden="true">4</span><span class="intro-step-copy"><strong>Guarda favoritos</strong><span>Toca no coração para guardares os preferidos.</span></span></li>
  </ol>
  <p class="intro-guide-footer"><strong>Evento</strong> abre o anúncio do organizador · <strong>D+</strong> é a subida acumulada · Os favoritos ficam neste navegador.</p>
@@ -717,11 +735,11 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 
 <section class="comparison-page shell" id="comparisonPage">
  <header class="comparison-head"><a class="brand brand-hero comparison-brand" href="index.html">trilhário<span class="brand-dot">.</span></a><a href="index.html" class="comparison-back">← Voltar à agenda</a></header>
- <div class="comparison-intro"><span class="eyebrow">ESCOLHER O PRÓXIMO TRILHO</span><h1>Comparar caminhadas</h1><p>Até três caminhadas, lado a lado. Distância a pé, desnível, tempo de carro, combustível, portagens e custo total da viagem.</p></div>
+ <div class="comparison-intro"><span class="eyebrow">ESCOLHER O PRÓXIMO TRILHO</span><h1>Comparar caminhadas</h1><p>Compara as caminhadas que quiseres. Desliza a tabela para os lados para veres todas, com a coluna dos critérios sempre visível. Inclui distância a pé, desnível, tempo de carro, combustível, portagens e custo total da viagem.</p></div>
  <div id="comparisonContent" aria-live="polite"></div>
  <p class="comparison-note">Distâncias e duração rodoviárias estimadas a partir do ponto de partida e da origem definida. O custo total da viagem corresponde a combustível e portagens (ida e volta), sem incluir a inscrição na caminhada. Sem portagens calculadas não é apresentado um total incompleto.</p>
 </section>
-<div class="compare-tray" id="compareTray" hidden><div class="compare-tray-content"><div><strong id="compareQty">0 de 3 seleccionadas</strong><span id="compareNames">Selecciona caminhadas para comparar</span></div><div class="compare-tray-actions"><button type="button" id="compareClear">Limpar</button><a id="compareOpen" href="?comparar=1" target="_blank" rel="noopener noreferrer" class="compare-open">Comparar ↗</a></div></div></div>
+<div class="compare-tray" id="compareTray" hidden><div class="compare-tray-content"><div><strong id="compareQty">0 seleccionadas</strong><span id="compareNames">Selecciona caminhadas para comparar</span></div><div class="compare-tray-actions"><button type="button" id="compareClear">Limpar</button><a id="compareOpen" href="?comparar=1" target="_blank" rel="noopener noreferrer" class="compare-open">Comparar ↗</a></div></div></div>
 <footer class="footer"><div class="shell"><span><strong>trilhário.</strong> Um projecto experimental e independente, sem associação aos organizadores.</span><span>Eventos de demonstração · Outubro 2026 · Feito para caminhar mais, procurar menos.</span></div></footer>
 <div class="modal" hidden="" id="modal"><div aria-labelledby="modalTitle" aria-modal="true" class="dialog" role="dialog"><h2 id="modalTitle">Adicionar caminhada</h2><p>Regista aqui eventos que encontrares. Ficam guardados neste navegador, não são publicados na internet.</p><form id="eventForm"><div class="dialog-grid"><div class="field wide"><label for="fTitle">Nome do percurso *</label><input class="control" id="fTitle" maxlength="100" placeholder="Ex.: Trilho dos Bosques de Outono" required=""/></div><div class="field"><label for="fDate">Data *</label><input class="control" id="fDate" required="" type="date" value="2026-10-24"/></div><div class="field"><label for="fTime">Hora</label><input class="control" id="fTime" type="time" value="09:00"/></div><div class="field"><label for="fTown">Localidade *</label><input class="control" id="fTown" maxlength="70" placeholder="Ex.: Arouca" required=""/></div><div class="field"><label for="fRegion">Região *</label><select class="control" id="fRegion" required=""><option>Norte</option><option>Centro</option><option>Lisboa e Vale do Tejo</option></select></div><div class="field"><label for="fOrg">Organizador *</label><input class="control" id="fOrg" maxlength="70" required=""/></div><div class="field"><label for="fUrl">Link do evento</label><input class="control" id="fUrl" placeholder="https://..." type="url"/></div><div class="field"><label for="fKm">Quilómetros</label><input class="control" id="fKm" max="200" min="0" step="0.1" type="number"/></div><div class="field"><label for="fGain">Desnível positivo (m)</label><input class="control" id="fGain" max="9000" min="0" step="1" type="number"/></div><div class="field"><label for="fPrice">Preço (€)</label><input class="control" id="fPrice" max="10000" min="0" step="0.5" type="number"/></div><div class="field"><label for="fDifficulty">Dificuldade</label><select class="control" id="fDifficulty"><option value="2">Moderada</option><option value="1">Fácil</option><option value="3">Exigente</option><option value="4">Difícil</option><option value="5">Muito difícil</option></select></div><div class="field"><label for="fDuration">Duração (horas)</label><input class="control" id="fDuration" max="72" min="0.5" placeholder="Ex.: 6" step="0.5" type="number"/></div>
 <input id="fMaxParticipants" type="hidden" value=""/>
@@ -1291,21 +1309,22 @@ function travelRow(e){
  const action=hasOrigin&&!unavailable&&!t&&!queued?`<button type="button" onclick="calculateOneRoute('${esc(e.id)}')" title="Voltar a pedir uma estimativa da viagem">${error||tripOriginProblem?'Tentar novamente':'Calcular'}</button>`:'';
  return `<div class="walk-trip-line"><div class="walk-trip-info">${desc}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
 }
-function toggleCompare(id){if(compared.has(id))compared.delete(id);else{if(compared.size>=3){toast('Podes comparar até 3 caminhadas.');return;}compared.add(id);}persistTravel();render();}
+function toggleCompare(id){if(compared.has(id))compared.delete(id);else compared.add(id);persistTravel();render();}
 function clearCompare(){compared.clear();persistTravel();render();}
 function renderCompareTray(){const bar=$('compareTray');if(!bar)return;bar.hidden=compared.size===0||COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE;
- $('compareQty').textContent=compared.size+' de 3 seleccionadas';const items=allEvents().filter(e=>compared.has(e.id));$('compareNames').textContent=items.map(e=>e.title).join(' · ')||'Selecciona caminhadas';
+ $('compareQty').textContent=compared.size+' seleccionada'+(compared.size===1?'':'s');const items=allEvents().filter(e=>compared.has(e.id));$('compareNames').textContent=items.length>3?items.slice(0,3).map(e=>e.title).join(' · ')+' · …':items.map(e=>e.title).join(' · ')||'Selecciona caminhadas';
  $('compareOpen').classList.toggle('is-disabled',compared.size<2);$('compareOpen').setAttribute('aria-disabled',String(compared.size<2));}
 function travelSortVal(e,sort){const t=tripCalc(e);return sort==='km'?t?.km:sort==='fuel'?t?.fuel:t?.total;}
 function sortedWalks(xs){const s=$('travelSort')?.value||'date';if(s==='date')return xs;return xs.sort((a,b)=>{const av=travelSortVal(a,s),bv=travelSortVal(b,s);return av==null?bv==null?0:1:bv==null?-1:av-bv});}
-function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('comparisonContent');if(!target)return;const items=allEvents().filter(e=>compared.has(e.id)).slice(0,3);
+function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('comparisonContent');if(!target)return;const items=allEvents().filter(e=>compared.has(e.id));
  if(!items.length){target.innerHTML='<div class="org-empty">Ainda não seleccionaste caminhadas. <a href="index.html">Voltar à agenda</a></div>';return;}
- const head=(e)=>`<th scope="col"><strong>${esc(e.title)}</strong><br><small>${esc(e.organizer)} · ${esc(dateShort(e))}</small></th>`;
+ const head=(e)=>`<th scope="col"><strong>${esc(e.title)}</strong><br><small>${esc(e.organizer)} · ${esc(dateShort(e))}</small><button type="button" class="compare-remove" data-compare-remove="${esc(e.id)}" aria-label="Retirar ${esc(e.title)} da comparação">Retirar ×</button></th>`;
  const cell=(e,key)=>{const t=tripCalc(e),r=travelData(e);switch(key){
  case 'organizer':return esc(e.organizer);case 'date':return esc(dateShort(e))+' · '+esc(e.time||'—');case 'walk':return e.km==null?'—':fmtN(e.km)+' km';case 'gain':return e.gain==null?'—':fmtN(e.gain)+' m';case 'difficulty':return esc(names[e.difficulty]||'—');case 'price':return fmtP(e.price);
  case 'location':return esc(displayDeparture(e)||'Por confirmar');case 'driveKm':return t?fmtN(t.km)+' km':'—';case 'driveTime':return t?timeStr(t.minutes):'—';case 'fuel':return t?travelMoney(t.fuel):'—';case 'toll':return t&&t.toll!=null?travelMoney(t.toll):'—';case 'total':return t&&t.total!=null?travelMoney(t.total):'—';case 'source':return safeExternalUrl(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ver evento ↗</a>`:'—';default:return '—';}};
  const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Total viagem (combustível + portagens)'],['source','Anúncio']];
- target.innerHTML=`<div class="comparison-action"><button type="button" onclick="calculateVisibleRoutes(true)" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" onclick="renderComparison()">Actualizar tabela</button></div><div class="comparison-table-wrap"><table class="comparison-table"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}"><th scope="row">${label}</th>${items.map(e=>`<td>${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ target.innerHTML=`<div class="comparison-action"><button type="button" onclick="calculateVisibleRoutes(true)" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" onclick="renderComparison()">Actualizar tabela</button></div><p class="comparison-swipe-hint">${items.length} caminhadas seleccionadas · Desliza horizontalmente a tabela para comparar todas.</p><div class="comparison-table-wrap" role="region" aria-label="Comparação de ${items.length} caminhadas; deslocação horizontal" tabindex="0"><table class="comparison-table" style="min-width:${Math.max(625,155+items.length*225)}px"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}"><th scope="row">${label}</th>${items.map(e=>`<td>${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ target.querySelectorAll('[data-compare-remove]').forEach(button=>button.addEventListener('click',()=>{compared.delete(button.dataset.compareRemove);persistTravel();renderComparison();}));
 }
 function openTravelPanel(){if(COMPARE_PAGE_MODE){window.open('index.html','_blank','noopener');return;}$('travelPanel').hidden=false;$('travelToggle').setAttribute('aria-expanded','true');$('tripOrigin').focus();}
 function toggleTravelPanel(){const p=$('travelPanel');p.hidden=!p.hidden;$('travelToggle').setAttribute('aria-expanded',String(!p.hidden));}
