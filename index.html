@@ -761,7 +761,7 @@ const TRAVEL_BATCH_SIZE=10;
 let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
 let tripFilterSignature='',tripBatchObserver=null,tripScheduling=false,tripWorking=false;
 let tollJobs=[],tollWorking=false;
-const GEOCODER_VERSION=25,geoMisses=new Set();
+const GEOCODER_VERSION=25,geoMisses=new Set(),tripRetryAfter=new Map();
 
 const COMPARE_PAGE_MODE=new URLSearchParams(location.search).has('comparar');
 if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.title='Comparar caminhadas — Trilhário';}
@@ -1284,19 +1284,64 @@ async function refreshFuelPrices(){const results=await Promise.allSettled(['gaso
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function gapThrottle(type){const key=type==='geo'?'geoLastRequest':'roadLastRequest';const now=Date.now(),last=type==='geo'?geoLastRequest:roadLastRequest;const gap=Math.max(0,1200-(now-last));if(gap)await sleep(gap);if(type==='geo')geoLastRequest=Date.now();else roadLastRequest=Date.now();}
+// A localização automática usa uma pesquisa pontual, cache local e pedidos sequenciais.
+// O Nominatim público é limitado (até 1 pedido/s por aplicação); não fazer varrimentos.
+// Photon é uma alternativa para nomes de locais/POI quando a primeira pesquisa falha.
+let photonCooldownUntil=0,nominatimCooldownUntil=0;
+const pointInPortugal=p=>hasCoords(p)&&p.lat>=36.6&&p.lat<=42.3&&p.lon>=-9.8&&p.lon<=-6.0;
 async function geocodeText(text){
- const key=String(text||'').trim().toLowerCase();if(!key||geoMisses.has(key))return null;
- const cached=travelGeocodes[key];if(cached&&hasCoords(cached))return cached;
- // Nominatim público: pedidos sequenciais, no máximo um por ~1,2 s; nunca tentar em paralelo.
- await gapThrottle('geo');
- const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=pt&q='+encodeURIComponent(text);
- const r=await fetch(u,{headers:{Accept:'application/json'}});
- if(!r.ok)throw new Error('Geocodificação indisponível');
- const j=await r.json();
- const p=j?.length?{lat:Number(j[0].lat),lon:Number(j[0].lon)}:null;
- if(!p||!hasCoords(p)){geoMisses.add(key);return null;}
- travelGeocodes[key]=p;try{localStorage.setItem(TRAVEL_GEO_KEY,JSON.stringify(travelGeocodes))}catch{}
- return p;
+ const key=String(text||'').trim().toLocaleLowerCase('pt-PT');
+ if(!key||geoMisses.has(key))return null;
+ const cached=travelGeocodes[key];
+ if(cached&&pointInPortugal(cached))return cached;
+ if(Date.now()<photonCooldownUntil&&Date.now()<nominatimCooldownUntil)throw new Error('Serviços de localização temporariamente limitados. Tenta novamente mais tarde.');
+ let temporarilyUnavailable=0;
+ // Primeiro Photon: procura lugares e estabelecimentos mesmo com ortografia variável.
+ if(Date.now()>=photonCooldownUntil)try{
+  await gapThrottle('geo');
+  const u='https://photon.komoot.io/api/?limit=4&q='+encodeURIComponent(text);
+  const r=await fetch(u,{headers:{Accept:'application/json'}});
+  if(r.status===429||r.status===403){temporarilyUnavailable++;photonCooldownUntil=Date.now()+120000;}
+  else if(!r.ok)temporarilyUnavailable++;
+  else{
+   const j=await r.json();
+   const queryWords=fold(text.replace(/,?\s*Portugal$/i,'')).split(/[^a-z0-9]+/).filter(x=>x.length>=4&&!['posto','turismo','parque','estacionamento','junto','centro','municipal','igreja','estrada','portugal'].includes(x));
+   for(const f of (j?.features||[]).slice(0,4)){
+    if(String(f?.properties?.countrycode||'').toUpperCase()!=='PT')continue;
+    const xy=f?.geometry?.coordinates;
+    if(!Array.isArray(xy)||xy.length!==2)continue;
+    const p={lat:Number(xy[1]),lon:Number(xy[0])};
+    if(!pointInPortugal(p))continue;
+    const label=fold([f.properties.name,f.properties.city,f.properties.district,f.properties.county,f.properties.state].filter(Boolean).join(' '));
+    if(queryWords.length&&!queryWords.some(w=>label.includes(w)))continue;
+    travelGeocodes[key]=p;
+    try{localStorage.setItem(TRAVEL_GEO_KEY,JSON.stringify(travelGeocodes))}catch{}
+    return p;
+   }
+  }
+ }catch(err){temporarilyUnavailable++;console.info('Photon indisponível:',err?.message||err)}
+ // Segundo fornecedor, sem depender de um único geocodificador externo.
+ if(Date.now()>=nominatimCooldownUntil)try{
+  await gapThrottle('geo');
+  const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=pt&q='+encodeURIComponent(text);
+  const r=await fetch(u,{headers:{Accept:'application/json'}});
+  if(r.status===429||r.status===403){nominatimCooldownUntil=Date.now()+120000;throw new Error('Serviço de localização temporariamente limitado. Tenta novamente mais tarde.');}
+  if(!r.ok)throw new Error('Pesquisa indisponível ('+r.status+')');
+  const j=await r.json();
+  const p=j?.length?{lat:Number(j[0].lat),lon:Number(j[0].lon)}:null;
+  if(p&&pointInPortugal(p)){
+   travelGeocodes[key]=p;
+   try{localStorage.setItem(TRAVEL_GEO_KEY,JSON.stringify(travelGeocodes))}catch{}
+   return p;
+  }
+ }catch(err){
+  if(/temporariamente limitado/.test(String(err?.message||'')))throw err;
+  temporarilyUnavailable++;
+  console.info('Nominatim indisponível:',err?.message||err);
+ }
+ if(temporarilyUnavailable>=2||(Date.now()<photonCooldownUntil&&Date.now()<nominatimCooldownUntil))throw new Error('Serviço de localização temporariamente indisponível. Tenta novamente mais tarde.');
+ if(!temporarilyUnavailable)geoMisses.add(key); // Só memorizar pesquisas concluídas nos dois fornecedores.
+ return null;
 }
 // Remover notas logísticas, mas conservar a localidade real anunciada.
 function cleanLocationHint(s){
@@ -1308,6 +1353,54 @@ function isUsablePlace(s){
  const value=cleanLocationHint(s);
  return value.length>=3&&value.length<=135&&!/^(?:por confirmar|a confirmar|desconhecido|local a definir|por definir|não definido)$/i.test(value)
   &&!/^\d{1,2}h\d{0,2}\s/i.test(value);
+}
+// v31: extrair localidades administrativas explícitas do texto do organizador.
+// Os resultados sem GPS são aproximações; não tratar como ponto exacto de partida.
+const LOCALIDADES_31=[
+ 'Pedrógão Pequeno','Portela de Sintra','Malveira da Serra','Paredes de Coura',
+ 'Vila Nova de Gaia','Cabeceiras de Basto','Castanheira de Pera','Terras de Bouro',
+ 'Porto de Mós','São Pedro do Sul','Pedrógão Grande','Castro Laboreiro',
+ 'Alcabideche','Alcanadas','Manteigas','Palmela','Óbidos',
+ 'Batalha','Mafra','Sintra','Ourém','Lousã','Regoufe','Valdigem',
+ 'Mendiga','Montalegre','Alvações do Corgo','Cascais','Coentral',
+ 'Leonte','Fafe','Góis','Arouca','Matosinhos','Tomar','Lamego',
+ 'Braga','Melgaço','Almada','Lisboa','Seia','Loriga','Pombal','Valongo',
+ 'Fundão','Castelo Branco','Aveiro','Mafomedes','Bezerra',
+ 'Colares','Alenquer','Santarém','Trafaria'
+];
+function localityHints31(e,start,town){
+ const hints=[],seen=new Set();
+ const push=(name)=>{const k=fold(name);if(name&&!seen.has(k)){seen.add(k);hints.push(name)}};
+ const full=fold([start,town].filter(Boolean).join(' '));
+ const titled=fold(e.title||'');
+ // POI publicados com referência municipal inequívoca.
+ if(/rio da mula/.test(full))push('Barragem do Rio da Mula, Alcabideche');
+ if(/monserrate/.test(full))push('Monserrate, Sintra');
+ if(/peninha/.test(full))push('Peninha, Sintra');
+ if(/palacio nacional de sintra/.test(full))push('Palácio Nacional de Sintra');
+ if(/portela de sintra/.test(full))push('Portela de Sintra');
+ if(/terreiro das bruxas/.test(full))push('Lousã');
+ if(/alcanadas/.test(full))push('Alcanadas, Batalha');
+ if(/valdigem/.test(full))push('Valdigem, Lamego');
+ if(/malveira da serra/.test(full))push('Malveira da Serra, Cascais');
+ if(/cova[oã] da ametade/.test(full))push('Covão da Ametade, Manteigas');
+ const concelho=start.match(/\bconcelho\s+d[aeo]s?\s+([^,.;()]{3,45})/i);
+ if(concelho)push(concelho[1].trim());
+ const escaped=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ // Preferir lugares com mais palavras, evitando confundir 'Sintra' com 'Portela de Sintra'.
+ for(const place of LOCALIDADES_31){
+  const rx=new RegExp('(^|[^a-z0-9])'+escaped(fold(place))+'($|[^a-z0-9])');
+  if(rx.test(full))push(place);
+ }
+ // Fallback de último recurso: município mencionado no título, nunca inferir a partir de 'floresta' ou 'serra'.
+ if(!hints.length){
+  for(const place of LOCALIDADES_31){
+   if(place.length<5)continue;
+   const rx=new RegExp('(^|[^a-z0-9])'+escaped(fold(place))+'($|[^a-z0-9])');
+   if(rx.test(titled)){push(place);break;}
+  }
+ }
+ return hints.slice(0,3);
 }
 // Começar pelo ponto anunciado; se for demasiado detalhado, recuar para aldeia/localidade/concelho.
 // Nunca assumir que o nome do trilho é o local de partida.
@@ -1336,6 +1429,8 @@ function departureCandidates(e){
   return '';
  })();
  if(isUsablePlace(start)){
+  // Um texto que só contém horários e uma referência vaga não permite geocodificação segura.
+  if(/^Hor[aá]rio\s+IN[IÍ]CIO\b/i.test(start)&&!isUsablePlace(town))return [];
   // Agregadores por vezes só publicam município e distrito, não um GPS de início.
   // Tentar a localidade administrativa primeiro, claramente marcada como aproximada.
   const aggregatorHost=(()=>{try{return new URL(e.url||'').hostname.replace(/^www\./,'')}catch{return ''}})();
@@ -1346,6 +1441,11 @@ function departureCandidates(e){
     add(municipality[0],'localidade');
    }else if(municipality.length===1&&municipality[0].length<55){add(municipality[0],'localidade');}
   }
+  // Lugares evidentes no texto têm prioridade sobre fragmentos de morada longos.
+  const locationHints=localityHints31(e,start,town);
+  // Tentar o ponto anunciado quando é curto e minimamente pesquisável.
+  if(start.length<=90&&!/\b(?:que desce|ponto de encontro|Hora|final|contacto)\b/i.test(start))add(start,'descricao');
+  for(const hint of locationHints)add(hint,'localidade');
   // 1.º experimentar a localidade explícita, em vez de endereços narrativos enormes.
   const village=start.match(/\b(?:aldeia|localidade|vila|freguesia|povoação)\s+d[aeo]s?\s+([^,.;()]+)/i);
   if(village){add(village[1]+(context?', '+context:''),'localidade');add(village[1]);}
@@ -1381,9 +1481,12 @@ function departureCandidates(e){
   if(/\bMata dos Medos\b/i.test(e.title||''))add('Mata dos Medos, Almada','zona');
   if(!candidates.length&&start.length<=115)add(start,'descricao');
  }
+ if(!candidates.length&&isUsablePlace(start)){
+  for(const hint of localityHints31(e,start,town))add(hint,'localidade');
+ }
  if(isUsablePlace(town)&&!isPlacePlaceholder(town)&&town!==start&&town.length<65)add(town,'localidade');
  if(hasCoords(e))candidates.push({coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'aproximado',label:'ponto de referência'});
- return candidates.slice(0,5); // Máximo de cinco tentativas de geocodificação por caminhada.
+ return candidates.filter(x=>!x.coords).slice(0,4).concat(candidates.filter(x=>x.coords).slice(0,1)); // Poucas tentativas, preservando GPS se houver.
 }
 function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade|Ver\s+no\s+Google\s+Maps/i.test(String(e.start||''))?'geo-refinado-v30':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
 function endpointName(e){return departureCandidates(e)[0]?.query||null;}
@@ -1441,6 +1544,7 @@ function scheduleTravelBatches(events){
 }
 function tripNeedsRoute(e,force=false){
  const r=travelData(e),key=routeCacheKey(e);
+ if(tripRetryAfter.has(key)&&Date.now()>=tripRetryAfter.get(key)){tripRetryAfter.delete(key);tripProblems.delete(key);}
  return (force||!r||r.manual||!Number.isFinite(r.kmOne)||
    (r.geocoderVersion!==GEOCODER_VERSION||r.destinationFingerprint!==endpointFingerprint(e)))
    &&(!tripProblems.has(key)||force);
@@ -1506,7 +1610,7 @@ async function processTripQueue(){
    let p=await geocodeText(job.origin.replace(/,?\s*Portugal\s*$/i,'')+', Portugal');
    if(!p){tripOriginProblem='Origem não localizada. Verifica a localidade.';throw new Error(tripOriginProblem);}
    const q=await locateEndpoint(e);
-   if(!q)throw new Error('Local de partida não localizado.');
+   if(!q)throw new Error('Ponto de partida sem correspondência no mapa (também tentámos a localidade).');
    const r=await roadRoute(p,q),previous=travelRoutes[job.key]||{};
    const {geometry,...data}=r;
    const sameDestination=previous.geocoderVersion===GEOCODER_VERSION&&previous.destinationFingerprint===endpointFingerprint(e);
@@ -1522,7 +1626,8 @@ async function processTripQueue(){
   }catch(err){
    const reason=err?.message||'Serviço de rotas indisponível';
    tripProblems.set(job.key,reason);
-   if(reason==='Origem não localizada. Verifica a localidade.'||/Geocodificação indisponível/.test(reason)&&!travelGeocodes[(job.origin+', Portugal').toLowerCase()]){
+   if(/temporariamente|indisponível|HTTP|Sem rota rodoviária/i.test(reason))tripRetryAfter.set(job.key,Date.now()+180000);
+   if(reason==='Origem não localizada. Verifica a localidade.'){ 
     tripOriginProblem=reason==='Origem não localizada. Verifica a localidade.'?reason:'Serviço de localização indisponível. Tenta novamente.';
     tripJobs=[];tripJobsSet.clear();
    }
