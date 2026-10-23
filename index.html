@@ -907,8 +907,16 @@ function localPartidaLegivel(valor){
  let texto=String(valor??'').replace(/\s+/g,' ').trim();
  if(!texto)return '';
  texto=texto.split(/\b(?:Coordenadas(?:\s+GPS)?|GPS|Latitude|Longitude|Lat|Long|Hora\s+de\s+Fim|A\s+hora\s+de\s+fim|Hora\s+de\s+Início)\b\s*:?(?=\s|$|[-+0-9])/i)[0];
+ // O agregador inclui ligações como texto dentro da localidade.
+ texto=texto.replace(/\s*\(\s*Ver\s+no\s+Google\s+Maps\s*\)/gi,'')
+            .replace(/\s*\bVer\s+no\s+Google\s+Maps\b.*$/gi,'');
  // Também retirar pares de coordenadas escritos sem rótulo.
  texto=texto.replace(/\s*[,;([]?\s*-?\d{1,2}[.,]\d{4,}\s*[,; /]+\s*-?\d{1,3}[.,]\d{4,}.*$/,'');
+ texto=texto.replace(/\bVila[\s-]*real\b/gi,'Vila Real')
+            .replace(/\bCastelo[\s-]*branco\b/gi,'Castelo Branco')
+            .replace(/\bFundao\b/gi,'Fundão')
+            .replace(/\bMelgaco\b/gi,'Melgaço')
+            .replace(/\bTerras[\s-]*de[\s-]*bouro\b/gi,'Terras de Bouro');
  texto=texto.replace(/[\s,;:–—-]+$/g,'').replace(/\(\s*$/,'').trim();
  return texto||'Por confirmar';
 }
@@ -1019,7 +1027,7 @@ function googleMapsDeparture(x,spot){
  // Usar coordenadas apenas quando o próprio ponto foi confirmado pela fonte.
  const query=x.verified&&hasCoords(x)?Number(x.lat)+','+Number(x.lon):
    [text.replace(/\s*\([^)]*(?:a confirmar|ponto exacto|local exacto)[^)]*\)/gi,'').trim(),
-    x.town&&fold(text).includes(fold(x.town))?'':x.town,'Portugal'].filter(Boolean).join(', ');
+    x.town&&fold(text).includes(fold(localPartidaLegivel(x.town)))?'':localPartidaLegivel(x.town),'Portugal'].filter(Boolean).join(', ');
  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
 }
 const TRILHARIO_ACTION_ICONS={
@@ -1292,8 +1300,7 @@ async function geocodeText(text){
 }
 // Remover notas logísticas, mas conservar a localidade real anunciada.
 function cleanLocationHint(s){
- return String(s||'').replace(/\bCoordenadas(?:\s+GPS)?\b[\s\S]*$/i,'')
-  .replace(/\bHora\s+de\s+(?:Fim|Início|Inicio)\b[\s\S]*$/i,'')
+ return localPartidaLegivel(s)
   .replace(/\s*\([^)]*\b(?:a confirmar|local exacto|ponto exacto)\b[^)]*\)/gi,'')
   .replace(/\s+/g,' ').replace(/[\s.\-–—,;]+$/,'').trim();
 }
@@ -1329,6 +1336,16 @@ function departureCandidates(e){
   return '';
  })();
  if(isUsablePlace(start)){
+  // Agregadores por vezes só publicam município e distrito, não um GPS de início.
+  // Tentar a localidade administrativa primeiro, claramente marcada como aproximada.
+  const aggregatorHost=(()=>{try{return new URL(e.url||'').hostname.replace(/^www\./,'')}catch{return ''}})();
+  if(aggregatorHost==='trilhosecaminhadas.pt'){
+   const municipality=start.split(',').map(p=>p.trim()).filter(Boolean);
+   if(municipality.length>=2&&municipality[0].length>=3&&municipality[0].length<45){
+    add(municipality.slice(0,2).join(', '),'localidade');
+    add(municipality[0],'localidade');
+   }else if(municipality.length===1&&municipality[0].length<55){add(municipality[0],'localidade');}
+  }
   // 1.º experimentar a localidade explícita, em vez de endereços narrativos enormes.
   const village=start.match(/\b(?:aldeia|localidade|vila|freguesia|povoação)\s+d[aeo]s?\s+([^,.;()]+)/i);
   if(village){add(village[1]+(context?', '+context:''),'localidade');add(village[1]);}
@@ -1368,7 +1385,7 @@ function departureCandidates(e){
  if(hasCoords(e))candidates.push({coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'aproximado',label:'ponto de referência'});
  return candidates.slice(0,5); // Máximo de cinco tentativas de geocodificação por caminhada.
 }
-function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade/i.test(String(e.start||''))?'geo-refinado-v27':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
+function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade|Ver\s+no\s+Google\s+Maps/i.test(String(e.start||''))?'geo-refinado-v30':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
 function endpointName(e){return departureCandidates(e)[0]?.query||null;}
 async function locateEndpoint(e){
  const candidates=departureCandidates(e);
