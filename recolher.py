@@ -76,7 +76,9 @@ SOURCES = [
     {"organizer": "Gerês Viver Turismo", "url": "https://geres.pt/programa-anual-de-caminhadas-2026/", "mode": "programa"},
     {"organizer": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39", "mode": "lousada"},
     # Agregador como segunda fonte; a entidade promotora mantém o nome real.
-    {"organizer": "Trilhos & Caminhadas", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php", "mode": "agregador"},
+    {"organizer": "RB Hiking & Trekking", "url": "https://barbosa-trekking.pt/", "mode": "rb"},
+    {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/", "mode": "smile"},
+    # Agregador Trilhos & Caminhadas desactivado; utilizar apenas as fontes oficiais.
 ]
 
 MONTHS = {
@@ -1010,7 +1012,18 @@ def collect_source(source: dict) -> list[dict]:
 # Desactivar uma fonte por qualidade de dados; protege também entradas
 # antigas e registos devolvidos por agregadores externos.
 def excluded_organizer(name: str) -> bool:
-    return re.sub(r'[^a-z0-9]', '', folded(str(name or ''))) == 'caminhadassmile'
+    # A exclusão antiga da Smile era por má qualidade dos dados do agregador;
+    # a v40 admite apenas anúncios recolhidos directamente no site oficial.
+    return False
+
+
+
+# TRILHARIO V39 — AGREGADOR TRILHOS CAMINHADAS DESACTIVADO
+# TRILHARIO V40 — RB E SMILE COM FONTES OFICIAIS
+def is_disallowed_aggregator_event(item):
+    host = (urlparse(str(item.get('url') or '')).hostname or '').removeprefix('www.').lower()
+    return (host == 'trilhosecaminhadas.pt' or
+            str(item.get('source') or '').strip().casefold() == 'trilhos & caminhadas')
 
 
 def main() -> int:
@@ -1020,7 +1033,7 @@ def main() -> int:
             saved = json.loads(OUT.read_text(encoding="utf-8"))
             if saved.get("mode") != "demo":
                 for item in saved.get("events", []):
-                    if excluded_organizer(item.get('organizer')):
+                    if is_disallowed_aggregator_event(item) or excluded_organizer(item.get('organizer')):
                         logging.info('A excluir registo antigo da fonte desactivada: %s',item.get('url'))
                         continue
                     # Preservar apenas anúncios que já tinham sido confirmados
@@ -1042,7 +1055,12 @@ def main() -> int:
     for source in SOURCES:
         try:
             mode=source.get('mode')
-            if mode=='ndesafios': found=collect_ndesafios(source)
+            if mode in ('rb','smile'):
+                from fontes_oficiais import collect_official
+                found=collect_official(source,fetch=fetch,date_from=date_from,
+                    new_event=new_event,valid_new_event=valid_new_event,
+                    parse_meta=parse_meta,enrich_jsonld=enrich_jsonld,today=TODAY)
+            elif mode=='ndesafios': found=collect_ndesafios(source)
             elif mode=='agregador': found=collect_aggregator(source)
             elif mode=='drenergies': found=collect_drenergies(source)
             elif mode=='sal': found=collect_sal(source)
@@ -1059,7 +1077,7 @@ def main() -> int:
                 # Um [] pode significar 0 eventos ou erro: nunca declarar êxito.
                 logging.warning('Fonte %s: sem resultados confirmados (ausência ou falha)',name)
             for item in found:
-                if excluded_organizer(item.get('organizer')):
+                if is_disallowed_aggregator_event(item) or excluded_organizer(item.get('organizer')):
                     continue
                 if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                     # Não aceitar datas desta empresa reenviadas por agregadores.
