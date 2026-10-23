@@ -1,30 +1,6 @@
 {
-  "updated_at": "2026-10-22T18:55:06+00:00",
+  "updated_at": "2026-10-23T10:01:00+00:00",
   "events": [
-    {
-      "id": "web-4248c633f5bf688",
-      "title": "À Descoberta da Magia da Peneda e Castro Laboreiro",
-      "date": "2026-10-22",
-      "organizer": "GreenTrekker",
-      "url": "https://www.greentrekker.pt/agenda/peneda-e-castro-laboreiro-7",
-      "town": "Por confirmar",
-      "start": "Hotel Miracastro - 4960-095 Castro Laboreiro Coordenadas GPS Lat: N 42°1' 39",
-      "region": "",
-      "area": "",
-      "time": "20:00",
-      "km": 14.0,
-      "gain": 700,
-      "duration": 6.0,
-      "price": null,
-      "difficulty": 3,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "lat": 42.02774167,
-      "lon": -8.16032778,
-      "verified": true,
-      "image": "https://www.greentrekker.pt/site/assets/files/174967/dsc_0201-1.700x700.jpg",
-      "image_checked_at": "2026-10-22"
-    },
     {
       "id": "web-02edcfa2ba5102a",
       "title": "Ascensão à Fonte Fria pelo Gerês Selvagem",
@@ -51,12 +27,12 @@
     },
     {
       "id": "web-38a1ed340fd1e53",
-      "title": "GR Peneda-Gerês Etapas 16 e 17",
+      "title": "GR Peneda-Gerês “Etapas 16 e 17”",
       "date": "2026-10-24",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=515",
-      "town": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "start": "Montalegre, Vila-real ( Ver no Google Maps )",
+      "town": "Montalegre, Vila Real",
+      "start": "Montalegre, Vila Real",
       "region": "",
       "area": "",
       "time": "08:00",
@@ -69,28 +45,6 @@
       "tag": "Caminhada",
       "source": "Trilhos & Caminhadas",
       "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_6a1c2afa99503db0.jpg",
-      "image_checked_at": "2026-10-22"
-    },
-    {
-      "id": "web-c590c22c764459c",
-      "title": "Vamos ao Barro e à Azeitona",
-      "date": "2026-10-24",
-      "organizer": "DRenergies Contacto: +351963160951",
-      "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=555",
-      "town": "Fundao, Castelo-branco ( Ver no Google Maps )",
-      "start": "Fundao, Castelo-branco ( Ver no Google Maps )",
-      "region": "",
-      "area": "",
-      "time": "08:00",
-      "km": 6.0,
-      "gain": null,
-      "duration": null,
-      "price": 25.0,
-      "difficulty": null,
-      "description": "Consultar informações e inscrições junto do organizador.",
-      "tag": "Caminhada",
-      "source": "Trilhos & Caminhadas",
-      "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_a9dc33a88a0fb193.jpg",
       "image_checked_at": "2026-10-22"
     },
     {
@@ -112,28 +66,6 @@
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "image": "https://maistrilhos.pt/images/servicos/a-nascente-do-ave.jpg",
-      "image_checked_at": "2026-10-22"
-    },
-    {
-      "id": "web-552f430c0c05de5",
-      "title": "Ascensão à Fonte Fria pelo Gerês Selvagem",
-      "date": "2026-10-24",
-      "organizer": "Trekking Roots Contacto: +351918682650",
-      "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=565",
-      "town": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "start": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "region": "",
-      "area": "",
-      "time": "09:00",
-      "km": 23.0,
-      "gain": null,
-      "duration": null,
-      "price": 25.0,
-      "difficulty": null,
-      "description": "Consultar informações e inscrições junto do organizador.",
-      "tag": "Caminhada",
-      "source": "Trilhos & Caminhadas",
-      "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_89d2d010156711c2.jpg",
       "image_checked_at": "2026-10-22"
     },
     {
@@ -185,8 +117,8 @@
       "date": "2026-10-24",
       "organizer": "Indoeu",
       "url": "https://indoeu.pt/camposeoaltodotrovao",
-      "town": "Aldeia de Campos, Vieira do Minho.",
-      "start": "Aldeia de Campos, Vieira do Minho.",
+      "town": "Aldeia de Campos, Vieira do Minho",
+      "start": "Aldeia de Campos, Vieira do Minho",
       "region": "",
       "area": "",
       "time": "09:15",
@@ -224,10 +156,10 @@
       "id": "web-e126d7a1f80a5a9",
       "title": "Caminhada pelas Cascatas, Aldeia da Mata e Vulcão",
       "date": "2026-10-24",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=542",
-      "town": "Sintra, Lisboa ( Ver no Google Maps )",
-      "start": "Sintra, Lisboa ( Ver no Google Maps )",
+      "town": "Sintra, Lisboa",
+      "start": "Sintra, Lisboa",
       "region": "",
       "area": "",
       "time": "09:30",
@@ -261,27 +193,6 @@
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/capa-1-e1790260831765.jpg",
-      "image_checked_at": "2026-10-22"
-    },
-    {
-      "id": "web-099365052884571",
-      "title": "Pelos Trilhos de Sico do Moinho da Melrica ao Vale Encantado Pombal",
-      "date": "2026-10-24",
-      "organizer": "Hike Land",
-      "url": "https://www.hikeland.pt/eventos/pelos-trilhos-de-sico-do-moinho-da-melrica-ao-vale-encantado-pombal-2",
-      "town": "Associação Cultural e Recreativa Pousadas Vedras",
-      "start": "Associação Cultural e Recreativa Pousadas Vedras",
-      "region": "",
-      "area": "",
-      "time": "09:30",
-      "km": 16.5,
-      "gain": null,
-      "duration": null,
-      "price": null,
-      "difficulty": null,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2024/09/IMG_0131-e1725902699307.jpg",
       "image_checked_at": "2026-10-22"
     },
     {
@@ -365,8 +276,8 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/DSC07252_Site-e1790341708576.jpg"
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/DSC07252_Site-e1790341708576.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-d36cca107866c95",
@@ -522,8 +433,8 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/196822/01-1.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/196822/01-1.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-7b010c5a51b2ca0",
@@ -543,8 +454,8 @@
       "difficulty": 3,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/204267/drave2.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/204267/drave2.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-33aa1af2cddc0e0",
@@ -564,8 +475,8 @@
       "difficulty": 3,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/203985/01_montejunto_capa-1.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/203985/01_montejunto_capa-1.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-af8a64159ea3bcd",
@@ -586,8 +497,8 @@
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "endTime": "12:45",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.montanhismo-guarda.pt/portal/wp-content/uploads/2026/01/Cartaz-MarchaOutubro2026-scaled.jpg"
+      "image": "https://www.montanhismo-guarda.pt/portal/wp-content/uploads/2026/01/Cartaz-MarchaOutubro2026-scaled.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-862f2ddbfa92616",
@@ -607,17 +518,17 @@
       "difficulty": 4,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://maistrilhos.pt/images/servicos/aldeias-serranas-de-fafe-1.jpg"
+      "image": "https://maistrilhos.pt/images/servicos/aldeias-serranas-de-fafe-1.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-440c5df4ac53577",
       "title": "Caminhada Outubro Rosa",
       "date": "2026-10-25",
-      "organizer": "Liga Portuguesa Contra o Cancro Contacto: +351912630701",
+      "organizer": "Liga Portuguesa Contra o Cancro",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=572",
-      "town": "Leiria, Leiria ( Ver no Google Maps )",
-      "start": "Leiria, Leiria ( Ver no Google Maps )",
+      "town": "Leiria, Leiria",
+      "start": "Leiria, Leiria",
       "region": "",
       "area": "",
       "time": "09:00",
@@ -629,8 +540,8 @@
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
       "source": "Trilhos & Caminhadas",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_822158ed86f013df.jpg"
+      "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_822158ed86f013df.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-b2a58236b72fdc9",
@@ -653,30 +564,8 @@
       "lat": 41.561239,
       "lon": -7.982697,
       "verified": true,
-      "image_checked_at": "2026-10-22",
-      "image": "https://trekkingroots.pt/assets/images/caminhadas/6a30520b2ffd9.jpg"
-    },
-    {
-      "id": "web-0cf4532286c2f19",
-      "title": "Levada da Víbora e Moinhos de Rei",
-      "date": "2026-10-25",
-      "organizer": "Trekking Roots Contacto: +351918682650",
-      "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=553",
-      "town": "Cabeceiras-de-basto, Braga ( Ver no Google Maps )",
-      "start": "Cabeceiras-de-basto, Braga ( Ver no Google Maps )",
-      "region": "",
-      "area": "",
-      "time": "09:30",
-      "km": 10.5,
-      "gain": null,
-      "duration": null,
-      "price": 15.0,
-      "difficulty": null,
-      "description": "Consultar informações e inscrições junto do organizador.",
-      "tag": "Caminhada",
-      "source": "Trilhos & Caminhadas",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_b805383b004c7e84.jpg"
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6a30520b2ffd9.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-ba589e56cd6da93",
@@ -716,7 +605,9 @@
       "price": null,
       "difficulty": 1,
       "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada"
+      "tag": "Caminhada",
+      "image_checked_at": "2026-10-23",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2021/05/IMG_4188_site-e1620297427299.jpg"
     },
     {
       "id": "web-7de03c764b5333d",
@@ -739,8 +630,8 @@
       "date_verified": "official_detail",
       "lat": 41.8877275,
       "lon": -8.5147214,
-      "image_checked_at": "2026-10-22",
-      "image": "https://montanhasdentro.pt/evento/106/imagem.jpg?larga&v=835"
+      "image": "https://montanhasdentro.pt/evento/106/imagem.jpg?larga&v=835",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-a307f7470a9b2f5",
@@ -760,8 +651,8 @@
       "difficulty": null,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://montanhasdonorte.pt/wp-content/uploads/2026/09/DSC_0077.jpg"
+      "image": "https://montanhasdonorte.pt/wp-content/uploads/2026/09/DSC_0077.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-5e225026ddafdc7",
@@ -781,8 +672,8 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2023/03/DSC02186_Site-e1678472876798.jpg"
+      "image": "https://www.hikeland.pt/wp-content/uploads/2023/03/DSC02186_Site-e1678472876798.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-38473ccf68a7900",
@@ -801,7 +692,9 @@
       "price": null,
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada"
+      "tag": "Caminhada",
+      "image_checked_at": "2026-10-23",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2023/09/P5290040-e1693827013341.jpg"
     },
     {
       "id": "web-9c53980058075ac",
@@ -820,7 +713,9 @@
       "price": 15.0,
       "difficulty": 5,
       "description": "Um trilho de pura montanha com paisagens arrebatadoras",
-      "tag": "Caminhada"
+      "tag": "Caminhada",
+      "image_checked_at": "2026-10-23",
+      "image": "https://maistrilhos.pt/images/servicos/vale-da-candeeira.jpg"
     },
     {
       "id": "web-6993240c385a2ec",
@@ -839,7 +734,9 @@
       "price": null,
       "difficulty": null,
       "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada"
+      "tag": "Caminhada",
+      "image_checked_at": "2026-10-23",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2021/02/DSCF4022-e1790096251116.jpg"
     },
     {
       "id": "web-7a28a2d88e2469c",
@@ -859,17 +756,17 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/IMG_4418-e1790090000419.jpg"
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/IMG_4418-e1790090000419.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-946fe06569f0c96",
       "title": "Uma Caminhada pelos Caminhos do Mistério",
       "date": "2026-10-25",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=545",
-      "town": "Sintra, Lisboa ( Ver no Google Maps )",
-      "start": "Sintra, Lisboa ( Ver no Google Maps )",
+      "town": "Sintra, Lisboa",
+      "start": "Sintra, Lisboa",
       "region": "",
       "area": "",
       "time": "16:30",
@@ -880,7 +777,9 @@
       "difficulty": null,
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
-      "source": "Trilhos & Caminhadas"
+      "source": "Trilhos & Caminhadas",
+      "image_checked_at": "2026-10-23",
+      "image": "https://www.trilhosecaminhadas.pt/percursos/ficheiros/eventos/MR_848d2ee7192ba5b6.jpg"
     },
     {
       "id": "web-2566b9aa089e2ed",
@@ -900,8 +799,8 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2019/06/DSCF9181-e1561330359471.jpg"
+      "image": "https://www.hikeland.pt/wp-content/uploads/2019/06/DSCF9181-e1561330359471.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-1ed10dcefe849c3",
@@ -926,8 +825,8 @@
       "lon": -9.15550833,
       "verified": true,
       "gps_checked_at": "2026-10-22",
-      "image_checked_at": "2026-10-22",
-      "image": "https://caminhando.pt/wp-content/uploads/2018/01/caminhada-parques-jardins-lisboa-caminhando-10.jpg"
+      "image": "https://caminhando.pt/wp-content/uploads/2018/01/caminhada-parques-jardins-lisboa-caminhando-10.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-17bb4d2b1b96607",
@@ -952,8 +851,8 @@
       "lon": -9.07476389,
       "verified": true,
       "gps_checked_at": "2026-10-22",
-      "image_checked_at": "2026-10-22",
-      "image": "https://caminhando.pt/wp-content/uploads/2025/05/caminhada-sesimbra-arrabida-caminhando-10.jpg"
+      "image": "https://caminhando.pt/wp-content/uploads/2025/05/caminhada-sesimbra-arrabida-caminhando-10.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-f9e14ce7a1151b9",
@@ -978,8 +877,8 @@
       "lon": -9.39846944,
       "verified": true,
       "gps_checked_at": "2026-10-22",
-      "image_checked_at": "2026-10-22",
-      "image": "https://caminhando.pt/wp-content/uploads/2018/03/caminhada-rota-aldeias-sintra-caminhando-18.jpg"
+      "image": "https://caminhando.pt/wp-content/uploads/2018/03/caminhada-rota-aldeias-sintra-caminhando-18.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-483962a138262f6",
@@ -999,8 +898,8 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/203508/12046667_10153604800843695_9056435322500470896_n.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/203508/12046667_10153604800843695_9056435322500470896_n.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-97d8602e81621e4",
@@ -1020,8 +919,8 @@
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/204031/dsc_0020.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/204031/dsc_0020.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-108ea34f98d094c",
@@ -1041,8 +940,8 @@
       "difficulty": null,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/203904/p1010373.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/203904/p1010373.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-c59724664c825ad",
@@ -1062,8 +961,8 @@
       "difficulty": null,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/143251/883622.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/143251/883622.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-6f12cc7198c5777",
@@ -1086,8 +985,8 @@
       "lat": 39.49602778,
       "lon": -8.85566667,
       "verified": true,
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/204084/sem_titulo1.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/204084/sem_titulo1.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-4fc122ec207954b",
@@ -1107,8 +1006,8 @@
       "difficulty": 4,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
-      "image_checked_at": "2026-10-22",
-      "image": "https://www.greentrekker.pt/site/assets/files/203890/palmela-setubal-188.700x700.jpg"
+      "image": "https://www.greentrekker.pt/site/assets/files/203890/palmela-setubal-188.700x700.jpg",
+      "image_checked_at": "2026-10-22"
     },
     {
       "id": "web-787c74b9df18879",
@@ -1127,7 +1026,9 @@
       "price": null,
       "difficulty": null,
       "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada"
+      "tag": "Caminhada",
+      "image_checked_at": "2026-10-23",
+      "image": "https://www.greentrekker.pt/site/assets/files/204407/17342985_10202868208581615_601296573323783893_n.700x700.jpg"
     },
     {
       "id": "web-c9478836e103770",
@@ -1146,7 +1047,9 @@
       "price": null,
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada"
+      "tag": "Caminhada",
+      "image_checked_at": "2026-10-23",
+      "image": "https://www.greentrekker.pt/site/assets/files/204060/p1040073.700x700.jpg"
     },
     {
       "id": "web-30f751024e683df",
@@ -1168,7 +1071,9 @@
       "tag": "Caminhada",
       "lat": 41.162813,
       "lon": -8.592803,
-      "verified": true
+      "verified": true,
+      "image_checked_at": "2026-10-23",
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6a22003f316fb.jpg"
     },
     {
       "id": "web-083bfbae2f3eb15",
@@ -1190,7 +1095,9 @@
       "tag": "Caminhada",
       "date_verified": "official_detail",
       "lat": 41.1878001,
-      "lon": -8.5132986
+      "lon": -8.5132986,
+      "image_checked_at": "2026-10-23",
+      "image": "https://montanhasdentro.pt/evento/109/imagem.jpg?larga&v=1173"
     },
     {
       "id": "web-7f952ddf55a0a2f",
@@ -1256,10 +1163,10 @@
       "id": "web-f4e214e5062843b",
       "title": "Trekking interpretado às Minas dos Carris",
       "date": "2026-10-31",
-      "organizer": "RB Hiking & Trekking Contacto: +351938450305",
+      "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=516",
-      "town": "Terras-de-bouro, Braga ( Ver no Google Maps )",
-      "start": "Terras-de-bouro, Braga ( Ver no Google Maps )",
+      "town": "Terras-de-bouro, Braga",
+      "start": "Terras-de-bouro, Braga",
       "region": "",
       "area": "",
       "time": "08:00",
@@ -1298,8 +1205,8 @@
       "date": "2026-10-31",
       "organizer": "Indoeu",
       "url": "https://indoeu.pt/curraldocambalhao",
-      "town": "Casa da Guarda Florestal de Leonte, Campo do Gerês – Terras de Bouro.",
-      "start": "Casa da Guarda Florestal de Leonte, Campo do Gerês – Terras de Bouro.",
+      "town": "Casa da Guarda Florestal de Leonte, Campo do Gerês – Terras de Bouro",
+      "start": "Casa da Guarda Florestal de Leonte, Campo do Gerês – Terras de Bouro",
       "region": "",
       "area": "",
       "time": "09:15",
@@ -1334,26 +1241,6 @@
       "verified": true
     },
     {
-      "id": "web-381163c5afbc07a",
-      "title": "Corno do Bico e Alto dos Morrões",
-      "date": "2026-10-31",
-      "organizer": "Trekking Roots Contacto: +351918682650",
-      "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=574",
-      "town": "Paredes-de-coura, Viana-do-castelo ( Ver no Google Maps )",
-      "start": "Paredes-de-coura, Viana-do-castelo ( Ver no Google Maps )",
-      "region": "",
-      "area": "",
-      "time": "09:30",
-      "km": 12.5,
-      "gain": null,
-      "duration": null,
-      "price": 15.0,
-      "difficulty": null,
-      "description": "Consultar informações e inscrições junto do organizador.",
-      "tag": "Caminhada",
-      "source": "Trilhos & Caminhadas"
-    },
-    {
       "id": "web-f8d28479f63ecc9",
       "title": "Pelo Trilho Secular dos Moleiros e Aldeias de Xisto da Lousã",
       "date": "2026-10-31",
@@ -1376,10 +1263,10 @@
       "id": "web-cdf5e0011b05df7",
       "title": "Trilho da Porta do Vento",
       "date": "2026-10-31",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=554",
-      "town": "Porto-de-mos, Leiria ( Ver no Google Maps )",
-      "start": "Porto-de-mos, Leiria ( Ver no Google Maps )",
+      "town": "Porto-de-mos, Leiria",
+      "start": "Porto-de-mos, Leiria",
       "region": "",
       "area": "",
       "time": "09:30",
@@ -1396,10 +1283,10 @@
       "id": "web-733cd363f34686c",
       "title": "Caminhada em Sintra com Yoga no Parque",
       "date": "2026-10-31",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=538",
-      "town": "Sintra, Lisboa ( Ver no Google Maps )",
-      "start": "Sintra, Lisboa ( Ver no Google Maps )",
+      "town": "Sintra, Lisboa",
+      "start": "Sintra, Lisboa",
       "region": "",
       "area": "",
       "time": "10:00",
@@ -1435,10 +1322,10 @@
       "id": "web-0a7d4ee8021034e",
       "title": "Da Malveira da Serra ao Guincho e Dunas da Crismina",
       "date": "2026-10-31",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=546",
-      "town": "Sintra, Lisboa ( Ver no Google Maps )",
-      "start": "Sintra, Lisboa ( Ver no Google Maps )",
+      "town": "Sintra, Lisboa",
+      "start": "Sintra, Lisboa",
       "region": "",
       "area": "",
       "time": "10:00",
@@ -1611,7 +1498,7 @@
       "lat": 38.57069222,
       "lon": -8.90597028,
       "verified": true,
-      "gps_checked_at": "2026-10-22"
+      "gps_checked_at": "2026-10-23"
     },
     {
       "id": "web-f34ca2a61cbd916",
@@ -1659,7 +1546,7 @@
       "lat": 38.79025,
       "lon": -9.37958056,
       "verified": true,
-      "gps_checked_at": "2026-10-22"
+      "gps_checked_at": "2026-10-23"
     },
     {
       "id": "web-a7a980e48f001c6",
@@ -1695,7 +1582,7 @@
       "start": "Palácio Nacional de Sintra ( Palácio da Vila) Hora de Fim 23:00 (31-Out-2026) A hora de fim é a",
       "region": "",
       "area": "",
-      "time": "",
+      "time": "20:00",
       "km": 8.0,
       "gain": null,
       "duration": 3.0,
@@ -1822,10 +1709,10 @@
       "id": "web-53a13df4f8fe189",
       "title": "Levada da Víbora e Moinhos de Rei",
       "date": "2026-11-01",
-      "organizer": "Trekking Roots Contacto: +351918682650",
+      "organizer": "Trekking Roots",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=573",
-      "town": "Cabeceiras-de-basto, Braga ( Ver no Google Maps )",
-      "start": "Cabeceiras-de-basto, Braga ( Ver no Google Maps )",
+      "town": "Cabeceiras-de-basto, Braga",
+      "start": "Cabeceiras-de-basto, Braga",
       "region": "",
       "area": "",
       "time": "09:30",
@@ -2112,12 +1999,12 @@
     },
     {
       "id": "web-9e6db2c9c408d2d",
-      "title": "GR Peneda-Gerês Etapas 18 e 19",
+      "title": "GR Peneda-Gerês “Etapas 18 e 19”",
       "date": "2026-11-07",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=517",
-      "town": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "start": "Montalegre, Vila-real ( Ver no Google Maps )",
+      "town": "Montalegre, Vila Real",
+      "start": "Montalegre, Vila Real",
       "region": "",
       "area": "",
       "time": "09:00",
@@ -2136,8 +2023,8 @@
       "date": "2026-11-07",
       "organizer": "Indoeu",
       "url": "https://indoeu.pt/cornodobico",
-      "town": "Túmio, Freguesia de Bico – Paredes de Coura.",
-      "start": "Túmio, Freguesia de Bico – Paredes de Coura.",
+      "town": "Túmio, Freguesia de Bico – Paredes de Coura",
+      "start": "Túmio, Freguesia de Bico – Paredes de Coura",
       "region": "",
       "area": "",
       "time": "09:15",
@@ -2232,10 +2119,10 @@
       "id": "web-8cf29b0a57da507",
       "title": "Por Campos de Lapiás e Cascata de Fervença",
       "date": "2026-11-07",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=543",
-      "town": "Sintra, Lisboa ( Ver no Google Maps )",
-      "start": "Sintra, Lisboa ( Ver no Google Maps )",
+      "town": "Sintra, Lisboa",
+      "start": "Sintra, Lisboa",
       "region": "",
       "area": "",
       "time": "10:00",
@@ -2423,10 +2310,10 @@
       "id": "web-7c678c44daca678",
       "title": "Rota das Faias e Covão da Ponte I Edição/26",
       "date": "2026-11-08",
-      "organizer": "DRenergies Contacto: +351963160951",
+      "organizer": "DRenergies",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=556",
-      "town": "Manteigas, Guarda ( Ver no Google Maps )",
-      "start": "Manteigas, Guarda ( Ver no Google Maps )",
+      "town": "Manteigas, Guarda",
+      "start": "Manteigas, Guarda",
       "region": "",
       "area": "",
       "time": "09:00",
@@ -2460,26 +2347,6 @@
       "lat": 41.239048,
       "lon": -7.933639,
       "verified": true
-    },
-    {
-      "id": "web-50dbb71d9cc59bd",
-      "title": "O Marão Tem Sangue Azul",
-      "date": "2026-11-08",
-      "organizer": "Trekking Roots Contacto: +351918682650",
-      "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=575",
-      "town": "Amarante, Porto ( Ver no Google Maps )",
-      "start": "Amarante, Porto ( Ver no Google Maps )",
-      "region": "",
-      "area": "",
-      "time": "09:30",
-      "km": 10.0,
-      "gain": null,
-      "duration": null,
-      "price": 15.0,
-      "difficulty": null,
-      "description": "Consultar informações e inscrições junto do organizador.",
-      "tag": "Caminhada",
-      "source": "Trilhos & Caminhadas"
     },
     {
       "id": "web-0463ac9a8ddce21",
@@ -2833,10 +2700,10 @@
       "id": "web-50a8620cb197251",
       "title": "À Mesa Alentejana: A Abertura das Talhas",
       "date": "2026-11-14",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=474",
-      "town": "Vidigueira, Beja ( Ver no Google Maps )",
-      "start": "Vidigueira, Beja ( Ver no Google Maps )",
+      "town": "Vidigueira, Beja",
+      "start": "Vidigueira, Beja",
       "region": "",
       "area": "",
       "time": "07:00",
@@ -2872,10 +2739,10 @@
       "id": "web-089717b8c7e1ea6",
       "title": "Rota das Faias e Covão da Ponte II Edição/26",
       "date": "2026-11-14",
-      "organizer": "DRenergies Contacto: +351963160951",
+      "organizer": "DRenergies",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=557",
-      "town": "Manteigas, Guarda ( Ver no Google Maps )",
-      "start": "Manteigas, Guarda ( Ver no Google Maps )",
+      "town": "Manteigas, Guarda",
+      "start": "Manteigas, Guarda",
       "region": "",
       "area": "",
       "time": "09:00",
@@ -3125,8 +2992,8 @@
       "date": "2026-11-15",
       "organizer": "Indoeu",
       "url": "https://indoeu.pt/levadadavibora",
-      "town": "Área de Lazer do Oural, Abadim – Cabeceiras de Basto.",
-      "start": "Área de Lazer do Oural, Abadim – Cabeceiras de Basto.",
+      "town": "Área de Lazer do Oural, Abadim – Cabeceiras de Basto",
+      "start": "Área de Lazer do Oural, Abadim – Cabeceiras de Basto",
       "region": "",
       "area": "",
       "time": "09:15",
@@ -3183,10 +3050,10 @@
       "id": "web-d913bfd026acd04",
       "title": "Trilho do Zêzere e Passadiços do Penedo Granada",
       "date": "2026-11-15",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=576",
-      "town": "Castelo-branco, Castelo-branco ( Ver no Google Maps )",
-      "start": "Castelo-branco, Castelo-branco ( Ver no Google Maps )",
+      "town": "Castelo Branco, Castelo Branco",
+      "start": "Castelo Branco, Castelo Branco",
       "region": "",
       "area": "",
       "time": "09:30",
@@ -3417,8 +3284,8 @@
       "date": "2026-11-21",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=518",
-      "town": "Arouca, Aveiro ( Ver no Google Maps )",
-      "start": "Arouca, Aveiro ( Ver no Google Maps )",
+      "town": "Arouca, Aveiro",
+      "start": "Arouca, Aveiro",
       "region": "",
       "area": "",
       "time": "09:30",
@@ -3641,6 +3508,27 @@
       "tag": "Caminhada"
     },
     {
+      "id": "web-099365052884571",
+      "title": "Pelos Trilhos de Sico do Moinho da Melrica ao Vale Encantado Pombal",
+      "date": "2026-11-22",
+      "organizer": "Hike Land",
+      "url": "https://www.hikeland.pt/eventos/pelos-trilhos-de-sico-do-moinho-da-melrica-ao-vale-encantado-pombal-2",
+      "town": "Associação Cultural e Recreativa Pousadas Vedras",
+      "start": "Associação Cultural e Recreativa Pousadas Vedras",
+      "region": "",
+      "area": "",
+      "time": "10:00",
+      "km": 16.5,
+      "gain": null,
+      "duration": null,
+      "price": null,
+      "difficulty": null,
+      "description": "Consultar os detalhes na página do organizador.",
+      "tag": "Caminhada",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2024/09/IMG_0131-e1725902699307.jpg",
+      "image_checked_at": "2026-10-22"
+    },
+    {
       "id": "web-d6d5bacc9dd2f93",
       "title": "À Descoberta dos Encantados Carvalhais de Fafe",
       "date": "2026-11-22",
@@ -3777,10 +3665,10 @@
       "id": "web-e956d0edd0a02b1",
       "title": "As maravilhas do Outono em Montesinho com Magusto",
       "date": "2026-11-28",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=544",
-      "town": "Mogadouro, Braganca ( Ver no Google Maps )",
-      "start": "Mogadouro, Braganca ( Ver no Google Maps )",
+      "town": "Mogadouro, Braganca",
+      "start": "Mogadouro, Braganca",
       "region": "",
       "area": "",
       "time": "07:00",
@@ -3799,8 +3687,8 @@
       "date": "2026-11-28",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=519",
-      "town": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "start": "Montalegre, Vila-real ( Ver no Google Maps )",
+      "town": "Montalegre, Vila Real",
+      "start": "Montalegre, Vila Real",
       "region": "",
       "area": "",
       "time": "08:00",
@@ -3929,12 +3817,12 @@
     },
     {
       "id": "web-3682220e600302a",
-      "title": "Caminhada Bosques de Pitões",
+      "title": "Caminhada “Bosques de Pitões”",
       "date": "2026-11-29",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=520",
-      "town": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "start": "Montalegre, Vila-real ( Ver no Google Maps )",
+      "town": "Montalegre, Vila Real",
+      "start": "Montalegre, Vila Real",
       "region": "",
       "area": "",
       "time": "09:00",
@@ -4048,8 +3936,8 @@
       "date": "2026-11-30",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=521",
-      "town": "Montalegre, Vila-real ( Ver no Google Maps )",
-      "start": "Montalegre, Vila-real ( Ver no Google Maps )",
+      "town": "Montalegre, Vila Real",
+      "start": "Montalegre, Vila Real",
       "region": "",
       "area": "",
       "time": "09:30",
@@ -4085,10 +3973,10 @@
       "id": "web-8b2a3d829a2b3c6",
       "title": "Luzes de Natal em Águeda e Mata do Buçaco",
       "date": "2026-12-05",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=489",
-      "town": "Agueda, Aveiro ( Ver no Google Maps )",
-      "start": "Agueda, Aveiro ( Ver no Google Maps )",
+      "town": "Agueda, Aveiro",
+      "start": "Agueda, Aveiro",
       "region": "",
       "area": "",
       "time": "06:30",
@@ -4103,12 +3991,12 @@
     },
     {
       "id": "web-1742bef1159a01a",
-      "title": "Trekking Alma Castreja",
+      "title": "Trekking “Alma Castreja”",
       "date": "2026-12-05",
       "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=522",
-      "town": "Melgaco, Viana-do-castelo ( Ver no Google Maps )",
-      "start": "Melgaco, Viana-do-castelo ( Ver no Google Maps )",
+      "town": "Melgaco, Viana-do-castelo",
+      "start": "Melgaco, Viana-do-castelo",
       "region": "",
       "area": "",
       "time": "09:00",
@@ -4201,10 +4089,10 @@
       "id": "web-c195a767b3e7717",
       "title": "Trekking aos Prados da Messe e Alto do Borrageiro",
       "date": "2026-12-12",
-      "organizer": "RB Hiking & Trekking Contacto: +351938450305",
+      "organizer": "RB Hiking & Trekking",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=523",
-      "town": "Terras-de-bouro, Braga ( Ver no Google Maps )",
-      "start": "Terras-de-bouro, Braga ( Ver no Google Maps )",
+      "town": "Terras-de-bouro, Braga",
+      "start": "Terras-de-bouro, Braga",
       "region": "",
       "area": "",
       "time": "08:30",
@@ -4261,16 +4149,16 @@
       "date": "2026-12-13",
       "organizer": "Mais Trilhos",
       "url": "https://maistrilhos.pt/caminhadas/ascensao-as-gralheiras",
-      "town": "Por confirmar",
-      "start": "Por confirmar",
+      "town": "Pitões das Júnias, Montalegre",
+      "start": "Estacionamento da Rua das Chães, Pitões das Júnias",
       "region": "",
       "area": "",
       "time": "10:00",
       "km": 17.0,
       "gain": 650,
-      "duration": null,
+      "duration": 6,
       "price": 20.0,
-      "difficulty": null,
+      "difficulty": 4,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada"
     },
@@ -4280,16 +4168,16 @@
       "date": "2026-12-19",
       "organizer": "Mais Trilhos",
       "url": "https://maistrilhos.pt/caminhadas/a-magia-do-natal-na-serra-da-estrela-219",
-      "town": "Por confirmar",
-      "start": "Por confirmar",
+      "town": "Loriga, Seia",
+      "start": "Junto ao Café Império, Loriga",
       "region": "",
       "area": "",
       "time": "10:00",
       "km": 16.0,
       "gain": 600,
-      "duration": null,
+      "duration": 5,
       "price": 15.0,
-      "difficulty": null,
+      "difficulty": 3,
       "description": "Venha descobrir a magia do Natal na Aldeia da Cabeça.",
       "tag": "Caminhada"
     },
@@ -4316,10 +4204,10 @@
       "id": "web-bd9bb285a124922",
       "title": "Passagem de Ano no Gerês e Vila do Conde",
       "date": "2026-12-31",
-      "organizer": "Caminhadas Smile Contacto: 914 839 887",
+      "organizer": "Caminhadas Smile",
       "url": "https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=558",
-      "town": "Vila-do-conde, Porto ( Ver no Google Maps )",
-      "start": "Vila-do-conde, Porto ( Ver no Google Maps )",
+      "town": "Vila-do-conde, Porto",
+      "start": "Vila-do-conde, Porto",
       "region": "",
       "area": "",
       "time": "10:00",
