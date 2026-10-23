@@ -30,22 +30,43 @@ jobs:
           python-version: '3.12'
       - name: Instalar dependências
         run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Aplicar correcções da Fase 2 ao colector
+        run: |
+          python aplicar_fase2.py
+          python -m py_compile recolher.py normalizar_eventos.py
+      - name: Verificar correcções de extracção sem consultar sites
+        shell: bash
+        run: |
+          python - <<'PYTEST'
+          import recolher
+          from bs4 import BeautifulSoup
+          from datetime import date
+          assert recolher.date_from('2026-11-01T09:00:00+00:00') == date(2026,11,1)
+          e={'price':None}
+          recolher.parse_meta(BeautifulSoup('<main>Duração: 3h30. Crianças 5 €. Preço por participante 20 €</main>','html.parser'),e)
+          assert e.get('price') == 20, e
+          assert e.get('duration') == 3.5, e
+          a={'id':'a','title':'Trilho das Fragas','date':'2026-11-01','organizer':'X','url':'https://site.pt/agenda'}
+          b={'id':'b','title':'Trilho do Rio','date':'2026-11-01','organizer':'X','url':'https://site.pt/agenda'}
+          assert len(recolher.deduplicate([a,b])) == 2
+          print('Testes de integração Fase 2 OK')
+          PYTEST
       - name: Procurar eventos
         run: python recolher.py
       - name: Corrigir dados e validar catálogo
         run: python normalizar_eventos.py
-      - name: Publicar catálogo se existirem alterações
+      - name: Publicar catálogo e correcções de código
         id: publicar
         shell: bash
         run: |
-          if [ -z "$(git status --porcelain -- eventos.json)" ]; then
-            echo "Sem alterações no catálogo."
+          if [ -z "$(git status --porcelain -- eventos.json recolher.py)" ]; then
+            echo "Sem alterações no catálogo ou colector."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add eventos.json
-          git commit -m "Actualizar e validar agenda de caminhadas"
+          git add eventos.json recolher.py
+          git commit -m "Actualizar e validar agenda de caminhadas (Fase 2)"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
       - name: Pedir nova publicação do GitHub Pages (se activado)
