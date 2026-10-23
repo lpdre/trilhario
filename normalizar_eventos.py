@@ -32,6 +32,45 @@ def meaningful(value):
     return value is not None and (not isinstance(value, str) or folded(value) not in PLACEHOLDERS)
 
 
+def location_identity(event):
+    """Identidade normalizada do início anunciado, para validar GPS herdado.
+
+    Uma nova designação concreta substitui a anterior; alterações de espaços,
+    pontuação e acentos não bastam para invalidar um ponto.
+    """
+    def clean(value):
+        if not meaningful(value):
+            return ''
+        return re.sub(r'[^a-z0-9]+', ' ', folded(value)).strip()
+    return clean(event.get('start')), clean(event.get('town'))
+
+
+def invalidate_stale_coordinates(event, old):
+    """Nunca certificar coordenadas antigas após alteração do ponto anunciado."""
+    if not isinstance(old, dict) or not old:
+        return False
+    new_start, new_town = location_identity(event)
+    old_start, old_town = location_identity(old)
+    changed = ((new_start and old_start and new_start != old_start) or
+               (new_town and old_town and new_town != old_town))
+    if not changed:
+        return False
+    # Coordenadas novas, diferentes das anteriores e explicitamente verificadas
+    # pelo organizador não devem ser apagadas por uma mudança legítima de lugar.
+    coords_new = (meaningful(event.get('lat')) and meaningful(event.get('lon')))
+    coords_old = (meaningful(old.get('lat')) and meaningful(old.get('lon')))
+    new_gps = (coords_new and event.get('verified') is True and
+               (not coords_old or (str(event['lat']),str(event['lon'])) !=
+                (str(old['lat']),str(old['lon']))))
+    if new_gps:
+        return False
+    had_stale = any(event.get(key) is not None for key in ('lat','lon','gps_checked_at')) or bool(event.get('verified'))
+    for field in ('lat', 'lon', 'gps_checked_at'):
+        event.pop(field, None)
+    event['verified'] = False
+    return had_stale
+
+
 def title_from_official_url(url):
     """Só recuperar título se o URL fornecer um nome de percurso inteligível."""
     try:
@@ -517,7 +556,11 @@ def tidy_aggregator_fields(event):
 
 
 def remove_aggregator_duplicates(events):
-    """Um evento/dia/promotor, preferindo a ficha original ao agregador."""
+    """Fundir duplicados exactos com preferência pela fonte oficial.
+
+    Nunca usar apenas o URL como identidade: calendários podem conter várias
+    caminhadas na mesma página. Conservar IDs alternativos para os favoritos.
+    """
     by_key={}
     for entry in events:
         if not isinstance(entry,dict):continue
@@ -529,8 +572,20 @@ def remove_aggregator_duplicates(events):
             by_key[key]=entry
             continue
         agg=lambda x:(urlsplit(str(x.get('url') or '')).hostname or '').removeprefix('www.')=='trilhosecaminhadas.pt'
-        if (agg(old) and not agg(entry)) or (agg(old)==agg(entry) and not old.get('verified') and entry.get('verified')):
-            by_key[key]=entry
+        winner=entry if ((agg(old) and not agg(entry)) or
+            (agg(old)==agg(entry) and not old.get('verified') and entry.get('verified'))) else old
+        loser=old if winner is entry else entry
+        aliases=set(winner.get('alias_ids') or []) | set(loser.get('alias_ids') or [])
+        if loser.get('id') and loser.get('id')!=winner.get('id'):
+            aliases.add(loser['id'])
+        aliases.discard(winner.get('id'))
+        if aliases:winner['alias_ids']=sorted(aliases)
+        # Completar apenas atributos publicados inequívocos. Não copiar GPS
+        # entre pontos de encontro diferentes (protecção da Fase 1).
+        for field in ('km','gain','price','duration','time','image'):
+            if not meaningful(winner.get(field)) and meaningful(loser.get(field)):
+                winner[field]=loser[field]
+        by_key[key]=winner
     return list(by_key.values())
 
 
@@ -634,8 +689,22 @@ def main():
                     if e.get(field)!=value:e[field]=value;changed+=1
             elif e.get('time')=='00:00':
                 e['time']='';changed+=1
-        # Uma nova recolha incompleta não deve apagar informação publicada anteriormente.
-        for field in ('start', 'town', 'time', 'endTime', 'km', 'gain', 'duration', 'price', 'lat', 'lon', 'verified', 'gps_checked_at', 'status', 'image', 'image_checked_at'):
+        # Conservar valores antigos APENAS se a identidade do ponto de partida se mantiver.
+        # Caso contrário não voltar a confirmar GPS do evento antigo com uma morada nova.
+        if invalidate_stale_coordinates(e, old):
+            changed += 1
+        new_start,new_town=location_identity(e)
+        old_start,old_town=location_identity(old)
+        place_changed = ((new_start and old_start and new_start != old_start) or
+                         (new_town and old_town and new_town != old_town))
+        old_fields=('start', 'town', 'time', 'endTime', 'km', 'gain', 'duration', 'price', 'image', 'image_checked_at')
+        # 'status' antigo apenas se a fonte não foi confirmada nesta recolha.
+        # Evita conservar "Esgotado" após uma nova listagem sem esse estado.
+        if str(e.get('last_seen_at') or '') != datetime.now(timezone.utc).date().isoformat():
+            old_fields+=('status',)
+        if not place_changed:
+            old_fields+=('lat', 'lon', 'verified', 'gps_checked_at')
+        for field in old_fields:
             if not meaningful(e.get(field)) and meaningful(old.get(field)):
                 e[field] = old[field]
                 changed += 1
@@ -662,6 +731,9 @@ def main():
                         changed += 1
         if e.get('organizer')=='Clube de Montanhismo da Guarda' and e.get('time')=='00:00':
             e['time']='';changed+=1
+        # A consulta ao anúncio oficial pode ter actualizado o ponto após a
+        # recuperação dos campos antigos. Verificar novamente antes de publicar.
+        if invalidate_stale_coordinates(e,old):changed+=1
         if e.get('lat') is not None and e.get('lon') is not None:
             if not (-90 <= float(e['lat']) <= 90 and -180 <= float(e['lon']) <= 180):
                 # Coordenadas geograficamente impossíveis não são consideradas válidas.
@@ -718,7 +790,11 @@ def main():
             changed+=1
     if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
-    lines = [f'Agregador: {removed_aggregator} duplicados/não caminhadas retirados',
+    health=data.get('sources_health') or {}
+    state_counts={name:sum(1 for item in health.values() if isinstance(item,dict) and item.get('state')==name)
+                  for name in ('com_eventos','sem_eventos_ou_indisponivel','erro')}
+    lines = [f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
+             f'Agregador: {removed_aggregator} duplicados/não caminhadas retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
              f'Fotografias nos primeiros {PHOTO_FIRST_EVENTS} eventos futuros: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
