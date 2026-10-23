@@ -518,7 +518,7 @@ def read_official_photo(event):
                  'montanhismo-guarda.pt','amigosdamontanha.com','caminhando.pt',
                  'penomundo.pt','clubearlivre.org','trilhosnocturnos.com',
                  'geoparkestrela.pt','drenergies.com','sal.pt','geres.pt',
-                 'trilhosecaminhadas.pt')
+                 'trilhosecaminhadas.pt','barbosa-trekking.pt','caminhadassmile.pt')
         domain=parts.hostname.lower().removeprefix('www.')
         if domain not in allowed:
             return None
@@ -589,6 +589,15 @@ def remove_aggregator_duplicates(events):
     return list(by_key.values())
 
 
+def is_trilhos_caminhadas_record(event):
+    """A origem é o URL/source, não o organizador mencionado no anúncio."""
+    if not isinstance(event, dict):
+        return False
+    host = (urlsplit(str(event.get('url') or '')).hostname or '').removeprefix('www.').lower()
+    return (host == 'trilhosecaminhadas.pt' or
+            str(event.get('source') or '').strip().casefold() == 'trilhos & caminhadas')
+
+
 def suppress_non_walks(event):
     """Apenas exclusões verificadas: não apagar caminhadas por terem oficinas no programa."""
     return (event.get('date')=='2026-10-24'
@@ -611,8 +620,13 @@ def main():
     for item in events:
         if isinstance(item,dict): tidy_aggregator_fields(item)
     initial_count=len(events)
-    events[:]=remove_aggregator_duplicates([e for e in events if not (isinstance(e,dict) and suppress_non_walks(e))])
+    # Uma caminhada da RB ou de outro organizador só fica se tiver fonte
+    # própria; as ligações antigas ao agregador não são reutilizadas.
+    events[:]=remove_aggregator_duplicates([e for e in events if isinstance(e,dict)
+        and not is_trilhos_caminhadas_record(e) and not suppress_non_walks(e)])
     removed_aggregator=initial_count-len(events)
+    if isinstance(data.get('sources_health'),dict):
+        data['sources_health'].pop('Trilhos & Caminhadas',None)
     previous = git_previous()
     by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
     errors = []
@@ -794,7 +808,7 @@ def main():
     state_counts={name:sum(1 for item in health.values() if isinstance(item,dict) and item.get('state')==name)
                   for name in ('com_eventos','sem_eventos_ou_indisponivel','erro')}
     lines = [f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
-             f'Agregador: {removed_aggregator} duplicados/não caminhadas retirados',
+             f'Limpeza de anúncios: {removed_aggregator} duplicados, não caminhadas e registos de agregador retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
              f'Fotografias nos primeiros {PHOTO_FIRST_EVENTS} eventos futuros: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',

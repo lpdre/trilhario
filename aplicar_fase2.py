@@ -255,13 +255,92 @@ def patch_main(src):
     return ''.join(lines[:n.lineno-1])+block.rstrip()+'\n'+''.join(lines[n.end_lineno:])
 
 
+AGGREGATOR_DISABLED_MARKER = '# TRILHARIO V39 — AGREGADOR TRILHOS CAMINHADAS DESACTIVADO'
+
+def disable_aggregator(src):
+    """Desactivar fonte e descartar entradas herdadas. Aplicação idempotente."""
+    if AGGREGATOR_DISABLED_MARKER in src:
+        return src
+    # Tem de existir exactamente uma fonte configurada; falhar de forma explícita
+    # se o colector for modificado no futuro, em vez de publicar uma alteração parcial.
+    source_line = '    {"organizer": "Trilhos & Caminhadas", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php", "mode": "agregador"},\n'
+    if src.count(source_line) != 1:
+        raise ValueError('Fonte do agregador não encontrada no catálogo SOURCES')
+    src = src.replace(source_line, '    # Agregador Trilhos & Caminhadas desactivado; utilizar apenas as fontes oficiais.\n')
+    helper = '''def is_disallowed_aggregator_event(item):
+    host = (urlparse(str(item.get('url') or '')).hostname or '').removeprefix('www.').lower()
+    return (host == 'trilhosecaminhadas.pt' or
+            str(item.get('source') or '').strip().casefold() == 'trilhos & caminhadas')
+
+
+'''
+    anchor='def main() -> int:\n'
+    if src.count(anchor)!=1:raise ValueError('Função main do colector não encontrada')
+    src=src.replace(anchor,AGGREGATOR_DISABLED_MARKER+'\n'+helper+anchor)
+    # Tanto ao reler o JSON como ao importar novos anúncios, impedir reentrada.
+    old="if excluded_organizer(item.get('organizer')):"
+    if src.count(old)!=2:raise ValueError('Guardas de eventos no main foram alteradas')
+    src=src.replace(old,"if is_disallowed_aggregator_event(item) or excluded_organizer(item.get('organizer')):")
+    ast.parse(src)
+    return src
+
+
+
+OFFICIAL_SOURCES_MARKER = '# TRILHARIO V40 — RB E SMILE COM FONTES OFICIAIS'
+
+
+def enable_official_sources(src):
+    # Idempotente: recolha directa; não volta a abrir o agregador.
+    if OFFICIAL_SOURCES_MARKER in src:
+        return src
+    import ast
+    # A v39 deve ter eliminado a fonte do agregador primeiro.
+    anchor='    # Agregador Trilhos & Caminhadas desactivado; utilizar apenas as fontes oficiais.\n'
+    if src.count(anchor)!=1:
+        raise ValueError('v40 exige exclusão v39 do agregador já aplicada')
+    sources='''    {"organizer": "RB Hiking & Trekking", "url": "https://barbosa-trekking.pt/", "mode": "rb"},
+    {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/", "mode": "smile"},
+'''
+    src=src.replace(anchor,sources+anchor,1)
+    # Os anúncios Smile que vinham do agregador já são recusados por URL/source.
+    # As novas páginas oficiais da Smile não devem ser rejeitadas pelo nome.
+    src=replace_func(src,'excluded_organizer','''def excluded_organizer(name: str) -> bool:
+    # A exclusão antiga da Smile era por má qualidade dos dados do agregador;
+    # a v40 admite apenas anúncios recolhidos directamente no site oficial.
+    return False
+''')
+    tree=ast.parse(src)
+    main=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='main')
+    lines=src.splitlines(keepends=True)
+    block=''.join(lines[main.lineno-1:main.end_lineno])
+    call="            if mode=='ndesafios': found=collect_ndesafios(source)\n"
+    if block.count(call)!=1:raise ValueError('Ramo de fontes do colector não encontrado')
+    branch='''            if mode in ('rb','smile'):
+                from fontes_oficiais import collect_official
+                found=collect_official(source,fetch=fetch,date_from=date_from,
+                    new_event=new_event,valid_new_event=valid_new_event,
+                    parse_meta=parse_meta,enrich_jsonld=enrich_jsonld,today=TODAY)
+            elif mode=='ndesafios': found=collect_ndesafios(source)
+'''
+    block=block.replace(call,branch,1)
+    src=''.join(lines[:main.lineno-1])+block+''.join(lines[main.end_lineno:])
+    # Guardar versão no código para execução repetida sem duplicar fontes.
+    needle='def is_disallowed_aggregator_event(item):\n'
+    if src.count(needle)!=1:raise ValueError('Guarda do agregador ausente')
+    src=src.replace(needle,OFFICIAL_SOURCES_MARKER+'\n'+needle,1)
+    ast.parse(src)
+    return src
+
+
 def apply(src):
-    if MARKER in src:return src
-    for name,replacement in [('date_from',NEW_DATE),('parse_meta',NEW_PARSE),('enrich_jsonld',NEW_LD),('deduplicate',NEW_DEDUP)]:
-        src=replace_func(src,name,replacement)
-    src=patch_main(src)
-    pos=src.index('from __future__ import annotations')
-    src=src[:pos]+MARKER+'\n'+src[pos:]
+    if MARKER not in src:
+        for name,replacement in [('date_from',NEW_DATE),('parse_meta',NEW_PARSE),('enrich_jsonld',NEW_LD),('deduplicate',NEW_DEDUP)]:
+            src=replace_func(src,name,replacement)
+        src=patch_main(src)
+        pos=src.index('from __future__ import annotations')
+        src=src[:pos]+MARKER+'\n'+src[pos:]
+    src=disable_aggregator(src)
+    src=enable_official_sources(src)
     ast.parse(src)
     return src
 
@@ -271,7 +350,7 @@ def main():
     original=PATH.read_text(encoding='utf-8')
     modified=apply(original)
     if modified==original:
-        print('Fase 2 já aplicada; nenhum ficheiro alterado.')
+        print('Fases 2/v39 já aplicadas; nenhum ficheiro alterado.')
         return 0
     backup=ROOT/'recolher.py.bak'
     if not backup.exists():backup.write_text(original,encoding='utf-8')

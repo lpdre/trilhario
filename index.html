@@ -732,7 +732,7 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
   <div class="org-section-title"><h2>Empresas e associações</h2><span id="orgVisibleCount"></span></div>
   <div id="organizerCards" class="org-cards"></div>
   <div class="org-section-title org-aggregators-title"><h2>Outras fontes de eventos</h2></div>
-  <p class="org-helper">Agregadores e programas locais que divulgam caminhadas de diferentes organizadores.</p>
+  <p class="org-helper">Programas municipais que divulgam caminhadas de diferentes organizadores.</p>
   <div id="aggregatorCards" class="org-cards"></div>
   <p class="org-bottom-note">A inclusão neste directório não significa que a agenda de cada entidade já esteja integrada na recolha automática do Trilhário. Consulta o organizador para confirmares datas, preços e disponibilidade.</p>
 </section>
@@ -838,8 +838,8 @@ if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.ti
 
 // Fontes monitorizadas; a presença aqui não significa vagas ou eventos confirmados.
 // Trilhário v16 — Trekking4Life e NDesafios no directório; Hike Land já existia.
-const ORGANIZER_DIRECTORY = [{"name": "Hiking Around Adventures","url": "https://www.hikingaround.pt/aventurasnacionais"},{"name": "Mais Trilhos","url": "https://maistrilhos.pt/caminhadas"},{"name": "Indoeu","url": "https://indoeu.pt/caminhadas/"},{"name": "GreenTrekker","url": "https://www.greentrekker.pt/agenda/"},{"name": "Trekking Roots","url": "https://trekkingroots.pt/calendario-caminhadas/"},{"name": "Hike Land","url": "https://www.hikeland.pt/atividades-1-dia/"},{"name": "Montanhas Dentro","url": "https://montanhasdentro.pt/"},{"name": "Trekkin","url": "https://www.trekkin.pt/eventos/"},{"name": "Basto Trekking","url": "https://bastotrekking.pt/"},{"name": "Montanhas do Norte","url": "https://montanhasdonorte.pt/percursos-1-dia/"},{"name": "RB Hiking & Trekking","url": "https://barbosa-trekking.pt/"},{"name": "DRenergies","url": "https://www.drenergies.com/calendario-inscricoes-caminhadas"},{"name": "Clube de Montanhismo da Guarda","url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/"},{"name": "Amigos da Montanha","url": "https://amigosdamontanha.com/"},{"name": "Caminhando.pt","url": "https://caminhando.pt/agenda-eventos/caminhadas/"},{"name": "Pé no Mundo","url": "https://penomundo.pt/"},{"name": "CAAL — Clube de Actividades de Ar Livre","url": "https://clubearlivre.org/"},{"name": "Trilhos Nocturnos","url": "https://trilhosnocturnos.com/eventos-agenda/"},{"name": "SAL — Sistemas de Ar Livre","url": "https://www.sal.pt/"},{"name": "Associação Geopark Estrela","url": "https://geoparkestrela.pt/atividades"},{"name": "Gerês Viver Turismo","url": "https://geres.pt/programa-anual-de-caminhadas-2026/"},{"name": "Borealis on Trekking","url": "https://borealis.travel/calendario-de-viagens/"},{"name": "Trekking4Life","url": "https://trekking4life.wixsite.com/website-1"},{"name": "NDesafios — Natureza e Desafios","url": "https://ndesafios.pt/"}];
-const AGGREGATOR_DIRECTORY = [{"name": "Trilhos & Caminhadas", "url": "https://www.trilhosecaminhadas.pt/percursos/calendario.php"}, {"name": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39"}];
+const ORGANIZER_DIRECTORY = [{"name": "Hiking Around Adventures","url": "https://www.hikingaround.pt/aventurasnacionais"},{"name": "Mais Trilhos","url": "https://maistrilhos.pt/caminhadas"},{"name": "Indoeu","url": "https://indoeu.pt/caminhadas/"},{"name": "GreenTrekker","url": "https://www.greentrekker.pt/agenda/"},{"name": "Trekking Roots","url": "https://trekkingroots.pt/calendario-caminhadas/"},{"name": "Hike Land","url": "https://www.hikeland.pt/atividades-1-dia/"},{"name": "Montanhas Dentro","url": "https://montanhasdentro.pt/"},{"name": "Trekkin","url": "https://www.trekkin.pt/eventos/"},{"name": "Basto Trekking","url": "https://bastotrekking.pt/"},{"name": "Montanhas do Norte","url": "https://montanhasdonorte.pt/percursos-1-dia/"},{"name": "RB Hiking & Trekking","url": "https://barbosa-trekking.pt/"},{"name": "Caminhadas Smile","url": "https://www.caminhadassmile.pt/"},{"name": "DRenergies","url": "https://www.drenergies.com/calendario-inscricoes-caminhadas"},{"name": "Clube de Montanhismo da Guarda","url": "https://www.montanhismo-guarda.pt/portal/eventos/lista/"},{"name": "Amigos da Montanha","url": "https://amigosdamontanha.com/"},{"name": "Caminhando.pt","url": "https://caminhando.pt/agenda-eventos/caminhadas/"},{"name": "Pé no Mundo","url": "https://penomundo.pt/"},{"name": "CAAL — Clube de Actividades de Ar Livre","url": "https://clubearlivre.org/"},{"name": "Trilhos Nocturnos","url": "https://trilhosnocturnos.com/eventos-agenda/"},{"name": "SAL — Sistemas de Ar Livre","url": "https://www.sal.pt/"},{"name": "Associação Geopark Estrela","url": "https://geoparkestrela.pt/atividades"},{"name": "Gerês Viver Turismo","url": "https://geres.pt/programa-anual-de-caminhadas-2026/"},{"name": "Borealis on Trekking","url": "https://borealis.travel/calendario-de-viagens/"},{"name": "Trekking4Life","url": "https://trekking4life.wixsite.com/website-1"},{"name": "NDesafios — Natureza e Desafios","url": "https://ndesafios.pt/"}];
+const AGGREGATOR_DIRECTORY = [{"name": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39"}];
 
 const ORGANIZERS_PAGE_MODE=new URLSearchParams(location.search).has('organizadores');
 if(ORGANIZERS_PAGE_MODE){document.body.classList.add('organizers-mode');document.title='Organizadores — Trilhário';}
@@ -876,7 +876,7 @@ function renderOrganizersPage(){
 function renderSourcesDirectory(){
  const link=e=>'<a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+esc(e.name)+' ↗</a>';
  $('sourcesDirectory').innerHTML=ORGANIZER_DIRECTORY.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt')).map(link).join('')+
-  '<h4>Agregadores e programas municipais</h4>'+AGGREGATOR_DIRECTORY.map(link).join('');
+  '<h4>Programas municipais</h4>'+AGGREGATOR_DIRECTORY.map(link).join('');
 }
 
 // Eventos confirmados em 19/10/2026 na agenda oficial Hiking Around Adventures.
@@ -896,7 +896,6 @@ const NEW_SOURCES_FEATURED = [
  {id:'caa-leca-20261114',title:'O Porto visto do Rio Leça — Etapa Custió–Esposade',date:'2026-11-14',time:'10:00',town:'Matosinhos',start:'Estação CP de Campanhã (ponto de encontro da organização)',organizer:'CAAL — Clube de Actividades de Ar Livre',km:12,gain:null,duration:null,price:10,difficulty:null,description:'Caminhada pelo Corredor Verde do Leça, de Custió até Esposade.',url:'https://clubearlivre.org/produto/o-porto-visto-do-rio-leca-i/',tag:'Rio'},
  {id:'tn-queiriga-20261121',title:'Rota do Rebentão e Minas de Queiriga',date:'2026-11-21',time:'',town:'Viseu',start:'Queiriga (ponto exacto a confirmar; há transporte da organização)',organizer:'Trilhos Nocturnos',km:14,gain:null,duration:null,price:null,difficulty:2,description:'Percurso PR5 e Minas de Queiriga. A página oficial apresenta preços distintos; confirmar antes de reservar.',url:'https://trilhosnocturnos.com/eventos/rota-de-rebentao-e-minas-de-queiriga/',tag:'Minas'},
  {id:'sal-peninha-20261025',title:'Rota da Peninha',date:'2026-10-25',time:'09:30',town:'Cascais',start:'Capela da Malveira da Serra',organizer:'SAL — Sistemas de Ar Livre',km:9.5,gain:476,duration:4,price:0,difficulty:null,description:'Percurso circular em caminhos e veredas do Parque Natural de Sintra-Cascais.',url:'https://www.sal.pt/cascais/p1_cascais_pp_rotadapeninha.shtml',tag:'Natureza'},
- {id:'rb-regoufe-20261121',title:'Caminhada às Minas de Regoufe e aldeia de Drave',date:'2026-11-21',time:'09:30',town:'Arouca',start:'Arouca (local exacto a confirmar)',organizer:'RB Hiking & Trekking',km:11.5,gain:null,duration:7.5,price:25,difficulty:2,description:'Caminhada interpretada pelas minas de Regoufe e pela aldeia de Drave.',url:'https://www.trilhosecaminhadas.pt/percursos/evento_info.php?id=518',tag:'Aldeias'},
  {id:'dr-faias-20261108',title:'Rota das Faias — Covão da Ponte (I edição)',date:'2026-11-08',time:'',town:'Manteigas',start:'Por confirmar',organizer:'DRenergies',km:null,gain:null,duration:null,price:null,difficulty:null,description:'Caminhada anunciada no calendário da DRenergies; consultar programa e inscrição oficial.',url:'https://www.drenergies.com/calendario-inscricoes-caminhadas',tag:'Floresta'},
  {id:'dr-faias-20261114',title:'Rota das Faias — Covão da Ponte (II edição)',date:'2026-11-14',time:'',town:'Manteigas',start:'Por confirmar',organizer:'DRenergies',km:null,gain:null,duration:null,price:null,difficulty:null,description:'Segunda data oficial do programa Rota das Faias — Covão da Ponte.',url:'https://www.drenergies.com/calendario-inscricoes-caminhadas',tag:'Floresta'},
  {id:'caminhando-monsanto-20261101',title:'Caminhando por Trilhos e Miradouros de Monsanto',date:'2026-11-01',time:'09:30',town:'Lisboa',start:'Parque de estacionamento de Campolide Este',organizer:'Caminhando.pt',km:11,gain:null,duration:null,price:null,difficulty:null,description:'Passeio por trilhos e miradouros da mata de Monsanto.',url:'https://caminhando.pt/eventos/caminhando-por-trilhos-e-miradouros-de-monsanto-9kms/',tag:'Floresta'},
@@ -991,7 +990,13 @@ function localPartidaLegivel(valor){
 }
 // Fonte desactivada: o catálogo anterior confundiu 'EVENTO FECHADO' com títulos
 // e misturou actividades não pedestres. Nunca apresentar registos desta origem.
-function excludedOrganizer(name){return fold(name).replace(/[^a-z0-9]/g,'')==='caminhadassmile';}
+function excludedOrganizer(name){return false; /* A Smile entra apenas pela fonte oficial; o agregador é filtrado pelo URL. */}
+// v39 — rejeitar anúncios cujo link aponta para o agregador, independentemente do nome do organizador.
+function isTrilhosCaminhadasSource(e){
+ if(String(e?.source||'').trim().toLowerCase()==='trilhos & caminhadas')return true;
+ try{const host=new URL(String(e?.url||'')).hostname.replace(/^www\./,'').toLowerCase();return host==='trilhosecaminhadas.pt';}
+ catch{return false;}
+}
 // v38 — os eventos normalizados não dependem dos cálculos de viagem.
 // Evita reconstruir o mesmo catálogo centenas de vezes enquanto as rotas são calculadas.
 let normalizedEventsCache=null;
@@ -1000,12 +1005,12 @@ function allEvents(){
  if(normalizedEventsCache&&normalizedEventsCache.remote===remoteEvents&&
     normalizedEventsCache.custom===custom&&normalizedEventsCache.customLength===custom.length&&
     normalizedEventsCache.today===todayKey)return normalizedEventsCache.events;
- const catalogue=(remoteEvents??SEED).filter(e=>!excludedOrganizer(e.organizer));
+ const catalogue=(remoteEvents??SEED).filter(e=>!excludedOrganizer(e.organizer)&&!isTrilhosCaminhadasSource(e));
  const urls=new Set(catalogue.map(e=>String(e.url||'').replace(/\/$/,'')));
  const today=todayKey;
  const existingKeys=new Set(catalogue.map(e=>[e.date,fold(e.organizer),fold(e.title)].join('|')));
  const specials=(Array.isArray(remoteEvents)&&remoteEvents.length===0)?[]:HIKING_AROUND_FEATURED.concat(NEW_SOURCES_FEATURED);
- const extras=specials.filter(e=>e.date>=today &&
+ const extras=specials.filter(e=>!isTrilhosCaminhadasSource(e)&&e.date>=today &&
    !existingKeys.has([e.date,fold(e.organizer),fold(e.title)].join('|')) &&
    // Vários passeios oficiais podem partilhar página de calendário.
    !(urls.has(e.url)&&specials.filter(y=>y.url===e.url).length===1));
@@ -1056,6 +1061,7 @@ async function loadEventFeed(){
   if(!json||!Array.isArray(json.events)||json.events.length>10000){remoteFeedState='invalid';renderCatalogStatus();return;}
   const events=json.events.filter(e=>e&&typeof e.id==='string'&&typeof e.title==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&typeof e.organizer==='string'
     && !excludedOrganizer(e.organizer)
+    && !isTrilhosCaminhadasSource(e)
     && !(e.organizer==='Montanhas Dentro' && e.date_verified!=='official_detail'))
     .map(e=>({...e,url:(typeof e.url==='string'&&/^https?:\/\//i.test(e.url))?e.url:''}));
   remoteEvents=events;
