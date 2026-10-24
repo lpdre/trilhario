@@ -336,35 +336,21 @@ function refreshAgendaForClock(){
  if(current!==agendaCurrentFingerprint){populateOrganizers();render();}
 }
 function renderCatalogStatus(){
- const node=$('catalogStatus'),foot=$('footerSourceStatus');if(!node||!foot)return;
+ // O estado normal do catálogo não ocupa espaço na página.
+ // Quando a fonte falha ou está muito desactualizada, mostrar apenas o aviso útil.
+ const node=$('catalogStatus');if(!node)return;
  let status=remoteFeedState,message='';
- if(status==='loading')message='A verificar actualização dos eventos…';
- else if(status==='unavailable')message='Catálogo online indisponível · estás a ver eventos de exemplo, não uma agenda confirmada.';
- else if(status==='invalid')message='Catálogo inválido · a apresentar eventos de exemplo até recuperar a fonte.';
- else if(status==='offline')message='Modo local de demonstração · os eventos não estão actualizados.';
- else{
+ if(status==='unavailable')message='Não foi possível carregar o catálogo online. Os trilhos apresentados são exemplos e não uma agenda confirmada.';
+ else if(status==='invalid')message='O catálogo online está inválido. Os trilhos apresentados são exemplos.';
+ else if(status==='offline')message='Modo de demonstração: os trilhos apresentados podem não estar actualizados.';
+ else if(status==='ready'){
   const when=remoteUpdatedAt?new Date(remoteUpdatedAt):null;
-  const valid=when&&Number.isFinite(when.getTime());
-  const age=valid?(Date.now()-when.getTime())/3600000:Infinity;
-  const stamp=valid?when.toLocaleString('pt-PT',{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'data desconhecida';
-  const health=remoteSourcesHealth&&typeof remoteSourcesHealth==='object'?Object.values(remoteSourcesHealth).filter(x=>x&&typeof x==='object'):[];
-  const positive=health.filter(x=>x.state==='com_eventos'||x.state==='recolha_parcial').length;
-  const failed=health.filter(x=>String(x.state||'').startsWith('erro_')||x.state==='erro').length;
-  const noAnnouncements=health.filter(x=>x.state==='sem_anuncios_reconhecidos').length;
-  const remaining=health.length-positive-failed-noAnnouncements;
-  // Publicação recente NÃO significa confirmação recente de todos os eventos.
-  status=!valid||age>48||age< -1?'stale':'fresh';
-  message=`Catálogo: última publicação ${stamp}`;
-  if(!valid||age>48||age< -1)message+=' · actualização por confirmar';
-  if(health.length){
-   message+=` · ${positive}/${health.length} fontes com anúncios`;
-   if(failed)message+=` · ${failed} com erros`;
-   if(noAnnouncements)message+=` · ${noAnnouncements} sem anúncios reconhecidos`;
-   if(remaining)message+=` · ${remaining} por confirmar`;
-  }
+  const age=when&&Number.isFinite(when.getTime())?(Date.now()-when.getTime())/3600000:Infinity;
+  if(age>48||age< -1){status='stale';message='A agenda pode estar desactualizada. Confirma os detalhes no site do organizador.';}
  }
- node.dataset.status=status;node.textContent=message;
- foot.textContent=status==='fresh'?'Catálogo actualizado · consultar origem de cada evento':status==='loading'?'A verificar o catálogo…':status==='stale'?'Catálogo potencialmente desactualizado':'Eventos de demonstração / catálogo indisponível';
+ node.hidden=!message;
+ node.dataset.status=status;
+ node.textContent=message;
 }
 // v44: a data de PUBLICAÇÃO do JSON não confirma cada caminhada individual.
 // Só avisar quando existe uma data de observação conhecida e suficientemente antiga.
