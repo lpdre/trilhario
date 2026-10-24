@@ -365,7 +365,7 @@ def parse_official_listing(organizer, html, url):
         if m:found['km']=number(m[1])
         m=re.search(r'\bDesn[ií]vel\s+(\d{2,4})\s*m\b',txt,re.I)
         if m:found['gain']=int(m[1])
-        m=re.search(r'Fa[cç]a J[aá] A Sua Reserva\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',txt,re.I)
+        m=re.search(r'(?:Fa[cç]a J[aá] A Sua Reserva|Reservas Fechadas!?)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',txt,re.I)
         if m:found['price']=number(m[1])
         # O formato GPS tem dois valores completos: nunca usar apenas latitude.
         dms=re.search(r'Lat:\s*N\s*(\d{1,2})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]\s*Long:\s*W\s*(\d{1,3})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]',txt,re.I)
@@ -591,7 +591,12 @@ def main():
     # Aplicar à lista nova em cada execução, inclusive quando os anúncios
     # chegam repetidos ou a fonte tem rótulos extra.
     for item in events:
-        if isinstance(item,dict): tidy_aggregator_fields(item)
+        if isinstance(item,dict):
+            tidy_aggregator_fields(item)
+            # A heurística antiga marcou como gratuitas dezenas de caminhadas pagas.
+            # Sem confirmação explícita, preço desconhecido é preferível a 0 €.
+            if item.get('organizer') == 'GreenTrekker' and item.get('price') == 0:
+                item['price'] = None
     initial_count=len(events)
     # Uma caminhada da RB ou de outro organizador só fica se tiver fonte
     # própria; as ligações antigas ao agregador não são reutilizadas.
@@ -698,6 +703,9 @@ def main():
         if not place_changed:
             old_fields+=('lat', 'lon', 'verified', 'gps_checked_at')
         for field in old_fields:
+            # Não voltar a importar o preço zero errado de um catálogo anterior.
+            if field == 'price' and e.get('organizer') == 'GreenTrekker' and old.get('price') == 0:
+                continue
             if not meaningful(e.get(field)) and meaningful(old.get(field)):
                 e[field] = old[field]
                 changed += 1
