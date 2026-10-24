@@ -490,21 +490,23 @@ function eventRow(x){
    const mins=Number(x.time.slice(0,2))*60+Number(x.time.slice(3,5))+Math.round(Number(x.duration)*60);
    finish='≈ '+String(Math.floor(mins/60)%24).padStart(2,'0')+':'+String(mins%60).padStart(2,'0')+(mins>=1440?' (+1 dia)':'');
  }
- return `<article class="walk-row" data-eid="${esc(x.id)}">
+ return `<article class="walk-row v51-card" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
-   ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="96" height="72" onerror="this.remove()">`:''}
-   <h3>${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="Abrir evento no site do organizador">${esc(x.title)}</a>`:esc(x.title)}</h3>
+   ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="114" height="99" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'v51-no-photo',textContent:'↗'}))">`:'<div class="v51-no-photo" aria-hidden="true">↗</div>'}
+   <h3>${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="Abrir evento no site do organizador">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
+   <p class="v51-difficulty"><span class="walk-caption">Dificuldade:</span> <strong>${esc(names[x.difficulty]||'Por indicar')}</strong></p>
   </div>
   <div class="walk-metrics">
-   <span><small>Km</small><b>${distance}</b></span>
-   <span><small title="Desnível positivo: subida acumulada em metros" aria-label="Desnível positivo (subida acumulada)">D+</small><b>${gain}</b></span>
-   <span><small>Horas</small><b>${duration}</b></span>
-   <span><small>Preço</small><b>${fmtP(x.price)}</b></span>
+   <span><small>Distância</small><b>${distance}</b></span>
+   <span><small title="Desnível positivo: subida acumulada em metros" aria-label="Desnível positivo (subida acumulada)">Desnível D+</small><b>${gain}</b></span>
+   <span><small>Duração</small><b>${duration}</b></span>
+   <span><small>Inscrição</small><b>${fmtP(x.price)}</b></span>
   </div>
+  ${travelRow(x)}
   <div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
    <div class="walk-action-main">
     ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
@@ -516,7 +518,6 @@ function eventRow(x){
     ${x.userAdded?`<button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_ACTION_ICONS.trash}</button>`:''}
    </div>
   </div>
-  ${travelRow(x)}
  </article>`;
 }
 function chips(){let xs=[];
@@ -693,6 +694,7 @@ function render(){const events=sortedWalks(selected());
  $('filtersCounterMini').textContent=applied?String(applied):'';$('filtersCounterMini').hidden=!applied;
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
+ document.querySelectorAll('[data-quick-km]').forEach(b=>{const on=state.kmMin===Number(b.dataset.quickKm)&&state.kmMax===KM_CAP;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
  const activeOrgCount=new Set(displayedEvents.map(e=>e.organizer)).size; $('heroStats').innerHTML=`${displayedEvents.length} caminhada${displayedEvents.length===1?'':'s'} · <a class="org-header-link" href="?organizadores=1" target="_blank" rel="noopener noreferrer" title="Ver todos os organizadores" aria-label="Abrir lista completa de organizadores num novo separador">${activeOrgCount} organizador${activeOrgCount===1?'':'es'} ↗</a>`;renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
    scheduleTravelBatches(events);
  }else{stopListObserver();if(tripBatchObserver){tripBatchObserver.disconnect();tripBatchObserver=null;}if(state.view==='calendar')renderCalendar(displayedEvents);else renderMap(events)}}
@@ -816,6 +818,7 @@ function openModal(){$('modal').hidden=false;$('fTitle').focus();document.body.s
 $('addBtn')?.addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
 $('eventForm').addEventListener('submit',e=>{e.preventDefault();const val=id=>$(id).value.trim(),maybeNumber=id=>val(id)!==''?Number(val(id)):null;const lat=maybeNumber('fLat'),lon=maybeNumber('fLon');const entry={id:'meu-'+Date.now(),userAdded:true,title:val('fTitle'),date:val('fDate'),time:val('fTime'),town:val('fTown'),region:val('fRegion'),area:val('fTown'),organizer:val('fOrg'),km:maybeNumber('fKm'),gain:maybeNumber('fGain'),price:maybeNumber('fPrice'),duration:maybeNumber('fDuration'),capacity:maybeNumber('fMaxParticipants'),start:val('fStart'),lat,lon,verified:lat!=null&&lon!=null,difficulty:Number(val('fDifficulty')),description:val('fDescription'),url:val('fUrl'),tag:'Manual'};if(!entry.title||!entry.date||!entry.town||!entry.organizer)return;const next=[...custom,entry];if(!persistValue('trilhario_custom_v1',next))return;custom=next;$('eventForm').reset();closeModal();populateOrganizers();resetFilters();toast('Evento guardado neste navegador.');});
 $('search').addEventListener('input',e=>{state.search=e.target.value;render()});
+document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{state.kmMin=Number(b.dataset.quickKm);state.kmMax=KM_CAP;state.view='list';render();}));
 $('difficulty').addEventListener('change',e=>{state.difficulty=e.target.value;render()});
 $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;render()});
 ['km','gain'].forEach(prefix=>{
@@ -916,20 +919,32 @@ function tripCalc(e){
 }
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
 function travelRow(e){
- const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,oneway=travelData(e);
+ const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key),queued=tripJobsSet.has(key)||tripActiveKey===key;
  const unavailable=!departureCandidates(e).length;
- let desc;
- if(t)desc=`<strong>${fmtN(t.km)} km i/v · ${timeStr(t.minutes)} de carro</strong>${oneway?.precision&&oneway.precision!=='gps'?' <span class="trip-missing" title="Destino estimado: '+esc(oneway.destinationLabel||'localidade')+'">(partida aprox.)</span>':''} · combustível ≈ ${travelMoney(t.fuel)} · portagens ${t.toll==null?'— (dois sentidos por confirmar)':'≈ '+travelMoney(t.toll)+(oneway?.tollSource==='IP'?' <span title="Estimativa automática para os dois sentidos pela IP, Classe 1">(IP)</span>':'')}${t.total==null?' · <span class="trip-missing">total da viagem: portagens por calcular</span>':` · <strong>total viagem ≈ ${travelMoney(t.total)}</strong>`}`;
- else if(!hasOrigin)desc='<span class="trip-missing">Define a origem para ver os custos</span>';
- else if(unavailable)desc=ambiguousDeparture(e)?'<span class="trip-missing">Vários encontros / travessia de barco · cálculo de carro indisponível</span>':'<span class="trip-missing">Local de partida por confirmar · sem cálculo</span>'; 
- else if(tripOriginProblem)desc=`<span class="trip-error">${esc(tripOriginProblem)}</span>`;
- else if(error)desc=`<span class="trip-error">${esc(error)}</span>`;
- else if(queued)desc='<span class="trip-loading">A calcular percurso…</span>';
- else desc='<span class="trip-missing">Por calcular</span>';
- const action=hasOrigin&&!unavailable&&!t&&!queued?`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}" title="Voltar a pedir uma estimativa da viagem">${error||tripOriginProblem?'Tentar novamente':'Calcular'}</button>`:
-  (t&&t.toll==null&&!tollsDue(oneway)?'':t&&t.toll==null?`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}" title="Repetir apenas a consulta das portagens">Portagens</button>`:'');
- return `<div class="walk-trip-line"><div class="walk-trip-info">${desc}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
+ let body;
+ if(t){
+  const full=t.total!=null&&t.fee!=null?t.total+t.fee:null;
+  const approx=route?.precision&&route.precision!=='gps'?' <span class="v51-trip-note">· destino aproximado</span>':'';
+  body=`<div class="v51-trip-label">Deslocação desde ${esc(travelPrefs.origin)} · ida e volta${approx}</div>
+    <div class="v51-trip-grid">
+     <span><small>Carro (i/v)</small><strong>${timeStr(t.minutes)}</strong></span>
+     <span><small>Km (i/v)</small><strong>${fmtN(t.km)} km</strong></span>
+     <span><small>Combustível</small><strong>${travelMoney(t.fuel)}</strong></span>
+     <span><small>Portagens</small><strong>${t.toll==null?'Por calcular':travelMoney(t.toll)}</strong></span>
+     <span><small>Viagem</small><strong>${t.total==null?'Por calcular':travelMoney(t.total)}</strong></span>
+     <span class="v51-grand-total"><small>Total c/ inscrição</small><strong>${full==null?'—':travelMoney(full)}</strong></span>
+    </div>`;
+ }else{
+  const status=!hasOrigin?'Define a origem para calcular distância, tempo e custos.':
+   unavailable?(ambiguousDeparture(e)?'Vários encontros ou travessia de barco · cálculo rodoviário indisponível.':'Local de partida por confirmar · cálculo indisponível.'):
+   tripOriginProblem||error||(queued?'A calcular percurso…':'Percurso por calcular.');
+  body=`<div class="v51-trip-label">Deslocação${hasOrigin?' desde '+esc(travelPrefs.origin):''} · ida e volta</div><div class="v51-trip-empty">${esc(status)}</div>`;
+ }
+ const action=!hasOrigin?`<button type="button" data-event-action="openOriginSettings" data-event-id="${esc(e.id)}">Definir origem</button>`:
+  !unavailable&&!t&&!queued?`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}">${error||tripOriginProblem?'Tentar novamente':'Calcular viagem'}</button>`:
+  t&&t.toll==null&&tollsDue(route)?`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Calcular portagens</button>`:'';
+ return `<div class="walk-trip-line v51-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
 // dataset devolve o ID literal, mesmo contendo aspas ou outros caracteres.
@@ -945,6 +960,7 @@ document.addEventListener('click',function(event){
   case 'mapSelect':mapSelect(id);break;
   case 'calculateOneRoute':calculateOneRoute(id);break;
   case 'retryTolls':retryTolls(id);break;
+  case 'openOriginSettings':openTravelPanel();break;
  }
 });
 function toggleCompare(id){if(compared.has(id))compared.delete(id);else compared.add(id);const saved=persistTravel(true);render();if(!saved)toast('Comparação actualizada apenas nesta sessão; não foi possível guardar.');}

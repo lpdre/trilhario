@@ -669,3 +669,106 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 }
 @media(max-width:350px){.calendar-grid .day-cell{padding:3px 1px}.calendar-grid .day-number{font-size:11px}}
 
+
+
+/* v51 — lista completa de cartões: nenhuma informação escondida */
+.hero-inner{padding-top:14px;padding-bottom:14px}
+.hero .eyebrow,.hero .hero-copy>p{display:none}
+.main{padding-top:16px}
+.v51-search{display:flex;align-items:center;gap:13px;background:#fffdf7;border:1px solid #d1dcd1;border-radius:9px;padding:9px 14px;margin-bottom:9px}
+.v51-search label{font-size:12px;color:#4c6953;font-weight:800;white-space:nowrap}
+.v51-search input{flex:1;min-width:0;border:0;background:transparent;color:#223b2c;font-size:15px;min-height:33px;outline:none}
+.v51-search:focus-within{border-color:#719578;box-shadow:0 0 0 2px #71957828}
+.v51-quick-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.v51-quick-filters>span{font-size:11px;font-weight:750;color:#526454;margin-right:4px}
+.v51-quick-filters button{border:1px solid #d1dccc;background:#f8f9f2;color:#3e5b43;border-radius:999px;padding:7px 12px;min-height:35px;font-size:12px;font-weight:700}
+.v51-quick-filters button.active{background:#234e39;color:#fff;border-color:#234e39}
+.v51-quick-filters button:hover:not(.active){background:#e8eee6}
+.content-head{margin-bottom:10px}
+.toolbar-sort{display:flex;gap:3px;align-items:center;justify-content:center;flex:0 0 99px;width:99px}
+.v51-sort-label{font-size:11px;font-weight:750;pointer-events:none}
+.compact-list{background:transparent;border:0;overflow:visible;display:grid;gap:12px}
+.walk-row.v51-card,.walk-row.v51-card:nth-child(even){display:grid;grid-template-columns:76px minmax(0,1fr);grid-template-areas:"date main" "metrics metrics" "trip trip" "actions actions";align-items:start;gap:0;border:1px solid #d6ddcf;border-radius:12px;background:#fffcf6;overflow:hidden;box-shadow:0 2px 9px #2333290c;margin:0;min-width:0}
+.walk-row.v51-card:hover{background:#fffcf6;border-color:#9fb49d;box-shadow:0 3px 14px #23332918}
+.v51-card .walk-date{grid-area:date;position:static;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:15px 5px 0 13px;padding:8px 2px;min-height:71px;border:1px solid #e3dfcd;border-radius:8px;background:#f1efe3;color:#264635;text-align:center}
+.v51-card .walk-date strong{font-size:26px;line-height:1.05;color:#254e38}
+.v51-card .walk-date span{font-size:10px;font-weight:850;letter-spacing:.3px}
+.v51-card .walk-date small{font-size:9px;line-height:1.25}
+.v51-card .walk-main{grid-area:main;min-width:0;display:block;padding:14px 16px 10px 12px;border:0;min-height:104px}
+.v51-card .walk-main::after{content:"";display:block;clear:both}
+.v51-card .walk-main .walk-photo,.v51-card .v51-no-photo{float:left;position:static;display:block;width:114px;height:99px;object-fit:cover;border-radius:7px;margin:0 13px 8px 0;max-width:34%;border:0}
+.v51-card .v51-no-photo{display:grid;place-items:center;background:linear-gradient(140deg,#dee8dc,#b5c7b4);font-size:26px;color:#698a70;font-weight:800}
+.v51-card .walk-main h3{font-size:16px;line-height:1.27;margin:1px 0 5px;color:#1c3e2e;font-weight:800;padding:0}
+.v51-card .walk-organizer{font-size:11px;margin:0 0 7px;color:#5f725f}
+.v51-card .walk-start{font-size:12px;line-height:1.4;margin:0 0 5px;word-break:normal;overflow-wrap:anywhere}
+.v51-card .walk-times{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 4px;font-size:11px;line-height:1.4}
+.v51-card .v51-difficulty{font-size:11px;margin:0;line-height:1.4}
+.v51-card .walk-caption{font-size:10px;font-weight:750;color:#6b7869}
+.v51-card .walk-times strong,.v51-card .v51-difficulty strong{color:#284834}
+.v51-card .v51-unverified{color:#9a7659;font-weight:600;font-size:10px}
+.v51-card .walk-metrics{grid-area:metrics;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 14px;border:0;border-top:1px solid #ecebdf;background:#fcfbf6}
+.v51-card .walk-metrics>span{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;background:#edf2e9;border:1px solid #e4e9df;border-radius:6px;padding:9px 12px;min-height:52px;box-shadow:none}
+.v51-card .walk-metrics small{display:block;font-size:10px;color:#647463;white-space:normal;font-weight:600;line-height:1.2}
+.v51-card .walk-metrics b{display:block;font-size:16px;color:#284633;white-space:normal;line-height:1.22;overflow-wrap:anywhere}
+.v51-card .walk-trip-line{grid-area:trip;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f2f5eb;border-top:1px solid #e0e6db;border-bottom:1px solid #e0e6db;min-width:0;min-height:0}
+.v51-card .walk-trip-info{flex:1;min-width:0;font-size:12px;color:#354e3b;line-height:1.4}
+.v51-card .v51-trip-label{font-size:10px;font-weight:800;color:#607460;margin:0 0 7px}
+.v51-card .v51-trip-note{color:#947657;font-weight:500}
+.v51-card .v51-trip-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.v51-card .v51-trip-grid>span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.v51-card .v51-trip-grid small{color:#6c7768;font-size:10px;line-height:1.2}
+.v51-card .v51-trip-grid strong{font-size:12px;font-weight:800;color:#2d4d37;line-height:1.35;overflow-wrap:anywhere}
+.v51-card .v51-grand-total{background:#dfe9db;border-radius:6px;padding:6px 9px;margin:-6px -4px -6px 0}
+.v51-card .v51-grand-total strong{font-size:19px;color:#1b4c31}
+.v51-card .v51-trip-empty{font-size:12px;color:#697568}
+.v51-card .walk-trip-ctrl{flex-shrink:0}
+.v51-card .walk-trip-ctrl button{border-radius:7px;min-height:36px;padding:7px 11px;font-size:11px;font-weight:750;white-space:normal}
+.v51-card .walk-actions{grid-area:actions;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:9px 14px;min-width:0;background:#fffcf6;border:0}
+.v51-card .walk-action-main,.v51-card .walk-action-quick{display:flex;align-items:center;gap:7px;min-width:0}
+.v51-card .walk-actions .walk-open,.v51-card .walk-actions .walk-compare{height:36px;min-height:36px;padding:0 14px;font-size:12px;border-radius:6px;font-weight:800}
+.v51-card .walk-actions .walk-icon-btn{height:36px;min-width:36px;width:36px;border-radius:6px}
+.v51-card .walk-actions .walk-icon-btn svg{height:18px;width:18px}
+@media(max-width:780px){
+ .v51-card .v51-trip-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px}
+ .v51-card .v51-grand-total{margin:0;justify-content:center}
+ .v51-card .walk-main{padding-right:12px}
+}
+@media(max-width:540px){
+ .shell{padding-left:12px;padding-right:12px}
+ .hero-inner{padding-top:11px;padding-bottom:12px}
+ .hero .brand-hero{font-size:28px}
+ .hero-stats{font-size:10px}
+ .main{padding-top:12px}
+ .v51-search{padding:7px 10px;gap:7px}
+ .v51-search label{font-size:0;width:17px;flex:0 0 17px}
+ .v51-search label::after{content:"⌕";font-size:24px;font-weight:400;line-height:1;display:block}
+ .v51-search input{font-size:14px}
+ .v51-quick-filters>span{width:100%}
+ .v51-quick-filters button{font-size:11px;padding:6px 10px;min-height:33px}
+ .toolbar-sort{width:75px;flex-basis:75px}
+ .v51-sort-label{font-size:9.5px}
+ .walk-row.v51-card{grid-template-columns:57px minmax(0,1fr)}
+ .v51-card .walk-date{margin:11px 1px 0 8px;padding:7px 1px;min-height:65px}
+ .v51-card .walk-date strong{font-size:22px}
+ .v51-card .walk-date span{font-size:9px}
+ .v51-card .walk-date small{font-size:8px}
+ .v51-card .walk-main{padding:11px 10px 8px 8px}
+ .v51-card .walk-main h3{font-size:14px;margin-bottom:4px}
+ .v51-card .walk-main .walk-photo,.v51-card .v51-no-photo{width:82px;height:81px;margin:0 9px 7px 0;max-width:39%}
+ .v51-card .walk-organizer{font-size:10.5px;margin-bottom:6px}
+ .v51-card .walk-start,.v51-card .walk-times,.v51-card .v51-difficulty{font-size:10.5px}
+ .v51-card .walk-caption{font-size:9.5px}
+ .v51-card .walk-metrics{gap:5px;padding:8px}
+ .v51-card .walk-metrics>span{padding:8px 5px;min-height:49px}
+ .v51-card .walk-metrics small{font-size:9px}
+ .v51-card .walk-metrics b{font-size:12px;line-height:1.3}
+ .v51-card .walk-trip-line{padding:10px 9px;flex-wrap:wrap}
+ .v51-card .v51-trip-grid{gap:9px 7px}
+ .v51-card .v51-trip-grid strong{font-size:12px}
+ .v51-card .v51-trip-grid small{font-size:9.5px}
+ .v51-card .v51-grand-total strong{font-size:17px}
+ .v51-card .walk-trip-ctrl{width:100%;display:flex;justify-content:flex-end}
+ .v51-card .walk-actions{padding:9px;gap:7px}
+ .v51-card .walk-actions .walk-open,.v51-card .walk-actions .walk-compare{font-size:11px;padding:0 11px}
+ .v51-card .walk-actions .walk-icon-btn{height:34px;min-width:34px;width:34px}
+}
