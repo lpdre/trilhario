@@ -1276,3 +1276,86 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .walk-row.v51-card.v56-card .v66-trip-route{column-gap:4px}
  .walk-row.v51-card.v56-card .v66-trip-route .v66-trip-heading{gap:3px}
 }
+
+
+/* v67 — duas colunas na viagem; valores do carro editáveis apenas quando necessário. */
+.v67-travel-box{border-radius:10px;background:#f3f6ef;border-color:#d6e0d4}
+.v67-travel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:11px 14px}
+.v67-travel-cell{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:4px}
+.v67-travel-label{font-size:10px;line-height:1.25;letter-spacing:.065em;font-weight:800;color:#6a7b6a}
+.v67-value-button{display:inline-flex;max-width:100%;min-width:0;align-items:center;gap:7px;border:0;background:transparent;padding:2px 0;color:#2a5139;font:inherit;font-size:13px;line-height:1.3;cursor:pointer;text-align:left}
+.v67-value-button strong{font-size:13px;line-height:1.3;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v67-value-button svg{flex:none}
+.v67-value-button .v67-edit-icon,.v67-value-button .v67-chevron{color:#74907b}
+.v67-value-button:hover strong{text-decoration:underline;text-underline-offset:3px}
+.v67-value-button:focus-visible,.v67-edit-value:focus-visible,.v67-help button:focus-visible{outline:2px solid #327353;outline-offset:3px;border-radius:3px}
+.v67-origin-editor{padding:9px 14px 11px;border-top:1px solid #e0e9dd}
+.v67-origin-form{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.v67-origin-form label{font-size:11px;font-weight:700;color:#617461;white-space:nowrap}
+.v67-origin-form .travel-input{flex:1 1 145px;min-width:110px;max-width:none;min-height:35px;padding:7px 9px;font-size:12px}
+.v67-save{min-height:32px;padding:6px 10px;border:1px solid #27553c;border-radius:6px;background:#28583f;color:white;font-size:11px;font-weight:750;cursor:pointer}
+.v67-save:hover{background:#204732}
+.v67-cancel{min-height:30px;padding:5px;border:0;background:transparent;color:#57725e;font-size:11px;cursor:pointer}
+.v67-cancel:hover{text-decoration:underline}
+.v67-car-panel{padding:3px 14px 9px;border-top:1px solid #dae4d8;background:#fbfcf8}
+.v67-setting-row{display:grid;grid-template-columns:minmax(100px,1fr) minmax(0,1.7fr);gap:10px;min-height:43px;align-items:center;border-bottom:1px solid #e7ede5}
+.v67-setting-row>label,.v67-row-label{font-size:12px;font-weight:650;color:#5d705f}
+.v67-fuel-kind{justify-self:end;max-width:200px;width:100%;min-height:32px;padding:5px 9px;font-size:12px;font-weight:650}
+.v67-edit-value{display:inline-flex;align-items:center;gap:9px;border:0;background:transparent;padding:5px 0;color:#284d37;font:inherit;cursor:pointer;text-align:left}
+.v67-edit-value strong{font-size:12px;font-weight:750;white-space:nowrap}
+.v67-edit-value svg{flex:none;color:#78917b}
+.v67-edit-value:hover strong{text-decoration:underline;text-underline-offset:3px}
+.v67-setting-row>.v67-edit-value{justify-self:end}
+.v67-price-display{display:flex;justify-self:end;min-width:0;align-items:center;gap:8px}
+.v67-reset{border:0;background:transparent;padding:4px 0;color:#3f7752;text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:10.5px}
+.v67-inline-editor{justify-self:end;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:5px;min-width:0}
+.v67-inline-editor .travel-input{width:92px;max-width:100%;min-height:32px;padding:5px 7px;font-size:12px}
+.v67-inline-editor .v67-save{min-height:30px}
+.v67-help{padding-top:6px}
+.v67-help>button{display:inline-flex;align-items:center;gap:6px;padding:4px 0;border:0;background:transparent;color:#68806c;font-size:10.5px;font-weight:650;cursor:pointer}
+.v67-help>button:hover{text-decoration:underline}
+.v67-help>button svg{flex:none}
+.v67-help>div{font-size:10.5px;color:#637766;line-height:1.5;padding:5px 0 4px}
+.v67-help>div p{margin:0 0 4px}
+.v67-help a{color:#366a48;text-decoration:underline}
+.v67-travel-box [hidden]{display:none!important}
+@media(max-width:540px){
+ .v67-travel-grid{padding:9px 10px;gap:8px}
+ .v67-travel-label{font-size:9.5px}
+ .v67-value-button{gap:5px;font-size:12px}
+ .v67-value-button strong{font-size:12px}
+ .v67-value-button>svg:first-child{width:17px;height:17px}
+ .v67-origin-editor{padding:9px 10px}
+ .v67-origin-form label{width:100%}
+ .v67-origin-form .travel-input{flex:1 1 90px;min-width:0}
+ .v67-car-panel{padding:3px 10px 9px}
+ .v67-setting-row{grid-template-columns:minmax(90px,1fr) minmax(0,1.7fr);gap:5px}
+ .v67-setting-row>label,.v67-row-label{font-size:11.5px}
+ .v67-fuel-kind{font-size:11px;max-width:170px}
+ .v67-inline-editor{gap:4px}
+ .v67-inline-editor .travel-input{width:80px}
+ .v67-inline-editor .v67-save{padding:5px 7px}
+ .v67-price-display{gap:5px;flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:365px){
+ .v67-travel-grid{gap:6px}
+ .v67-value-button{gap:4px}
+ .v67-value-button strong{font-size:11px}
+ .v67-setting-row{grid-template-columns:90px minmax(0,1fr)}
+}
+
+/* v67 — tipografia homogénea nos custos e alinhamento óptico do automóvel. */
+.walk-row.v51-card.v56-card .v56-trip-summary.v57-trip-summary,
+.walk-row.v51-card.v56-card .v57-trip-line,
+.walk-row.v51-card.v56-card .v57-trip-line>span,
+.walk-row.v51-card.v56-card .v57-trip-line strong,
+.walk-row.v51-card.v56-card .v57-trip-total strong,
+.walk-row.v51-card.v56-card .v66-trip-route .v66-trip-heading strong{
+ font-size:11px;line-height:1.35;
+}
+.walk-row.v51-card.v56-card .v57-trip-line{align-items:center}
+.walk-row.v51-card.v56-card .v66-trip-route .v66-trip-heading{display:inline-flex;align-items:center;gap:6px;line-height:1.35}
+.walk-row.v51-card.v56-card .v66-trip-route .v66-trip-car{
+ width:23px;height:23px;margin:0;flex:none;display:block;transform:translateY(-1px);
+}
+.walk-row.v51-card.v56-card .v53-trip-empty{font-size:11px}
