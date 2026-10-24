@@ -845,13 +845,14 @@ function persistTravel(notify=false){
 }
 function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCase()+'|'+e.id;}
 // v43: rotas e tarifas têm validades independentes. Não apresentar uma estimativa expirada como actual.
-const ROUTE_MAX_AGE_MS=14*86400000,TOLL_MAX_AGE_MS=7*86400000;
+const ROUTE_MAX_AGE_MS=14*86400000,TOLL_MAX_AGE_MS=7*86400000,PRECALC_MAX_AGE_MS=90*86400000;
+let precomputedRoutes=null;
 const ROUTE_GEOMETRY_LIMIT=24,ROUTE_GEOMETRY_MAX_AGE=ROUTE_MAX_AGE_MS;
 const timeValid=(stamp,maxAge,now=Date.now())=>Number.isFinite(Number(stamp))&&Number(stamp)>0&&Number(stamp)<=now+300000&&now-Number(stamp)<=maxAge;
 function routeFresh(e,r,now=Date.now()){
  return Boolean(r&&!r.manual&&r.roundTripVersion===ROUNDTRIP_VERSION&&r.geocoderVersion===GEOCODER_VERSION&&
  r.destinationFingerprint===endpointFingerprint(e)&&Number.isFinite(r.kmOne)&&Number.isFinite(r.kmBack)&&
- r.kmOne>=0&&r.kmBack>=0&&timeValid(r.updated,ROUTE_MAX_AGE_MS,now));
+ r.kmOne>=0&&r.kmBack>=0&&timeValid(r.updated,r.precomputed?PRECALC_MAX_AGE_MS:ROUTE_MAX_AGE_MS,now));
 }
 function tollFresh(r,now=Date.now()){
  return Boolean(r&&r.tollSource==='IP'&&Number.isFinite(r.tollOut)&&Number.isFinite(r.tollBack)&&
@@ -909,7 +910,44 @@ function getRouteGeometry(key,record){
  return out.length>=2&&back.length>=2?{out,back}:null;
 }
 
-function travelData(e){if(!travelPrefs.origin)return null;const d=travelRoutes[routeCacheKey(e)];return d&&typeof d==='object'?d:null;}
+// A cache pública guarda distâncias; o consumo continua definido no navegador.
+function normalizeCapital(value){
+ return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase()
+   .replace(/,\s*portugal\s*$/,'').replace(/\s+/g,' ');
+}
+function precomputedTravel(e){
+ if(!precomputedRoutes||!travelPrefs.origin||!e.verified||!hasCoords(e)||ambiguousDeparture(e))return null;
+ const capital=normalizeCapital(travelPrefs.origin);
+ if(!Object.prototype.hasOwnProperty.call(precomputedRoutes.origins||{},capital))return null;
+ const key=Number(e.lat).toFixed(5)+','+Number(e.lon).toFixed(5);
+ const row=precomputedRoutes.locations?.[key]?.routes?.[capital];
+ if(!row||!Number.isFinite(row.km)||row.km<0||row.km>=1600||
+    !Number.isFinite(row.minutes)||row.minutes<0||row.minutes>=10000)return null;
+ const stamp=Date.parse(String(row.updated||'')+'T12:00:00Z');
+ if(!timeValid(stamp,PRECALC_MAX_AGE_MS))return null;
+ return {kmOne:row.km,kmBack:row.km,minutesOne:row.minutes,minutesBack:row.minutes,
+  roundTripVersion:ROUNDTRIP_VERSION,geocoderVersion:GEOCODER_VERSION,
+  destinationFingerprint:endpointFingerprint(e),precision:'capital',
+  destinationLabel:'Percurso do centro de '+travelPrefs.origin,updated:stamp,precomputed:true};
+}
+function travelData(e){
+ if(!travelPrefs.origin)return null;
+ const local=travelRoutes[routeCacheKey(e)];
+ if(local&&typeof local==='object'&&routeFresh(e,local))return local;
+ return precomputedTravel(e)||(local&&typeof local==='object'?local:null);
+}
+async function loadPrecomputedRoutes(){
+ if(location.protocol==='file:')return;
+ try{
+  const res=await fetch('rotas_precalculadas.json',{cache:'no-store'});
+  if(!res.ok)return;
+  const data=await res.json();
+  if(data&&data.schema===1&&data.origins&&typeof data.origins==='object'&&
+     data.locations&&typeof data.locations==='object'&&!Array.isArray(data.locations)){
+   precomputedRoutes=data;
+  }
+ }catch(error){console.info('Cache partilhada indisponível; cálculo individual activo.',error?.message||error);}
+}
 function travelMoney(v){return Number.isFinite(v)?v.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}):'—';}
 function tripCalc(e){
  if(ambiguousDeparture(e))return null;
@@ -951,7 +989,8 @@ function travelRow(e){
       <span class="v57-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total: <strong>${t.total==null?'—':travelMoney(t.total)}</strong></span>
     </div>
    </div>`;
-  if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Repetir portagens</button>`;
+  if(t.toll==null&&route?.precomputed)action=`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}" title="Calcular também as portagens">Calcular portagens</button>`;
+  else if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Repetir portagens</button>`;
  }else{
   const status=!hasOrigin?'Define a origem acima para calcular a deslocação.':
    unavailable?(ambiguousDeparture(e)?'Vários pontos de encontro ou travessia de barco · sem cálculo rodoviário.':'Local de partida por confirmar · sem cálculo.'):
@@ -1481,7 +1520,8 @@ function tripNeedsRoute(e,force=false){
  const r=travelData(e),key=routeCacheKey(e);
  if(tripRetryAfter.has(key)&&Date.now()>=tripRetryAfter.get(key)){tripRetryAfter.delete(key);tripProblems.delete(key);}
  if(force||!routeFresh(e,r))return !tripProblems.has(key)||force;
- // Só reconstituir rota quando as portagens precisam dela e a geometria limitada já não existe.
+ // A rota pré-calculada oferece distância e combustível instantâneos; portagens são opcionais.
+ if(r?.precomputed)return false;
  return tollsDue(r)&&!getRouteGeometry(key,r)&&!tripProblems.has(key);
 }
 function scheduleCachedTolls(e,r,geometry){
@@ -1694,7 +1734,7 @@ $('orgPageSearch').addEventListener('input',renderOrganizersPage);
 populateOrganizers();
 render();
 renderTravelProgress();
-loadEventFeed();
+loadPrecomputedRoutes().finally(loadEventFeed);
 // A lista também se actualiza sozinha ao chegar a hora de início de uma caminhada.
 setInterval(refreshAgendaForClock,30000);
 document.addEventListener('visibilitychange',refreshAgendaForClock);
