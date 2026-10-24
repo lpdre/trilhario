@@ -1020,3 +1020,31 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .walk-row.v51-card.v56-card .walk-card-details p{font-size:10px}
  .walk-row.v51-card.v56-card .v56-trip-costs{gap:1px 7px}
 }
+
+/* v57 — duas linhas explicativas mantendo a densidade visual da v56 */
+.walk-row.v51-card.v56-card .v56-trip-summary.v57-trip-summary{
+ display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+ gap:2px;min-width:0;font-size:10px;line-height:1.25;
+}
+.walk-row.v51-card.v56-card .v57-trip-line{
+ display:flex;align-items:baseline;justify-content:flex-start;
+ flex-wrap:wrap;gap:1px 10px;min-width:0;
+}
+.walk-row.v51-card.v56-card .v57-trip-line>span{
+ white-space:nowrap;min-width:0;
+}
+.walk-row.v51-card.v56-card .v57-trip-line strong{
+ color:#304d39;font-size:10.5px;font-weight:750;
+}
+.walk-row.v51-card.v56-card .v57-trip-total{
+ margin-left:0;color:#315f41;font-weight:750;
+}
+.walk-row.v51-card.v56-card .v57-trip-total strong{
+ color:#185236;font-size:11.5px;font-weight:850;
+}
+@media(max-width:540px){
+ .walk-row.v51-card.v56-card .v57-trip-line{column-gap:8px}
+}
+@media(max-width:350px){
+ .walk-row.v51-card.v56-card .v57-trip-line{column-gap:6px}
+}
