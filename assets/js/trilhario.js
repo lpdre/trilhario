@@ -915,6 +915,12 @@ function tripCalc(e){
  return {km,minutes,fuel,toll,fee,total:toll==null?null:fuel+toll};
 }
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
+// Duração com unidades por extenso para o resumo da viagem.
+function tripDurationWords(minutes){
+ if(!Number.isFinite(minutes))return '—';
+ const m=Math.max(0,Math.round(minutes)),hours=Math.floor(m/60),mins=m%60;
+ return hours?hours+' '+(hours===1?'hora':'horas')+(mins?' e '+mins+' '+(mins===1?'minuto':'minutos'):''):mins+' '+(mins===1?'minuto':'minutos');
+}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key);
@@ -923,10 +929,17 @@ function travelRow(e){
  if(t){
   const approx=route?.precision&&route.precision!=='gps'?' · aprox.':'';
   // A inscrição já figura nas métricas do trilho: não integra o total da viagem.
-  // Uma linha de leitura rápida, não uma segunda grelha de cartões.
-  body=`<div class="v56-trip-summary" aria-label="Viagem de ida e volta desde ${esc(travelPrefs.origin)}">
-    <span class="v56-trip-route" title="Distância e tempo de carro de ida e volta"><strong>${fmtN(t.km)} km</strong> · ${timeStr(t.minutes)} i/v${approx}</span>
-    <span class="v56-trip-costs"><span>Comb. <strong>${travelMoney(t.fuel)}</strong></span><span>Port. <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span><span class="v56-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong></span></span>
+  // Manter os custos discretos, mas em duas linhas com rótulos explícitos.
+  body=`<div class="v56-trip-summary v57-trip-summary" aria-label="Viagem de ida e volta desde ${esc(travelPrefs.origin)}">
+    <div class="v57-trip-line v57-trip-route">
+      <span>Distância ida e volta: <strong>${fmtN(t.km)} km</strong>${approx}</span>
+      <span>Duração: <strong>${tripDurationWords(t.minutes)}</strong></span>
+    </div>
+    <div class="v57-trip-line v57-trip-costs">
+      <span>Combustível: <strong>${travelMoney(t.fuel)}</strong></span>
+      <span>Portagens: <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
+      <span class="v57-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total: <strong>${t.total==null?'—':travelMoney(t.total)}</strong></span>
+    </div>
    </div>`;
   if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Repetir portagens</button>`;
  }else{
