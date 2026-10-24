@@ -147,18 +147,31 @@ def build_cache(today: date | None = None, budget: int = DAILY_LIMIT, requester=
         if not isinstance(routes, dict):
             routes = {}
             entry["routes"] = routes
+        failures = entry.get("failures")
+        if not isinstance(failures, dict):
+            failures = {}
+            entry["failures"] = failures
         # A ordem é estável: mesmo depois de falhas retomamos a partir da cache.
         for city, origin in CAPITAIS.items():
             if not due(routes.get(city), today) or attempts >= budget:
                 continue
+            # Não saturar a fila com locais sem trajecto ou com erros temporários.
+            try:
+                failed_day = date.fromisoformat(str(failures.get(city, ""))[:10])
+                if today - failed_day < timedelta(days=7):
+                    continue
+            except ValueError:
+                pass
             attempts += 1
             try:
                 result = requester(origin, point)
                 if not isinstance(result, dict) or not {"km", "minutes", "updated"} <= result.keys():
                     raise ValueError("Resposta incompleta")
                 routes[city] = result
+                failures.pop(city, None)
                 successes += 1
             except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
+                failures[city] = today.isoformat()
                 print(f"Rota não disponível: {city} / {key}: {exc}")
             if requester_is_live and attempts < budget and COOLDOWN:
                 time.sleep(COOLDOWN)
