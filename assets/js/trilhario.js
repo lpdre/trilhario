@@ -488,7 +488,7 @@ function eventRow(x){
    const mins=Number(x.time.slice(0,2))*60+Number(x.time.slice(3,5))+Math.round(Number(x.duration)*60);
    finish='≈ '+String(Math.floor(mins/60)%24).padStart(2,'0')+':'+String(mins%60).padStart(2,'0')+(mins>=1440?' (+1 dia)':'');
  }
- return `<article class="walk-row v51-card" data-eid="${esc(x.id)}">
+ return `<article class="walk-row v51-card v54-card" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
    ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="114" height="99" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'v51-no-photo',textContent:'↗'}))">`:'<div class="v51-no-photo" aria-hidden="true">↗</div>'}
