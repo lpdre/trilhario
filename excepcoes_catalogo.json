@@ -175,6 +175,86 @@
         "price": 12,
         "difficulty": 2
       }
+    },
+    {
+      "organizer": "GreenTrekker",
+      "slug": "trilhos-do-zezere-6",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "price": 15
+      }
+    },
+    {
+      "organizer": "GreenTrekker",
+      "slug": "aldeia-magica-de-drave-emanuel-ribeiro-2",
+      "date": "2026-10-24",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "price": 15
+      }
+    },
+    {
+      "organizer": "GreenTrekker",
+      "slug": "cores-do-outono-no-bosque-das-faias-serra-da-estrela-9",
+      "date": "2026-11-07",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "price": 15
+      }
+    },
+    {
+      "organizer": "GreenTrekker",
+      "slug": "caminhada-de-halloween-na-serra-de-sintra-7",
+      "date": "2026-10-31",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "price": 15
+      }
+    },
+    {
+      "organizer": "DRenergies",
+      "slug": "calendario-inscricoes-caminhadas",
+      "date": "2026-10-31",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Ribeira da Goldra - Percursos pela Covilhã cidade Fábrica"
+      }
+    },
+    {
+      "organizer": "DRenergies",
+      "slug": "calendario-inscricoes-caminhadas",
+      "date": "2026-11-08",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Rota das Faias - Covão da Ponte"
+      }
+    },
+    {
+      "organizer": "DRenergies",
+      "slug": "calendario-inscricoes-caminhadas",
+      "date": "2026-11-14",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Rota das Faias - Covão da Ponte"
+      }
+    },
+    {
+      "organizer": "DRenergies",
+      "slug": "calendario-inscricoes-caminhadas",
+      "date": "2026-12-05",
+      "verified_at": "2026-10-24",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Vamos ao Barro e à Azeitona"
+      }
     }
   ],
   "fallback_events": [
