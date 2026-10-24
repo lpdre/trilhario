@@ -9,6 +9,7 @@ on:
   push:
     paths:
       - 'precalcular_rotas.py'
+      - 'testes/test_catalogo_unico.py'
       - '.github/workflows/actualizar.yml'
 
 permissions:
