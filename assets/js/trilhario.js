@@ -524,7 +524,6 @@ function eventRow(x){
   ${travelRow(x)}
   <div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
    <div class="walk-action-main">
-    ${safeExternalUrl(x.url)?`<a class="walk-open" href="${esc(x.url)}" aria-label="Ver anúncio de ${esc(x.title)} (novo separador)" title="Abrir anúncio do evento" rel="noopener noreferrer" target="_blank"><span>Evento</span><span class="btn-icon" aria-hidden="true">↗</span></a>`:''}
     <button type="button" class="walk-compare ${compared.has(x.id)?'is-compared':''}" data-event-action="toggleCompare" data-event-id="${esc(x.id)}" aria-label="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}" aria-pressed="${compared.has(x.id)?'true':'false'}" title="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}">${compared.has(x.id)?'✓ Comparar':'+ Comparar'}</button>
    </div>
    <div class="walk-action-quick">
