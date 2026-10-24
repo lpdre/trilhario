@@ -5,7 +5,7 @@
 <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="#143e32" name="theme-color"/><meta content="Trilhário — agenda de caminhadas organizadas em Portugal, com lista, calendário, mapa e estimativa de deslocações." name="description"/>
 <title>Trilhário — Agenda de caminhadas</title>
-<link rel="stylesheet" href="assets/css/trilhario.css?v=66"/>
+<link rel="stylesheet" href="assets/css/trilhario.css?v=67"/>
 </head>
 <body>
 <section class="hero" id="top"><div class="hero-inner shell"><div class="hero-copy">
@@ -13,32 +13,76 @@
 <button class="hero-help" id="introHelpOpen" type="button" aria-controls="introGuide" aria-expanded="false">Como procurar?</button>
 </div></div></section>
 <main class="shell main">
-<section class="travel-box v53-travel-box" aria-label="Configuração das deslocações">
- <div class="v53-travel-top">
-  <div class="v53-trip-brand"><span class="travel-symbol" aria-hidden="true">↗</span><strong>A minha viagem</strong></div>
-  <div class="v53-origin-group">
-   <form id="originForm" class="v53-origin-form" aria-label="Definir origem das viagens">
-    <label for="tripOrigin">Partida de</label>
-    <input class="travel-input" id="tripOrigin" name="origem" type="text" placeholder="Ex.: Aveiro" autocomplete="address-level2" minlength="2" required/>
-    <button id="originApply" type="submit" class="v53-origin-apply">Aplicar</button>
-    <button id="originCancel" type="button" class="v53-origin-cancel" hidden>Cancelar</button>
-   </form>
-   <div id="originSaved" class="v53-origin-saved" hidden><span>Origem: <strong id="originCurrent"></strong></span><button type="button" id="originEdit">Alterar</button></div>
+<section class="travel-box v53-travel-box v67-travel-box" aria-label="Configuração das deslocações">
+ <div class="v67-travel-grid">
+  <div class="v67-travel-cell">
+   <span class="v67-travel-label">PARTIDA</span>
+   <button type="button" id="originEdit" class="v67-value-button" aria-label="Definir ou alterar a partida">
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+    <strong id="originCurrent">Definir partida</strong>
+    <svg class="v67-edit-icon" aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16 4a2.8 2.8 0 0 1 4 4L9 19l-5 1 1-5Z"/></svg>
+   </button>
   </div>
-  <button id="travelToggle" class="v53-car-toggle" type="button" aria-controls="travelPanel" aria-expanded="false">
-   <span class="v53-car-caption">O meu carro <strong id="travelSub">Gasóleo · 5,5 L/100 km</strong></span>
-   <span class="v53-car-edit">Editar <span aria-hidden="true">⌄</span></span>
-  </button>
+  <div class="v67-travel-cell">
+   <span class="v67-travel-label">O MEU CARRO</span>
+   <button type="button" id="travelToggle" class="v67-value-button" aria-controls="travelPanel" aria-expanded="false" aria-label="Editar as definições do carro">
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h-2v-4l2-2 2-4h11l3 5 2 1v4h-2"/><path d="M6 10h14M8 16h8"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/></svg>
+    <strong id="travelSub">5,5 L/100 km</strong>
+    <svg class="v67-chevron" aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+   </button>
+  </div>
+ </div>
+ <div id="originEditor" class="v67-origin-editor" hidden>
+  <form id="originForm" class="v67-origin-form" aria-label="Definir origem das viagens">
+   <label for="tripOrigin">Partida de</label>
+   <input class="travel-input" id="tripOrigin" name="origem" type="text" placeholder="Ex.: Aveiro" autocomplete="address-level2" minlength="2" required/>
+   <button id="originApply" type="submit" class="v67-save">Aplicar</button>
+   <button id="originCancel" type="button" class="v67-cancel" hidden>Cancelar</button>
+  </form>
  </div>
  <div id="travelProgress" class="v53-progress" role="status" aria-live="polite" hidden></div>
- <div class="travel-panel v53-car-panel" id="travelPanel" hidden>
-  <div class="travel-fields v53-car-fields">
-   <label>Consumo · L/100 km<input class="travel-input" id="tripConsumption" type="number" min="1" max="35" step="0.1" inputmode="decimal"/></label>
-   <label>Tipo de combustível<select class="travel-input" id="tripFuelKind"><option value="gasoleo">Gasóleo simples</option><option value="gasolina">Gasolina 95 simples</option></select></label>
+ <div class="travel-panel v67-car-panel" id="travelPanel" hidden>
+  <div class="v67-setting-row">
+   <label for="tripFuelKind">Combustível</label>
+   <select class="travel-input v67-fuel-kind" id="tripFuelKind">
+    <option value="gasoleo">Gasóleo simples</option>
+    <option value="gasolina">Gasolina 95 simples</option>
+   </select>
   </div>
-  <div class="fuel-price-config"><div class="fuel-price-main"><label for="tripFuel">Preço do combustível · €/L<input class="travel-input" id="tripFuel" type="number" min="0.1" max="5" step="0.001" inputmode="decimal" readonly/></label><div class="fuel-price-aside"><label class="fuel-override-label"><input type="checkbox" id="tripFuelOverride"/> Personalizar €/L</label><span id="fuelPriceStatus" role="status" aria-live="polite">A consultar preço médio…</span></div></div><small>Estimativa para Portugal continental. <a href="https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/" target="_blank" rel="noopener noreferrer">Fonte: DGEG ↗</a> · o valor personalizado substitui a média.</small></div>
-  <div class="travel-panel-bottom"><button type="button" class="travel-primary" id="travelApply">Guardar carro</button></div>
-  <p class="travel-caption">Viagem de ida e volta com percursos calculados separadamente. Portagens estimadas pela Infraestruturas de Portugal (Classe 1), quando disponíveis. Sem ambos os sentidos, o total não é apresentado. Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>.</p>
+  <div class="v67-setting-row">
+   <span class="v67-row-label">Consumo</span>
+   <button type="button" id="tripConsumptionEdit" class="v67-edit-value" aria-label="Editar consumo do carro">
+    <strong id="tripConsumptionValue">5,5 L/100 km</strong>
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16 4a2.8 2.8 0 0 1 4 4L9 19l-5 1 1-5Z"/></svg>
+   </button>
+   <form id="consumptionForm" class="v67-inline-editor" hidden>
+    <input class="travel-input" id="tripConsumption" type="number" min="1" max="35" step="0.1" inputmode="decimal" aria-label="Consumo em litros por 100 quilómetros"/>
+    <button type="submit" class="v67-save">Guardar</button>
+    <button type="button" id="consumptionCancel" class="v67-cancel">Cancelar</button>
+   </form>
+  </div>
+  <div class="v67-setting-row">
+   <span class="v67-row-label" id="tripPriceLabel">Preço médio</span>
+   <div class="v67-price-display" id="priceDisplay">
+    <button type="button" id="tripFuelEdit" class="v67-edit-value" aria-label="Editar preço por litro">
+     <strong id="tripFuelValue">— €/L</strong>
+     <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16 4a2.8 2.8 0 0 1 4 4L9 19l-5 1 1-5Z"/></svg>
+    </button>
+    <button type="button" id="tripFuelReset" class="v67-reset" hidden>Repor média</button>
+   </div>
+   <form id="fuelPriceForm" class="v67-inline-editor" hidden>
+    <input class="travel-input" id="tripFuel" type="number" min="0.1" max="5" step="0.001" inputmode="decimal" aria-label="Preço do combustível em euros por litro"/>
+    <button type="submit" class="v67-save">Guardar</button>
+    <button type="button" id="fuelPriceCancel" class="v67-cancel">Cancelar</button>
+   </form>
+  </div>
+  <div class="v67-help">
+   <button type="button" id="travelInfoToggle" aria-controls="travelInfo" aria-expanded="false">
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7h.01"/></svg>
+    Informações sobre o cálculo
+   </button>
+   <div id="travelInfo" hidden><p id="fuelPriceStatus" role="status" aria-live="polite"></p><p>Estimativas de ida e volta calculadas em separado. O total só aparece quando existem portagens confirmadas nos dois sentidos (Classe 1). Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>. Preço médio: <a href="https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/" target="_blank" rel="noopener noreferrer">DGEG</a>.</p></div>
+  </div>
  </div>
 </section>
 
@@ -147,5 +191,5 @@
 <div class="field"><label for="fLat">Latitude GPS</label><input class="control" id="fLat" max="90" min="-90" placeholder="40.905768" step="any" type="number"/></div>
 <div class="field"><label for="fLon">Longitude GPS</label><input class="control" id="fLon" max="180" min="-180" placeholder="-8.303089" step="any" type="number"/></div>
 <div class="field wide"><label for="fDescription">Descrição</label><input class="control" id="fDescription" maxlength="250" placeholder="Paisagem, pontos de interesse, terreno..."/></div></div><div class="dialog-actions"><button id="cancelBtn" type="button">Cancelar</button><button class="save" type="submit">Guardar evento</button></div></form></div></div><div class="toast" hidden="" id="toast"></div>
-<script src="assets/js/trilhario.js?v=66"></script>
+<script src="assets/js/trilhario.js?v=67"></script>
 </body></html>
