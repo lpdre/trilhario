@@ -797,3 +797,94 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .v51-card .v52-trip .walk-trip-ctrl{width:auto;justify-content:flex-end}
  .v51-card .v52-trip .walk-trip-ctrl button{font-size:9.5px;min-height:26px;padding:4px 6px}
 }
+
+
+/* v53 — introdução da origem independente do carro */
+.v53-travel-box{background:#f5f7ef;border-color:#d5dfd1;border-radius:11px;box-shadow:0 1px 5px #284d3810}
+.v53-travel-top{display:flex;align-items:center;gap:12px;padding:10px 13px;flex-wrap:wrap}
+.v53-trip-brand{display:flex;align-items:center;gap:8px;flex-shrink:0;color:#284b34;font-size:13px;font-weight:800}
+.v53-trip-brand .travel-symbol{width:29px;height:29px;font-size:17px}
+.v53-origin-group{flex:1 1 270px;min-width:0}
+.v53-origin-form{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.v53-origin-form label{font-size:10.5px;color:#617563;font-weight:750;white-space:nowrap}
+.v53-origin-form .travel-input{flex:1 1 135px;max-width:none;min-width:110px;padding:8px 10px;min-height:35px;font-size:13px}
+.v53-origin-apply{background:#28583f;color:white;border:1px solid #28583f;border-radius:6px;min-height:35px;padding:6px 12px;font-size:12px;font-weight:800}
+.v53-origin-apply:hover{background:#1e4531}
+.v53-origin-cancel{background:transparent;border:0;color:#506854;text-decoration:underline;padding:5px 3px;font-size:11px}
+.v53-origin-saved{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:#5d725f}
+.v53-origin-saved strong{font-size:13px;color:#224a35}
+.v53-origin-saved button{font-size:11px;font-weight:750;padding:5px 8px;border:1px solid #d3dfce;background:white;border-radius:6px;color:#28543b}
+.v53-car-toggle{display:flex;align-items:center;gap:12px;text-align:left;padding:7px 10px;border:1px solid #d3dfcd;border-radius:8px;background:#fffdf8;color:#294b36;min-height:42px;max-width:100%;flex:0 1 auto}
+.v53-car-toggle:hover{background:#e9f0e7}
+.v53-car-caption{font-size:10.5px;font-weight:750;display:flex;flex-direction:column;gap:1px;line-height:1.3}
+.v53-car-caption strong{font-size:11px;font-weight:600;color:#647463}
+.v53-car-edit{font-size:10px;white-space:nowrap;color:#376c49;font-weight:800}
+.v53-car-panel{border-top:1px solid #dce6d8;background:#fbfcf6}
+.v53-car-fields{display:grid;grid-template-columns:minmax(130px,1fr) minmax(130px,1fr);max-width:610px;gap:12px}
+.v53-car-fields label:first-child{grid-column:auto}
+.v53-progress{font-size:10.5px;color:#54715a;padding:0 13px 9px}
+.v53-progress[hidden]{display:none!important}
+/* v53 — três mini-indicadores com uma linha de custos; caixa total destacada */
+.v51-card .walk-trip-line.v53-trip{padding:8px 12px;background:#f2f6ee;gap:7px;align-items:center;border-top:1px solid #e2e9de;border-bottom:1px solid #dce7d9;min-height:0;flex-wrap:nowrap}
+.v51-card .v53-trip .walk-trip-info{width:100%;flex:1;min-width:0}
+.v51-card .v53-trip-data{display:flex;flex-direction:column;gap:7px}
+.v51-card .v53-trip-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.v51-card .v53-trip-stat{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-width:0;padding:5px 9px;background:#e5ede1;border-radius:6px;min-height:39px}
+.v51-card .v53-trip-stat strong{font-size:13px;font-weight:800;line-height:1.2;color:#284933;overflow-wrap:anywhere}
+.v51-card .v53-trip-stat small{font-size:9.5px;color:#647765;font-weight:650;line-height:1.2}
+.v51-card .v53-trip-approx{font-size:9px;color:#866b50;font-weight:600}
+.v51-card .v53-trip-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px}
+.v51-card .v53-trip-details{display:flex;flex-wrap:wrap;gap:5px 15px;align-items:center;min-width:0;color:#687666;font-size:10.5px}
+.v51-card .v53-trip-details strong{color:#34553d;font-size:11px;font-weight:800;white-space:normal}
+.v51-card .v53-trip-total{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:5px 10px;background:#dce9d8;border-radius:7px;color:#2a4f34;flex:0 0 auto;min-width:125px}
+.v51-card .v53-trip-total small{font-size:9.5px;color:#466e50;font-weight:750}
+.v51-card .v53-trip-total strong{font-size:17px;color:#1b4b2e;font-weight:850;white-space:nowrap;line-height:1.2}
+.v51-card .v53-trip-empty{display:flex;align-items:center;gap:7px;min-height:27px;font-size:11px;color:#667867;line-height:1.4}
+.v51-card .v53-trip-empty-icon{display:inline-grid;place-items:center;flex:none;background:#e3ede0;color:#65806a;width:23px;height:23px;border-radius:50%;font-weight:750}
+.v51-card .v53-trip .walk-trip-ctrl{width:auto;flex-shrink:0}
+.v51-card .v53-trip .walk-trip-ctrl button{font-size:10.5px;min-height:29px;padding:5px 8px;white-space:normal}
+@media(max-width:840px){
+ .v53-travel-top{gap:9px}
+ .v53-trip-brand{flex:0 0 100%}
+ .v53-car-toggle{flex:0 0 auto}
+ .v51-card .v53-trip-details{gap:4px 9px}
+}
+@media(max-width:540px){
+ .v53-travel-top{padding:9px 10px;gap:8px}
+ .v53-trip-brand{font-size:12px}
+ .v53-origin-group{flex:1 1 100%;min-width:0}
+ .v53-origin-form{flex-wrap:nowrap}
+ .v53-origin-form label{font-size:10.5px}
+ .v53-origin-form .travel-input{min-width:0;flex:1 1 75px;min-height:34px;font-size:12px;padding:7px 8px}
+ .v53-origin-apply{min-height:34px;font-size:11px;padding:6px 9px}
+ .v53-origin-cancel{font-size:10px}
+ .v53-origin-saved{font-size:11px}
+ .v53-origin-saved strong{font-size:12px}
+ .v53-car-toggle{flex:1 1 100%;width:100%;justify-content:space-between;padding:6px 9px;min-height:38px}
+ .v53-car-caption{flex-direction:row;gap:8px;flex-wrap:wrap;align-items:baseline}
+ .v53-car-caption strong{font-size:10.5px}
+ .v53-car-panel{padding:10px}
+ .v53-car-fields{grid-template-columns:1fr 1fr}
+ .v53-car-fields label:first-child{grid-column:auto}
+ .v53-progress{padding:0 10px 8px}
+ .v51-card .walk-trip-line.v53-trip{padding:7px 9px;gap:6px;flex-wrap:nowrap}
+ .v51-card .v53-trip-data{gap:6px}
+ .v51-card .v53-trip-stats{gap:5px}
+ .v51-card .v53-trip-stat{padding:6px 6px;min-height:39px}
+ .v51-card .v53-trip-stat strong{font-size:12px}
+ .v51-card .v53-trip-stat small{font-size:9px}
+ .v51-card .v53-trip-bottom{gap:6px;align-items:center}
+ .v51-card .v53-trip-details{gap:3px 8px;font-size:9.5px}
+ .v51-card .v53-trip-details strong{font-size:10px}
+ .v51-card .v53-trip-total{flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;min-width:103px;padding:5px 7px}
+ .v51-card .v53-trip-total small{font-size:9px}
+ .v51-card .v53-trip-total strong{font-size:15px}
+ .v51-card .v53-trip-empty{font-size:10.5px}
+ .v51-card .v53-trip .walk-trip-ctrl{width:auto}
+}
+@media(max-width:350px){
+ .v53-origin-form{flex-wrap:wrap}
+ .v53-origin-form label{width:100%}
+ .v51-card .v53-trip-details{gap:2px 6px}
+ .v51-card .v53-trip-total{min-width:92px}
+}

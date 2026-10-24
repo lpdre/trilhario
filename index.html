@@ -5,7 +5,7 @@
 <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="#143e32" name="theme-color"/><meta content="Trilhário — agenda de caminhadas organizadas em Portugal, com lista, calendário, mapa e estimativa de deslocações." name="description"/>
 <title>Trilhário — Agenda de caminhadas</title>
-<link rel="stylesheet" href="assets/css/trilhario.css"/>
+<link rel="stylesheet" href="assets/css/trilhario.css?v=53"/>
 </head>
 <body>
 <section class="hero" id="top"><div class="hero-inner shell"><div class="hero-copy">
@@ -16,13 +16,32 @@
 <button class="hero-help" id="introHelpOpen" type="button" aria-controls="introGuide" aria-expanded="false">Como utilizar?</button>
 </div></div></section>
 <main class="shell main">
-<section class="travel-box" aria-label="Deslocações e custos">
- <div class="travel-bar"><div class="travel-heading"><span class="travel-symbol" aria-hidden="true">↗</span><div><strong>A minha deslocação</strong><span id="travelSub">Indica de onde sais e vê os quilómetros, o tempo de carro e os custos.</span></div></div><button class="travel-toggle" id="travelToggle" type="button" aria-controls="travelPanel" aria-expanded="false">Configurar <span aria-hidden="true">⌄</span></button></div>
- <div class="travel-panel" id="travelPanel" hidden>
-  <div class="travel-fields"><label>Origem<input class="travel-input" id="tripOrigin" placeholder="Ex.: Aveiro" autocomplete="street-address"/></label><label>Consumo · L/100 km<input class="travel-input" id="tripConsumption" type="number" min="1" max="35" step="0.1" inputmode="decimal"/></label><label>Tipo de combustível<select class="travel-input" id="tripFuelKind"><option value="gasoleo">Gasóleo simples</option><option value="gasolina">Gasolina 95 simples</option></select></label></div>
+<section class="travel-box v53-travel-box" aria-label="Configuração das deslocações">
+ <div class="v53-travel-top">
+  <div class="v53-trip-brand"><span class="travel-symbol" aria-hidden="true">↗</span><strong>A minha viagem</strong></div>
+  <div class="v53-origin-group">
+   <form id="originForm" class="v53-origin-form" aria-label="Definir origem das viagens">
+    <label for="tripOrigin">Partida de</label>
+    <input class="travel-input" id="tripOrigin" name="origem" type="text" placeholder="Ex.: Aveiro" autocomplete="address-level2" minlength="2" required/>
+    <button id="originApply" type="submit" class="v53-origin-apply">Aplicar</button>
+    <button id="originCancel" type="button" class="v53-origin-cancel" hidden>Cancelar</button>
+   </form>
+   <div id="originSaved" class="v53-origin-saved" hidden><span>Origem: <strong id="originCurrent"></strong></span><button type="button" id="originEdit">Alterar</button></div>
+  </div>
+  <button id="travelToggle" class="v53-car-toggle" type="button" aria-controls="travelPanel" aria-expanded="false">
+   <span class="v53-car-caption">O meu carro <strong id="travelSub">Gasóleo · 5,5 L/100 km</strong></span>
+   <span class="v53-car-edit">Editar <span aria-hidden="true">⌄</span></span>
+  </button>
+ </div>
+ <div id="travelProgress" class="v53-progress" role="status" aria-live="polite" hidden></div>
+ <div class="travel-panel v53-car-panel" id="travelPanel" hidden>
+  <div class="travel-fields v53-car-fields">
+   <label>Consumo · L/100 km<input class="travel-input" id="tripConsumption" type="number" min="1" max="35" step="0.1" inputmode="decimal"/></label>
+   <label>Tipo de combustível<select class="travel-input" id="tripFuelKind"><option value="gasoleo">Gasóleo simples</option><option value="gasolina">Gasolina 95 simples</option></select></label>
+  </div>
   <div class="fuel-price-config"><div class="fuel-price-main"><label for="tripFuel">Preço do combustível · €/L<input class="travel-input" id="tripFuel" type="number" min="0.1" max="5" step="0.001" inputmode="decimal" readonly/></label><div class="fuel-price-aside"><label class="fuel-override-label"><input type="checkbox" id="tripFuelOverride"/> Personalizar €/L</label><span id="fuelPriceStatus" role="status" aria-live="polite">A consultar preço médio…</span></div></div><small>Estimativa para Portugal continental. <a href="https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/" target="_blank" rel="noopener noreferrer">Fonte: DGEG ↗</a> · o valor personalizado substitui a média.</small></div>
-  <div class="travel-panel-bottom"><button type="button" class="travel-primary" id="travelApply">Guardar e calcular deslocações</button><span id="travelProgress" role="status" aria-live="polite"></span></div>
-  <p class="travel-caption">Viagem de ida e volta com percursos calculados separadamente. As portagens dos dois sentidos são estimadas pela Infraestruturas de Portugal (Classe 1), quando disponível. Se faltar um sentido, o total fica por calcular. Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>.</p>
+  <div class="travel-panel-bottom"><button type="button" class="travel-primary" id="travelApply">Guardar carro</button></div>
+  <p class="travel-caption">Viagem de ida e volta com percursos calculados separadamente. Portagens estimadas pela Infraestruturas de Portugal (Classe 1), quando disponíveis. Sem ambos os sentidos, o total não é apresentado. Rotas experimentais: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>.</p>
  </div>
 </section>
 
@@ -109,5 +128,5 @@
 <div class="field"><label for="fLat">Latitude GPS</label><input class="control" id="fLat" max="90" min="-90" placeholder="40.905768" step="any" type="number"/></div>
 <div class="field"><label for="fLon">Longitude GPS</label><input class="control" id="fLon" max="180" min="-180" placeholder="-8.303089" step="any" type="number"/></div>
 <div class="field wide"><label for="fDescription">Descrição</label><input class="control" id="fDescription" maxlength="250" placeholder="Paisagem, pontos de interesse, terreno..."/></div></div><div class="dialog-actions"><button id="cancelBtn" type="button">Cancelar</button><button class="save" type="submit">Guardar evento</button></div></form></div></div><div class="toast" hidden="" id="toast"></div>
-<script src="assets/js/trilhario.js"></script>
+<script src="assets/js/trilhario.js?v=53"></script>
 </body></html>
