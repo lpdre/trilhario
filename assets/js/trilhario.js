@@ -122,7 +122,7 @@ function persistValue(key,value,quiet=false){
 }
 let custom=storage('trilhario_custom_v1',[]);
 const KM_CAP=50, GAIN_CAP=2500;
-let state={day:'all',organizer:'all',difficulty:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,search:'',view:'list',month:9,year:2026};
+let state={day:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,view:'list',month:9,year:2026};
 let remoteEvents=null;
 let remoteUpdatedAt=null;
 let remoteSourcesHealth=null,remoteFeedState='loading';
@@ -415,10 +415,8 @@ function selected({ignoreDay=false}={}){const today=catalogToday();return allEve
   (ignoreDay ? x.date>=today : (state.day!=='all'||x.date>=today))&&
   (ignoreDay||state.day==='all'||x.date===state.day)&&
   (state.organizer==='all'||x.organizer===state.organizer)&&
-  (state.difficulty==='all'||String(x.difficulty)===state.difficulty)&&
   ((state.kmMin===0&&state.kmMax===KM_CAP)||(x.km!=null&&Number(x.km)>=state.kmMin&&Number(x.km)<=state.kmMax))&&
-  ((state.gainMin===0&&state.gainMax===GAIN_CAP)||(x.gain!=null&&Number(x.gain)>=state.gainMin&&Number(x.gain)<=state.gainMax))&&
-  fold(`${x.title} ${x.town} ${x.area} ${x.organizer} ${x.description}`).includes(fold(state.search))
+  ((state.gainMin===0&&state.gainMax===GAIN_CAP)||(x.gain!=null&&Number(x.gain)>=state.gainMin&&Number(x.gain)<=state.gainMax))
  ).sort((a,b)=>a.date.localeCompare(b.date)||String(a.time).localeCompare(String(b.time))||a.title.localeCompare(b.title,'pt'))}
 function dateShort(x){return new Date(x.date+'T12:00:00').toLocaleDateString('pt-PT',{weekday:'short',day:'2-digit',month:'short'}).replaceAll('.','')}
 // Links fiáveis e em novo separador. Não transformar textos em URLs sem validação.
@@ -523,7 +521,6 @@ function eventRow(x){
 function chips(){let xs=[];
  if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" onclick="clearSelectedDay()" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
  if(state.organizer!=='all')xs.push('Organizador: '+state.organizer);
- if(state.difficulty!=='all')xs.push(names[+state.difficulty]);
  if(state.kmMin>0||state.kmMax<KM_CAP)xs.push('Distância: '+state.kmMin+'–'+state.kmMax+' km');
  if(state.gainMin>0||state.gainMax<GAIN_CAP)xs.push('D+: '+state.gainMin+'–'+state.gainMax+' m');
  return xs.map(t=>t.startsWith('<button')?t:`<span class="pill">${esc(t)}</span>`).join('')}
@@ -651,8 +648,8 @@ const LIST_INITIAL=30,LIST_INCREMENT=30;
 let listLimit=LIST_INITIAL,listSignature='',listWalks=[],listMoreObserver=null;
 function stopListObserver(){if(listMoreObserver){listMoreObserver.disconnect();listMoreObserver=null;}}
 function renderProgressiveList(events){
- const stableSignature=JSON.stringify([state.day,state.organizer,state.difficulty,state.kmMin,state.kmMax,
-   state.gainMin,state.gainMax,state.search,$('travelSort')?.value||'date',
+ const stableSignature=JSON.stringify([state.day,state.organizer,state.kmMin,state.kmMax,
+   state.gainMin,state.gainMax,$('travelSort')?.value||'date',
    remoteFeedState,remoteUpdatedAt,custom.length,events.length,events[0]?.id,events.at(-1)?.id]);
  if(stableSignature!==listSignature){listSignature=stableSignature;listLimit=LIST_INITIAL;}
  listWalks=events;
@@ -690,7 +687,7 @@ function render(){const events=sortedWalks(selected());
  // O calendário usa os outros filtros, mas não restringe os resultados ao dia destacado.
  const displayedEvents=state.view==='calendar'?sortedWalks(selected({ignoreDay:true})):events;
  renderCatalogStatus();
- const applied=[state.day!=='all',state.organizer!=='all',state.difficulty!=='all',state.kmMin>0||state.kmMax<KM_CAP,state.gainMin>0||state.gainMax<GAIN_CAP,!!state.search].filter(Boolean).length;
+ const applied=[state.day!=='all',state.organizer!=='all',state.kmMin>0||state.kmMax<KM_CAP,state.gainMin>0||state.gainMax<GAIN_CAP].filter(Boolean).length;
  $('filtersCounterMini').textContent=applied?String(applied):'';$('filtersCounterMini').hidden=!applied;
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
@@ -779,7 +776,7 @@ function setDay(d){
  document.querySelector('[data-view="list"]')?.focus({preventScroll:true});
  document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function resetFilters(){Object.assign(state,{day:'all',organizer:'all',difficulty:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,search:''});$('search').value='';$('organizer').value='all';$('difficulty').value='all';render()}
+function resetFilters(){Object.assign(state,{day:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP});$('organizer').value='all';render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
 function calendarIcs(e){
@@ -817,9 +814,7 @@ function removeEvent(id){if(!confirm('Eliminar este evento?'))return;const next=
 function openModal(){$('modal').hidden=false;$('fTitle').focus();document.body.style.overflow='hidden'}function closeModal(){$('modal').hidden=true;document.body.style.overflow=''}
 $('addBtn')?.addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
 $('eventForm').addEventListener('submit',e=>{e.preventDefault();const val=id=>$(id).value.trim(),maybeNumber=id=>val(id)!==''?Number(val(id)):null;const lat=maybeNumber('fLat'),lon=maybeNumber('fLon');const entry={id:'meu-'+Date.now(),userAdded:true,title:val('fTitle'),date:val('fDate'),time:val('fTime'),town:val('fTown'),region:val('fRegion'),area:val('fTown'),organizer:val('fOrg'),km:maybeNumber('fKm'),gain:maybeNumber('fGain'),price:maybeNumber('fPrice'),duration:maybeNumber('fDuration'),capacity:maybeNumber('fMaxParticipants'),start:val('fStart'),lat,lon,verified:lat!=null&&lon!=null,difficulty:Number(val('fDifficulty')),description:val('fDescription'),url:val('fUrl'),tag:'Manual'};if(!entry.title||!entry.date||!entry.town||!entry.organizer)return;const next=[...custom,entry];if(!persistValue('trilhario_custom_v1',next))return;custom=next;$('eventForm').reset();closeModal();populateOrganizers();resetFilters();toast('Evento guardado neste navegador.');});
-$('search').addEventListener('input',e=>{state.search=e.target.value;render()});
 document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{state.kmMin=Number(b.dataset.quickKm);state.kmMax=KM_CAP;state.view='list';render();}));
-$('difficulty').addEventListener('change',e=>{state.difficulty=e.target.value;render()});
 $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;render()});
 ['km','gain'].forEach(prefix=>{
  $(prefix+'Min').addEventListener('input',e=>changeDual(prefix,'Min',e.target.value));
@@ -925,26 +920,24 @@ function travelRow(e){
  let body;
  if(t){
   const full=t.total!=null&&t.fee!=null?t.total+t.fee:null;
-  const approx=route?.precision&&route.precision!=='gps'?' <span class="v51-trip-note">· destino aproximado</span>':'';
-  body=`<div class="v51-trip-label">Deslocação desde ${esc(travelPrefs.origin)} · ida e volta${approx}</div>
-    <div class="v51-trip-grid">
-     <span><small>Carro (i/v)</small><strong>${timeStr(t.minutes)}</strong></span>
-     <span><small>Km (i/v)</small><strong>${fmtN(t.km)} km</strong></span>
-     <span><small>Combustível</small><strong>${travelMoney(t.fuel)}</strong></span>
-     <span><small>Portagens</small><strong>${t.toll==null?'Por calcular':travelMoney(t.toll)}</strong></span>
-     <span><small>Viagem</small><strong>${t.total==null?'Por calcular':travelMoney(t.total)}</strong></span>
-     <span class="v51-grand-total"><small>Total c/ inscrição</small><strong>${full==null?'—':travelMoney(full)}</strong></span>
-    </div>`;
+  const approx=route?.precision&&route.precision!=='gps'?' <span class="v52-approx">(partida aproximada)</span>':'';
+  body=`<div class="v52-trip-line v52-trip-route"><strong>De ${esc(travelPrefs.origin)}</strong> <span class="v52-i-v">· ida e volta</span> · ${fmtN(t.km)} km · ${timeStr(t.minutes)} de carro${approx}</div>
+   <div class="v52-trip-line v52-trip-costs">
+    <span>Comb. <strong>${travelMoney(t.fuel)}</strong></span>
+    <span>Portagens <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
+    <span>Viagem <strong>${t.total==null?'—':travelMoney(t.total)}</strong></span>
+    <span class="v52-total">Total c/ inscrição <strong>${full==null?'—':travelMoney(full)}</strong></span>
+   </div>`;
  }else{
-  const status=!hasOrigin?'Define a origem para calcular distância, tempo e custos.':
-   unavailable?(ambiguousDeparture(e)?'Vários encontros ou travessia de barco · cálculo rodoviário indisponível.':'Local de partida por confirmar · cálculo indisponível.'):
-   tripOriginProblem||error||(queued?'A calcular percurso…':'Percurso por calcular.');
-  body=`<div class="v51-trip-label">Deslocação${hasOrigin?' desde '+esc(travelPrefs.origin):''} · ida e volta</div><div class="v51-trip-empty">${esc(status)}</div>`;
+  const status=!hasOrigin?'Define a origem para calcular a viagem.':
+   unavailable?(ambiguousDeparture(e)?'Vários encontros ou travessia de barco · viagem indisponível.':'Local de partida por confirmar · viagem indisponível.'):
+   tripOriginProblem||error||(queued?'A calcular percurso…':'Viagem por calcular.');
+  body=`<div class="v52-trip-line v52-trip-pending"><strong>Viagem${hasOrigin?' desde '+esc(travelPrefs.origin):''}</strong> · ${esc(status)}</div>`;
  }
  const action=!hasOrigin?`<button type="button" data-event-action="openOriginSettings" data-event-id="${esc(e.id)}">Definir origem</button>`:
-  !unavailable&&!t&&!queued?`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}">${error||tripOriginProblem?'Tentar novamente':'Calcular viagem'}</button>`:
-  t&&t.toll==null&&tollsDue(route)?`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Calcular portagens</button>`:'';
- return `<div class="walk-trip-line v51-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
+  !unavailable&&!t&&!queued?`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}">${error||tripOriginProblem?'Tentar novamente':'Calcular'}</button>`:
+  t&&t.toll==null&&tollsDue(route)?`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Portagens</button>`:'';
+ return `<div class="walk-trip-line v51-trip v52-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
 // dataset devolve o ID literal, mesmo contendo aspas ou outros caracteres.

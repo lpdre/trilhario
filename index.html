@@ -29,7 +29,6 @@
 
 <div class="layout">
 <section aria-live="polite" class="results">
-<div class="v51-search"><label for="search">Pesquisar</label><input id="search" type="search" placeholder="Trilho, local ou organizador…" autocomplete="off" aria-label="Pesquisar caminhadas"/></div>
 <div class="v51-quick-filters" role="group" aria-label="Filtros rápidos de distância mínima"><span>Distância mínima:</span>
 <button type="button" data-quick-km="0" class="active" aria-pressed="true">Todas</button>
 <button type="button" data-quick-km="10" aria-pressed="false">10+ km</button>
@@ -44,8 +43,7 @@
     <div class="filter-grid">
       
       <div class="field filter-organizer"><label for="organizer">Organizador</label><select class="control" id="organizer"><option value="all">Todos os organizadores</option></select></div>
-      <div class="field filter-difficulty"><label for="difficulty">Dificuldade</label><select class="control" id="difficulty"><option value="all">Todas</option><option value="1">Fácil</option><option value="2">Moderada</option><option value="3">Exigente</option><option value="4">Difícil</option><option value="5">Muito difícil</option></select></div>
-      <div class="field filter-distance"><span class="field-label">Distância</span>
+            <div class="field filter-distance"><span class="field-label">Distância</span>
         <div class="dual-values"><span>Mín. <strong id="kmMinValue">0 km</strong></span><span>Máx. <strong id="kmMaxValue">50 km</strong></span></div>
         <div class="dual-slider" id="kmTrack" style="--from:0%;--to:100%">
           <input id="kmMin" type="range" min="0" max="50" step="1" value="0" aria-label="Distância mínima"/>
