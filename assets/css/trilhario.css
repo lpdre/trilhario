@@ -1405,3 +1405,105 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .results .v64-quick-filters button{min-height:28px;padding:4px 8px;font-size:9.8px}
  .walk-row.v51-card.v56-card .v66-trip-route .v66-trip-car{width:18px;height:18px}
 }
+
+
+/* v72 — cabeçalho numa linha e tipografia consolidada na interface activa. */
+:root{
+ --ui-caption:10px;
+ --ui-small:11px;
+ --ui-body:12px;
+ --ui-metric:13px;
+ --ui-card-title:16px;
+}
+/* Cabeçalho: identidade sem ponto e ajuda ao lado, não numa segunda linha. */
+.hero .hero-inner{padding-top:10px;padding-bottom:10px;gap:0}
+.hero .hero-copy{
+ display:flex;align-items:center;gap:16px;flex-wrap:nowrap;
+ width:100%;max-width:none;min-width:0;
+}
+.hero .hero-copy .brand-hero{
+ margin:0;display:inline-flex;align-items:center;gap:9px;
+ font-size:27px;line-height:1.13;letter-spacing:-1.2px;white-space:nowrap;
+}
+.hero .hero-copy .brand-hero::before{width:25px;height:25px;flex:0 0 25px}
+.hero .hero-copy .hero-help{
+ display:inline-flex;align-items:center;flex:none;margin:0;padding:8px 0;
+ font-size:var(--ui-small);line-height:1.2;white-space:nowrap;
+}
+/* Escala: legenda < informação secundária < corpo/valor < título. */
+.walk-row.v51-card.v56-card .walk-main h3{
+ font-size:var(--ui-card-title);line-height:1.27;
+}
+.walk-row.v51-card.v56-card .walk-card-details p,
+.walk-row.v51-card.v56-card .walk-card-details .walk-times,
+.walk-row.v51-card.v56-card .walk-card-details .walk-start{
+ font-size:var(--ui-small);
+}
+.walk-row.v51-card.v56-card .walk-card-details .walk-caption{
+ font-size:var(--ui-caption);
+}
+.walk-row.v51-card.v56-card .walk-metrics small{
+ font-size:var(--ui-caption);line-height:1.2;
+}
+.walk-row.v51-card.v56-card .walk-metrics b{
+ font-size:var(--ui-metric);line-height:1.2;
+}
+.walk-row.v51-card.v56-card .v56-trip-summary.v57-trip-summary,
+.walk-row.v51-card.v56-card .v57-trip-line,
+.walk-row.v51-card.v56-card .v57-trip-line>span,
+.walk-row.v51-card.v56-card .v57-trip-line strong,
+.walk-row.v51-card.v56-card .v57-trip-total strong,
+.walk-row.v51-card.v56-card .v66-trip-heading strong{
+ font-size:var(--ui-small);line-height:1.35;
+}
+/* Formulário de carro: a mesma escala para campos, rótulos e valores. */
+.v67-car-panel .v67-setting-row>label,
+.v67-car-panel .v67-row-label,
+.v67-car-panel .v67-fuel-kind,
+.v67-car-panel .v67-edit-value strong,
+.v67-car-panel .v67-inline-editor .travel-input,
+.v67-car-panel .v67-save{
+ font-size:var(--ui-body);
+}
+.v67-car-panel .v67-reset,.v67-car-panel .v67-help>button,
+.v67-car-panel .v67-help>div{font-size:var(--ui-small)}
+.v67-travel-box .v67-travel-label{font-size:var(--ui-caption)}
+.v67-travel-box .v67-value-button,
+.v67-travel-box .v67-value-button strong{font-size:var(--ui-body)}
+/* Comandos equivalentes partilham os mesmos tamanhos. */
+.results .v64-quick-filters>span,
+.results .v64-quick-filters button{font-size:var(--ui-caption)}
+.results .v65-toolbar .toolbar-filter.v64-filter,
+.results .v65-toolbar .v65-sort .v64-sort-label,
+.results .v65-toolbar .toolbar-sort.v65-sort select,
+.results .v65-toolbar .v64-view-switch button{font-size:var(--ui-small)}
+.intro-guide-heading strong{font-size:var(--ui-body)}
+.intro-step-copy strong,.intro-step-copy span,
+.intro-guide>p,.intro-guide-footer{font-size:var(--ui-small)!important}
+@media(max-width:540px){
+ .hero .hero-inner{padding-top:8px;padding-bottom:8px}
+ .hero .hero-copy{gap:12px}
+ .hero .hero-copy .brand-hero{font-size:24px;gap:7px}
+ .hero .hero-copy .brand-hero::before{width:22px;height:22px;flex-basis:22px}
+ .hero .hero-copy .hero-help{font-size:var(--ui-small);padding:7px 0}
+ .walk-row.v51-card.v56-card .walk-main h3{font-size:15px}
+ .walk-row.v51-card.v56-card .walk-metrics b{font-size:var(--ui-body)}
+ .walk-row.v51-card.v56-card .walk-card-details p,
+ .walk-row.v51-card.v56-card .walk-card-details .walk-caption,
+ .walk-row.v51-card.v56-card .walk-card-details .walk-times,
+ .walk-row.v51-card.v56-card .walk-card-details .walk-start{font-size:var(--ui-small)}
+ .walk-row.v51-card.v56-card .walk-metrics small{font-size:var(--ui-caption)}
+ .results .v65-toolbar .toolbar-filter.v64-filter,
+ .results .v65-toolbar .v65-sort .v64-sort-label,
+ .results .v65-toolbar .v64-view-switch button{font-size:var(--ui-caption)}
+ .v67-travel-box .v67-travel-label{font-size:var(--ui-caption)}
+ .v67-travel-box .v67-value-button strong{font-size:var(--ui-small)}
+ .v67-car-panel .v67-setting-row>label,
+ .v67-car-panel .v67-row-label,.v67-car-panel .v67-fuel-kind,
+ .v67-car-panel .v67-edit-value strong{font-size:var(--ui-small)}
+}
+@media(max-width:345px){
+ .hero .hero-copy{gap:9px}
+ .hero .hero-copy .brand-hero{font-size:22px}
+ .hero .hero-copy .brand-hero::before{width:20px;height:20px;flex-basis:20px}
+}
