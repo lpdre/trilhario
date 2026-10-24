@@ -1507,3 +1507,106 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .hero .hero-copy .brand-hero{font-size:22px}
  .hero .hero-copy .brand-hero::before{width:20px;height:20px;flex-basis:20px}
 }
+
+
+/* v73 — ajuda no canto inferior direito; custos alinhados numa grelha legível. */
+.hero .hero-copy{align-items:flex-start;min-height:36px;gap:12px}
+.hero .hero-copy .brand-hero{align-self:flex-start}
+.hero .hero-copy .hero-help{
+ align-self:flex-end;margin:0 0 1px auto;padding:0;
+ font-size:var(--ui-small);line-height:1.3;text-align:right;
+}
+/* Resumo da deslocação: primeira linha percurso, segunda linha custos. */
+.walk-row.v51-card.v56-card .walk-trip-line.v53-trip{
+ align-items:stretch;flex-wrap:wrap;gap:4px 10px;padding:6px 10px 7px;
+}
+.walk-row.v51-card.v56-card .v53-trip .walk-trip-info{
+ flex:1 1 240px;min-width:0;
+}
+.walk-row.v51-card.v56-card .v73-trip-summary{
+ display:grid;grid-template-columns:minmax(0,1fr);
+ gap:5px;width:100%;min-width:0;font-variant-numeric:tabular-nums;
+}
+.walk-row.v51-card.v56-card .v73-trip-route{
+ display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+ align-items:center;column-gap:10px;min-width:0;padding-bottom:4px;
+ border-bottom:1px solid #e3e9e0;
+ font-size:var(--ui-small);line-height:1.25;
+}
+.walk-row.v51-card.v56-card .v73-trip-brand{
+ display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+ color:#28573b;
+}
+.walk-row.v51-card.v56-card .v73-trip-brand strong{
+ font-size:var(--ui-small);font-weight:800;
+}
+.walk-row.v51-card.v56-card .v73-trip-brand .v66-trip-car{
+ width:19px;height:19px;flex:none;display:block;margin:0;
+ transform:translateY(-1px);color:#315f41;
+}
+.walk-row.v51-card.v56-card .v73-trip-distance{
+ min-width:0;white-space:nowrap;color:#536b59;
+}
+.walk-row.v51-card.v56-card .v73-trip-distance strong,
+.walk-row.v51-card.v56-card .v73-trip-duration strong{
+ font-size:var(--ui-small);font-weight:750;color:#294b35;white-space:nowrap;
+}
+.walk-row.v51-card.v56-card .v73-trip-distance small{
+ font-size:var(--ui-caption);font-weight:500;color:#677b69;
+}
+.walk-row.v51-card.v56-card .v73-trip-duration{
+ justify-self:end;white-space:nowrap;
+}
+.walk-row.v51-card.v56-card .v73-trip-costs{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:8px;align-items:stretch;min-width:0;
+}
+.walk-row.v51-card.v56-card .v73-trip-cost{
+ display:flex;flex-direction:column;align-items:flex-start;
+ justify-content:center;gap:1px;min-width:0;
+}
+.walk-row.v51-card.v56-card .v73-trip-label{
+ color:#6b7b6b;font-size:var(--ui-caption);
+ font-weight:600;line-height:1.2;
+}
+.walk-row.v51-card.v56-card .v73-trip-cost>strong{
+ font-size:var(--ui-body);font-weight:750;line-height:1.3;
+ color:#304d39;white-space:nowrap;
+}
+.walk-row.v51-card.v56-card .v73-trip-total{
+ border-left:1px solid #d6e3d4;padding-left:10px;
+}
+.walk-row.v51-card.v56-card .v73-trip-total .v73-trip-label{
+ color:#315f41;font-weight:750;
+}
+.walk-row.v51-card.v56-card .v73-trip-total>strong{
+ color:#185236;font-weight:850;
+}
+.walk-row.v51-card.v56-card .v53-trip .walk-trip-ctrl{
+ align-self:flex-end;margin-left:auto;
+}
+@media(max-width:540px){
+ .hero .hero-copy{min-height:32px;gap:8px}
+ .hero .hero-copy .hero-help{margin-bottom:0}
+ .walk-row.v51-card.v56-card .walk-trip-line.v53-trip{
+  padding:5px 8px 6px;gap:4px 7px;
+ }
+ .walk-row.v51-card.v56-card .v73-trip-summary{gap:4px}
+ .walk-row.v51-card.v56-card .v73-trip-route{
+  column-gap:7px;padding-bottom:4px;
+ }
+ .walk-row.v51-card.v56-card .v73-trip-brand .v66-trip-car{
+  width:18px;height:18px;
+ }
+ .walk-row.v51-card.v56-card .v73-trip-costs{gap:6px}
+ .walk-row.v51-card.v56-card .v73-trip-cost>strong{font-size:11.5px}
+ .walk-row.v51-card.v56-card .v73-trip-total{padding-left:7px}
+}
+@media(max-width:355px){
+ .walk-row.v51-card.v56-card .v73-trip-route{column-gap:4px}
+ .walk-row.v51-card.v56-card .v73-trip-brand{gap:3px}
+ .walk-row.v51-card.v56-card .v73-trip-distance small{font-size:9px}
+ .walk-row.v51-card.v56-card .v73-trip-costs{gap:4px}
+ .walk-row.v51-card.v56-card .v73-trip-cost>strong{font-size:11px}
+ .walk-row.v51-card.v56-card .v73-trip-total{padding-left:5px}
+}
