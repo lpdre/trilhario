@@ -488,7 +488,7 @@ function eventRow(x){
    const mins=Number(x.time.slice(0,2))*60+Number(x.time.slice(3,5))+Math.round(Number(x.duration)*60);
    finish='≈ '+String(Math.floor(mins/60)%24).padStart(2,'0')+':'+String(mins%60).padStart(2,'0')+(mins>=1440?' (+1 dia)':'');
  }
- return `<article class="walk-row v51-card v55-card" data-eid="${esc(x.id)}">
+ return `<article class="walk-row v51-card v56-card" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
    <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
@@ -498,7 +498,7 @@ function eventRow(x){
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
    <p class="v51-difficulty"><span class="walk-caption">Dificuldade:</span> <strong>${esc(names[x.difficulty]||'Por indicar')}</strong></p>
    </div>
-   ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="114" height="99" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'v51-no-photo',textContent:'↗'}))">`:'<div class="v51-no-photo" aria-hidden="true">↗</div>'}
+   ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="94" height="94" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'v51-no-photo',textContent:'↗'}))">`:'<div class="v51-no-photo" aria-hidden="true">↗</div>'}
   </div>
   <div class="walk-metrics">
    <span><small>Distância</small><b>${distance}</b></span>
@@ -923,11 +923,10 @@ function travelRow(e){
  if(t){
   const approx=route?.precision&&route.precision!=='gps'?' · aprox.':'';
   // A inscrição já figura nas métricas do trilho: não integra o total da viagem.
-  body=`<div class="v55-trip-inline" aria-label="Custos da viagem de ida e volta desde ${esc(travelPrefs.origin)}">
-    <span class="v55-trip-route" title="Distância e duração de ida e volta desde ${esc(travelPrefs.origin)}"><strong>${fmtN(t.km)} km</strong><small>${timeStr(t.minutes)} i/v${approx}</small></span>
-    <span><small>Comb.</small><strong>${travelMoney(t.fuel)}</strong></span>
-    <span><small>Port.</small><strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
-    <span class="v55-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}><small>Total</small><strong>${t.total==null?'—':travelMoney(t.total)}</strong></span>
+  // Uma linha de leitura rápida, não uma segunda grelha de cartões.
+  body=`<div class="v56-trip-summary" aria-label="Viagem de ida e volta desde ${esc(travelPrefs.origin)}">
+    <span class="v56-trip-route" title="Distância e tempo de carro de ida e volta"><strong>${fmtN(t.km)} km</strong> · ${timeStr(t.minutes)} i/v${approx}</span>
+    <span class="v56-trip-costs"><span>Comb. <strong>${travelMoney(t.fuel)}</strong></span><span>Port. <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span><span class="v56-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong></span></span>
    </div>`;
   if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Repetir portagens</button>`;
  }else{
