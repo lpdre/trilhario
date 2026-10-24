@@ -224,7 +224,7 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
             if len(adult)==1:
                 val=float(adult[0][1].replace(',','.'))
                 if 0<=val<=500:event['price']=val
-            elif re.search(r'\b(?:gratuit[oa]|participa[cç][aã]o\s+gratuita)\b',text,re.I):
+            elif re.search(r'\b(?:pre[cç]o|inscri[cç][aã]o|participa[cç][aã]o)\s*[:\-]?\s*gratuit[oa]\b',text,re.I):
                 event['price']=0.0
     if not event.get('duration'):
         dm=re.search(r'\b(?:dura[cç][aã]o|tempo previsto|tempo estimado)\s*[:\-]?\s*(\d{1,2})\s*h\s*(\d{1,2})(?:\s*min(?:utos?)?)?\b',text,re.I)
@@ -323,9 +323,9 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         # Os preços surgem normalmente em «Faça Já A Sua Reserva», frequentemente
         # depois dos 12 000 caracteres lidos por parse_meta. Procurar o valor
         # APENAS nessa secção evita confundir preços de anúncios relacionados.
-        if item.get("price") is None:
+        if item.get("price") is None or item.get("price") == 0:
             full_text = clean(scope.get_text(" ", strip=True))
-            for heading in re.finditer(r"fa[cç]a\s+j[aá]\s+a\s+sua\s+reserva", full_text, re.I):
+            for heading in re.finditer(r"(?:fa[cç]a\s+j[aá]\s+a\s+sua\s+reserva|reservas\s+fechadas!?)", full_text, re.I):
                 booking = full_text[heading.end():heading.end() + 240]
                 m_price = re.search(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|euros?)", booking, re.I)
                 if m_price:
