@@ -170,9 +170,9 @@ if(ORGANIZERS_PAGE_MODE){document.body.classList.add('organizers-mode');document
 function renderOrganizersPage(){
  if(!ORGANIZERS_PAGE_MODE)return;
  const count=new Map();
- const today=new Date().toLocaleDateString('sv-SE');
+ const clock=agendaClock();
  const es=allEvents();
- es.forEach(e=>{if(e.date>=today&&e.organizer)count.set(fold(e.organizer),(count.get(fold(e.organizer))||0)+1)});
+ es.forEach(e=>{if(eventHasNotStarted(e,clock)&&e.organizer)count.set(fold(e.organizer),(count.get(fold(e.organizer))||0)+1)});
  const byName=new Map();
  ORGANIZER_DIRECTORY.forEach(e=>byName.set(fold(e.name),e));
  es.forEach(e=>{
@@ -307,6 +307,34 @@ function allEvents(){
 // Num alojamento web, o catálogo actualizado pode ser publicado como eventos.json.
 // Se não existir, o HTML continua autónomo e mostra o catálogo demonstrativo.
 function catalogToday(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Lisbon'});}
+// v58 — a agenda usa sempre a hora portuguesa, independentemente do fuso do navegador.
+const AGENDA_CLOCK_FORMATTER=new Intl.DateTimeFormat('en-GB',{
+ timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit',
+ hour:'2-digit',minute:'2-digit',hourCycle:'h23'
+});
+function agendaClock(instant=new Date()){
+ const parts=Object.fromEntries(AGENDA_CLOCK_FORMATTER.formatToParts(instant)
+  .filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+ return {date:parts.year+'-'+parts.month+'-'+parts.day,
+         minute:Number(parts.hour)*60+Number(parts.minute)};
+}
+function eventHasNotStarted(e,clock=agendaClock()){
+ if(!e||typeof e.date!=='string')return false;
+ if(e.date!==clock.date)return e.date>clock.date;
+ // Se o organizador não indicar uma hora válida, conservar até ao fim desse dia.
+ const match=typeof e.time==='string'?e.time.trim().match(/^([01]?\d|2[0-3])[:h]([0-5]\d)$/i):null;
+ if(!match)return true;
+ return Number(match[1])*60+Number(match[2])>clock.minute;
+}
+function agendaUpcomingFingerprint(clock=agendaClock()){
+ return allEvents().filter(e=>eventHasNotStarted(e,clock)).map(e=>e.id).join('\u001f');
+}
+let agendaCurrentFingerprint='';
+function refreshAgendaForClock(){
+ if(document.hidden)return;
+ const current=agendaUpcomingFingerprint();
+ if(current!==agendaCurrentFingerprint){populateOrganizers();render();}
+}
 function renderCatalogStatus(){
  const node=$('catalogStatus'),foot=$('footerSourceStatus');if(!node||!foot)return;
  let status=remoteFeedState,message='';
@@ -366,7 +394,8 @@ async function loadEventFeed(){
   remoteUpdatedAt=typeof json.updated_at==='string'?json.updated_at:null;
   remoteSourcesHealth=json.sources_health&&typeof json.sources_health==='object'&&!Array.isArray(json.sources_health)?json.sources_health:null;
   remoteFeedState='ready';
-  const future=events.map(e=>e.date).filter(d=>d>=catalogToday()).sort();
+  const clock=agendaClock();
+  const future=events.filter(e=>eventHasNotStarted(e,clock)).map(e=>e.date).sort();
   if(future.length){state.year=Number(future[0].slice(0,4));state.month=Number(future[0].slice(5,7))-1;}
   geo.selectionShown=false;populateOrganizers();render();
  }catch(err){remoteFeedState='unavailable';console.info('Catálogo externo indisponível; dados locais indicados como demonstração.',err?.message);renderCatalogStatus();render();}
@@ -411,8 +440,8 @@ function populateOrganizers(){
  select.innerHTML='<option value="all">Todos os organizadores</option>'+orgs.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
  select.value=state.organizer;
 }
-function selected({ignoreDay=false}={}){const today=catalogToday();return allEvents().filter(x=>
-  (ignoreDay ? x.date>=today : (state.day!=='all'||x.date>=today))&&
+function selected({ignoreDay=false}={}){const clock=agendaClock();return allEvents().filter(x=>
+  eventHasNotStarted(x,clock)&&
   (ignoreDay||state.day==='all'||x.date===state.day)&&
   (state.organizer==='all'||x.organizer===state.organizer)&&
   ((state.kmMin===0&&state.kmMax===KM_CAP)||(x.km!=null&&Number(x.km)>=state.kmMin&&Number(x.km)<=state.kmMax))&&
@@ -685,7 +714,7 @@ function loadMoreWalks(){
  // Respeitar os lotes de cálculo de deslocações para os cartões agora visíveis.
  scheduleTravelBatches(listWalks);
 }
-function render(){const events=sortedWalks(selected());
+function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();const events=sortedWalks(selected());
  // O calendário usa os outros filtros, mas não restringe os resultados ao dia destacado.
  const displayedEvents=state.view==='calendar'?sortedWalks(selected({ignoreDay:true})):events;
  renderCatalogStatus();
@@ -694,7 +723,7 @@ function render(){const events=sortedWalks(selected());
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
  document.querySelectorAll('[data-quick-km]').forEach(b=>{const on=state.kmMin===Number(b.dataset.quickKm)&&state.kmMax===KM_CAP;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
- const activeOrgCount=new Set(displayedEvents.map(e=>e.organizer)).size; $('heroStats').innerHTML=`${displayedEvents.length} caminhada${displayedEvents.length===1?'':'s'} · <a class="org-header-link" href="?organizadores=1" target="_blank" rel="noopener noreferrer" title="Ver todos os organizadores" aria-label="Abrir lista completa de organizadores num novo separador">${activeOrgCount} organizador${activeOrgCount===1?'':'es'} ↗</a>`;renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
+ renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
    scheduleTravelBatches(events);
  }else{stopListObserver();if(tripBatchObserver){tripBatchObserver.disconnect();tripBatchObserver=null;}if(state.view==='calendar')renderCalendar(displayedEvents);else renderMap(events)}}
 // v47B — calendário mensal completo. A data destacada filtra a Lista, não o mês.
@@ -1628,8 +1657,11 @@ initIntroHelp();
 renderSourcesDirectory();
 $('orgPageSearch').addEventListener('input',renderOrganizersPage);
 populateOrganizers();
-$('heroStats').innerHTML='<strong>A carregar caminhadas…</strong><span>Agenda local e fontes acompanhadas</span>';
 render();
 renderTravelProgress();
 loadEventFeed();
+// A lista também se actualiza sozinha ao chegar a hora de início de uma caminhada.
+setInterval(refreshAgendaForClock,30000);
+document.addEventListener('visibilitychange',refreshAgendaForClock);
+window.addEventListener('focus',refreshAgendaForClock);
 refreshFuelPrices().catch(()=>{if($('tripFuelKind'))updateFuelInput();});
