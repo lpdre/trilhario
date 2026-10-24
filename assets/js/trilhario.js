@@ -938,11 +938,12 @@ function travelRow(e){
  if(t){
   const approx=route?.precision&&route.precision!=='gps'?' · aprox.':'';
   // A inscrição já figura nas métricas do trilho: não integra o total da viagem.
-  // Manter os custos discretos, mas em duas linhas com rótulos explícitos.
+  // Identificar a viagem com um carro lateral, mantendo duas linhas compactas de custo.
   body=`<div class="v56-trip-summary v57-trip-summary" aria-label="Viagem de ida e volta desde ${esc(travelPrefs.origin)}">
-    <div class="v57-trip-line v57-trip-route">
-      <span>Distância ida e volta: <strong>${fmtN(t.km)} km</strong>${approx}</span>
-      <span>Duração: <strong>${tripDurationWords(t.minutes)}</strong></span>
+    <div class="v57-trip-line v57-trip-route v66-trip-route">
+      <span class="v66-trip-heading"><svg class="v66-trip-car" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg><strong>Viagem</strong></span>
+      <span>· <strong>${fmtN(t.km)} km</strong> ida e volta${approx}</span>
+      <span>· <strong>${timeStr(t.minutes)}</strong></span>
     </div>
     <div class="v57-trip-line v57-trip-costs">
       <span>Combustível: <strong>${travelMoney(t.fuel)}</strong></span>
