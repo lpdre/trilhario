@@ -508,8 +508,8 @@ function eventRow(x){
   <div class="walk-main">
    <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
    <div class="walk-card-details">
-   <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
-   <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
+   <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
+   <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}</a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
    <p class="v51-difficulty"><span class="walk-caption">Dificuldade:</span> <strong>${esc(names[x.difficulty]||'Por indicar')}</strong></p>
    </div>
@@ -522,16 +522,11 @@ function eventRow(x){
    <span><small>Inscrição</small><b>${fmtP(x.price)}</b></span>
   </div>
   ${travelRow(x)}
-  <div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
-   <div class="walk-action-main">
-    <button type="button" class="walk-compare ${compared.has(x.id)?'is-compared':''}" data-event-action="toggleCompare" data-event-id="${esc(x.id)}" aria-label="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}" aria-pressed="${compared.has(x.id)?'true':'false'}" title="${compared.has(x.id)?'Remover da comparação':'Adicionar à comparação'}">${compared.has(x.id)?'✓ Comparar':'+ Comparar'}</button>
-   </div>
+  ${x.userAdded?`<div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
    <div class="walk-action-quick">
-    <button type="button" class="walk-icon-btn" data-event-action="focusEvent" data-event-id="${esc(x.id)}" aria-label="Ver no mapa: ${esc(x.title)}" title="Ver no mapa">${TRILHARIO_ACTION_ICONS.map}</button>
-    <button type="button" class="walk-icon-btn" data-event-action="downloadIcs" data-event-id="${esc(x.id)}" aria-label="Adicionar à agenda: ${esc(x.title)}" title="Adicionar à agenda">${TRILHARIO_ACTION_ICONS.calendar}</button>
-    ${x.userAdded?`<button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_ACTION_ICONS.trash}</button>`:''}
+    <button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_ACTION_ICONS.trash}</button>
    </div>
-  </div>
+  </div>`:''}
  </article>`;
 }
 function chips(){let xs=[];
@@ -984,7 +979,7 @@ document.addEventListener('click',function(event){
 });
 function toggleCompare(id){if(compared.has(id))compared.delete(id);else compared.add(id);const saved=persistTravel(true);render();if(!saved)toast('Comparação actualizada apenas nesta sessão; não foi possível guardar.');}
 function clearCompare(){compared.clear();const saved=persistTravel(true);render();if(!saved)toast('Comparação limpa apenas nesta sessão; não foi possível guardar.');}
-function renderCompareTray(){const bar=$('compareTray');if(!bar)return;bar.hidden=compared.size===0||COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE;
+function renderCompareTray(){const bar=$('compareTray');if(!bar)return;bar.hidden=true;return; // v63: comparação temporariamente fora da interface
  $('compareQty').textContent=compared.size+' seleccionada'+(compared.size===1?'':'s');const items=allEvents().filter(e=>compared.has(e.id));$('compareNames').textContent=items.length>3?items.slice(0,3).map(e=>e.title).join(' · ')+' · …':items.map(e=>e.title).join(' · ')||'Selecciona caminhadas';
  $('compareOpen').classList.toggle('is-disabled',compared.size<2);$('compareOpen').setAttribute('aria-disabled',String(compared.size<2));}
 function travelSortVal(e,sort){const t=tripCalc(e);return sort==='km'?t?.km:sort==='fuel'?t?.fuel:t?.total;}
