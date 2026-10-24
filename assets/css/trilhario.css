@@ -1054,3 +1054,22 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 
 /* v59 — ocultar o estado normal da publicação sem espaço em branco. */
 .catalog-status[hidden]{display:none!important}
+
+/* v60 — os títulos clicáveis devem ser imediatamente reconhecíveis como ligações. */
+.walk-row.v51-card.v56-card .walk-main h3 a.walk-title-link{
+ color:#246343;
+ text-decoration-line:underline;
+ text-decoration-style:solid;
+ text-decoration-color:#8cac94;
+ text-decoration-thickness:1px;
+ text-underline-offset:3px;
+ cursor:pointer;
+}
+.walk-row.v51-card.v56-card .walk-main h3 a.walk-title-link::after{
+ content:" ↗";font-size:.77em;font-weight:750;color:#44835b;
+ white-space:nowrap;
+}
+.walk-row.v51-card.v56-card .walk-main h3 a.walk-title-link:hover,
+.walk-row.v51-card.v56-card .walk-main h3 a.walk-title-link:focus-visible{
+ color:#174f32;text-decoration-color:currentColor;
+}
