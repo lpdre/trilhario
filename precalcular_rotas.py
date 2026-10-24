@@ -42,7 +42,7 @@ CAPITAIS = {
 }
 ROUTE_TTL_DAYS = 90
 # Poucos pedidos por execução, de forma sequencial e com intervalo > 1 segundo.
-DAILY_LIMIT = max(0, min(54, int(os.getenv("TRILHARIO_ROTAS_LIMITE", "54"))))
+DAILY_LIMIT = max(0, min(40, int(os.getenv("TRILHARIO_ROTAS_LIMITE", "40"))))
 BASE = os.getenv("TRILHARIO_ROUTER_URL", "https://router.project-osrm.org").rstrip("/")
 USER_AGENT = "Trilhario/1.0 (https://github.com/lpdre/trilhario; cache de rotas públicas)"
 COOLDOWN = 1.4
@@ -104,24 +104,50 @@ def due(row: dict | None, today: date) -> bool:
     return updated > today or today - updated > timedelta(days=ROUTE_TTL_DAYS)
 
 
-def fetch_route(session: requests.Session, origin: tuple, destination: dict) -> dict:
-    lon, lat = origin
-    target_lon, target_lat = destination["lon"], destination["lat"]
-    url = f"{BASE}/route/v1/driving/{lon},{lat};{target_lon},{target_lat}"
-    response = session.get(url, params={"overview": "false", "steps": "false"}, timeout=14)
+def fetch_matrix(session: requests.Session, destination: dict, cities: list[str]) -> dict:
+    """Uma consulta de matriz traz distâncias e tempos das cidades para 1 local.
+
+    Não usar velocidade de recurso/fallback: na ausência de estrada real, não
+    inventar distâncias rodoviárias.
+    """
+    coords = [CAPITAIS[city] for city in cities]
+    coords.append((destination["lon"], destination["lat"]))
+    coordinate_path = ";".join(f"{lon:.6f},{lat:.6f}" for lon, lat in coords)
+    params = {
+        "sources": ";".join(str(i) for i in range(len(cities))),
+        "destinations": str(len(cities)),
+        "annotations": "distance,duration",
+    }
+    response = session.get(f"{BASE}/table/v1/driving/{coordinate_path}", params=params, timeout=24)
     response.raise_for_status()
     data = response.json()
-    if data.get("code") != "Ok" or not data.get("routes"):
-        raise ValueError("Sem trajecto rodoviário")
-    waypoints = data.get("waypoints", [])
-    if len(waypoints) < 2 or float(waypoints[1].get("distance", 999999)) > 2500:
-        raise ValueError("Destino demasiado longe da estrada")
-    first = data["routes"][0]
-    km = round(float(first["distance"]) / 1000, 1)
-    minutes = round(float(first["duration"]) / 60)
-    if not (0 <= km < 1600 and 0 <= minutes < 10000):
-        raise ValueError("Métrica rodoviária inválida")
-    return {"km": km, "minutes": minutes, "updated": datetime.now(timezone.utc).date().isoformat()}
+    if data.get("code") != "Ok":
+        raise ValueError("Serviço de matriz sem trajecto: " + str(data.get("code")))
+    dest = data.get("destinations", [])
+    if len(dest) != 1 or float(dest[0].get("distance", 999999)) > 2500:
+        raise ValueError("Destino demasiado longe da estrada calculada")
+    distances, durations = data.get("distances"), data.get("durations")
+    if not (isinstance(distances, list) and isinstance(durations, list) and
+            len(distances) == len(cities) and len(durations) == len(cities)):
+        raise ValueError("Matriz incompleta")
+    source_waypoints = data.get("sources", [])
+    today = datetime.now(timezone.utc).date().isoformat()
+    computed = {}
+    for i, city in enumerate(cities):
+        try:
+            if len(source_waypoints) != len(cities) or float(source_waypoints[i]["distance"]) > 2500:
+                continue
+            meters = distances[i][0]
+            seconds = durations[i][0]
+            if not (isinstance(meters, (int, float)) and isinstance(seconds, (int, float))):
+                continue
+            km, minutes = round(meters / 1000, 1), round(seconds / 60)
+            if not (0 <= km < 1600 and 0 <= minutes < 10000):
+                continue
+            computed[city] = {"km": km, "minutes": minutes, "updated": today}
+        except (IndexError, KeyError, TypeError, ValueError):
+            continue
+    return computed
 
 
 def build_cache(today: date | None = None, budget: int = DAILY_LIMIT, requester=None) -> dict:
@@ -130,13 +156,13 @@ def build_cache(today: date | None = None, budget: int = DAILY_LIMIT, requester=
     found = destinations(payload.get("events", []), today)
     cache = load_cache()
     old = cache["locations"]
-    # Descartar pontos que já não pertencem a caminhadas futuras.
+    # Remover locais antigos, mantendo entradas partilhadas entre novos eventos.
     locations = {key: old.get(key, {"routes": {}}) for key in found}
     cache["locations"] = locations
     session = requests.Session()
     session.headers.update({"User-Agent": USER_AGENT, "Accept": "application/json"})
     requester_is_live = requester is None
-    requester = requester or (lambda origin, point: fetch_route(session, origin, point))
+    requester = requester or (lambda point, cities: fetch_matrix(session, point, cities))
     attempts, successes = 0, 0
     for key, point in found.items():
         entry = locations[key]
@@ -151,33 +177,41 @@ def build_cache(today: date | None = None, budget: int = DAILY_LIMIT, requester=
         if not isinstance(failures, dict):
             failures = {}
             entry["failures"] = failures
-        # A ordem é estável: mesmo depois de falhas retomamos a partir da cache.
-        for city, origin in CAPITAIS.items():
-            if not due(routes.get(city), today) or attempts >= budget:
+        pending = []
+        for city in CAPITAIS:
+            if not due(routes.get(city), today):
                 continue
-            # Não saturar a fila com locais sem trajecto ou com erros temporários.
             try:
                 failed_day = date.fromisoformat(str(failures.get(city, ""))[:10])
                 if today - failed_day < timedelta(days=7):
                     continue
             except ValueError:
                 pass
-            attempts += 1
-            try:
-                result = requester(origin, point)
-                if not isinstance(result, dict) or not {"km", "minutes", "updated"} <= result.keys():
-                    raise ValueError("Resposta incompleta")
-                routes[city] = result
-                failures.pop(city, None)
-                successes += 1
-            except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
+            pending.append(city)
+        if not pending or attempts >= budget:
+            continue
+        attempts += 1
+        try:
+            results = requester(point, pending)
+            if not isinstance(results, dict):
+                raise ValueError("Resultado da matriz inválido")
+            for city in pending:
+                row = results.get(city)
+                if isinstance(row, dict) and not due(row, today):
+                    routes[city] = row
+                    failures.pop(city, None)
+                    successes += 1
+                else:
+                    failures[city] = today.isoformat()
+        except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
+            for city in pending:
                 failures[city] = today.isoformat()
-                print(f"Rota não disponível: {city} / {key}: {exc}")
-            if requester_is_live and attempts < budget and COOLDOWN:
-                time.sleep(COOLDOWN)
+            print(f"Matriz indisponível para {key}: {exc}")
+        if requester_is_live and attempts < budget and COOLDOWN:
+            time.sleep(COOLDOWN)
     session.close()
     OUTPUT.write_text(json.dumps(cache, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Cache: {len(locations)} locais GPS; {attempts} pedidos; {successes} rotas guardadas.")
+    print(f"Cache: {len(locations)} locais GPS; {attempts} consultas de matriz; {successes} distâncias guardadas.")
     return cache
 
 
