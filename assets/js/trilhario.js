@@ -1021,9 +1021,18 @@ function applyOrigin(event){
  const origin=$('tripOrigin').value.trim().replace(/\s+/g,' ');
  if(origin.length<2){toast('Indica uma localidade de partida válida.');$('tripOrigin').focus();return;}
  const changed=travelPrefs.origin.trim().toLocaleLowerCase('pt-PT')!==origin.toLocaleLowerCase('pt-PT');
+ const previousOriginError=!!tripOriginProblem;
  travelPrefs={...travelPrefs,origin};
- originEditing=false;
- if(changed){tripJobs=[];tripJobsSet.clear();tripFilterSignature='';tripOriginProblem='';}
+ originEditing=false;tripOriginProblem='';
+ if(changed||previousOriginError){tripJobs=[];tripJobsSet.clear();tripFilterSignature='';}
+ // Voltar a premir «Aplicar» depois de um erro da origem deve permitir nova tentativa,
+ // mesmo que a localidade não tenha mudado.
+ if(previousOriginError){
+  geoMisses.clear();
+  const prefix=origin.toLocaleLowerCase('pt-PT')+'|';
+  for(const key of tripProblems.keys())if(key.startsWith(prefix))tripProblems.delete(key);
+  for(const key of tripRetryAfter.keys())if(key.startsWith(prefix))tripRetryAfter.delete(key);
+ }
  const saved=persistTravel(true);
  updateTravelHeader();render();renderTravelProgress();
  if(!saved)toast('Origem aplicada nesta sessão, mas não foi possível guardá-la no navegador.');
