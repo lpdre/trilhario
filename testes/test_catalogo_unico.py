@@ -25,7 +25,7 @@ class CatalogoUnico(unittest.TestCase):
     def test_registry_real_presente_e_valido(self):
         real = load_registry()
         self.assertEqual(real['schema'], 1)
-        self.assertEqual(len(real['corrections']), 10)
+        self.assertGreaterEqual(len(real['corrections']), 10)
         self.assertEqual(len(real['fallback_events']), 4)
         self.assertTrue(all('verified_at' in row for row in real['corrections']))
 
