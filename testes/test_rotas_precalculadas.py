@@ -26,16 +26,17 @@ class RotasTest(unittest.TestCase):
             e = {"id": "a", "date": "2026-11-01", "lat": 40.6405, "lon": -8.6538, "start": "Centro", "verified": True}
             catalog.write_text(json.dumps({"events": [e, {**e, "id": "b"}, {"date": "2026-11-01", "start": "Por confirmar"}]}))
             calls = []
-            def fake_route(origin, point):
-                calls.append(origin)
-                return {"km": 42.5, "minutes": 44, "updated": "2026-10-25"}
+            def fake_matrix(point, cities):
+                calls.append((point, cities))
+                return {city: {"km": 42.5, "minutes": 44, "updated": "2026-10-25"} for city in cities}
             with patch.object(rotas, "CATALOGUE", catalog), patch.object(rotas, "OUTPUT", dest):
-                first = rotas.build_cache(date(2026, 10, 25), budget=2, requester=fake_route)
+                first = rotas.build_cache(date(2026, 10, 25), budget=1, requester=fake_matrix)
                 self.assertEqual(len(first["locations"]), 1)
-                self.assertEqual(len(calls), 2)
-                again = rotas.build_cache(date(2026, 10, 25), budget=2, requester=fake_route)
-                self.assertEqual(len(calls), 4)
-                self.assertEqual(len(again["locations"][rotas.coord_key(e["lat"], e["lon"])]["routes"]), 4)
+                self.assertEqual(len(calls), 1)
+                self.assertEqual(len(first["locations"][rotas.coord_key(e["lat"], e["lon"])]["routes"]), 18)
+                again = rotas.build_cache(date(2026, 10, 25), budget=1, requester=fake_matrix)
+                self.assertEqual(len(calls), 1, "A segunda execução não deve pedir a mesma matriz")
+                self.assertEqual(len(again["locations"][rotas.coord_key(e["lat"], e["lon"])]["routes"]), 18)
 
 
 if __name__ == "__main__":
