@@ -1368,3 +1368,22 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 @media(max-width:540px){
  .v67-travel-box .v67-value-button .v68-trip-car{width:23px;height:23px}
 }
+
+
+/* v69 — caixa «Partida / O meu carro» mais baixa e texto proporcional. */
+.v67-travel-box .v67-travel-grid{padding:7px 10px;gap:9px}
+.v67-travel-box .v67-travel-cell{gap:2px}
+.v67-travel-box .v67-travel-label{font-size:9px;line-height:1.1;letter-spacing:.055em}
+.v67-travel-box .v67-value-button{gap:5px;padding:0;font-size:11.5px;line-height:1.25}
+.v67-travel-box .v67-value-button strong{font-size:11.5px;line-height:1.25}
+.v67-travel-box .v67-value-button>svg:first-child{width:17px;height:17px}
+.v67-travel-box .v67-value-button .v68-trip-car{width:19px;height:19px;transform:translateY(-1px)}
+.v67-travel-box .v67-value-button .v67-edit-icon{width:12px;height:12px}
+.v67-travel-box .v67-value-button .v67-chevron{width:13px;height:13px}
+@media(max-width:540px){
+ .v67-travel-box .v67-travel-grid{padding:7px 8px;gap:6px}
+ .v67-travel-box .v67-travel-label{font-size:8.8px}
+ .v67-travel-box .v67-value-button{gap:4px}
+ .v67-travel-box .v67-value-button strong{font-size:11px}
+ .v67-travel-box .v67-value-button .v68-trip-car{width:18px;height:18px}
+}
