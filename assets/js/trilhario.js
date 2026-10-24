@@ -154,7 +154,7 @@ let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tr
 let tripFilterSignature='',tripBatchObserver=null,tripScheduling=false,tripWorking=false;
 let tollJobs=[],tollWorking=false;
 const ROUNDTRIP_VERSION=37; // v37: ida e volta com percursos independentes; cache antiga não é fiável.
-const GEOCODER_VERSION=35,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
+const GEOCODER_VERSION=36,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
 
 const COMPARE_PAGE_MODE=new URLSearchParams(location.search).has('comparar');
 if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.title='Comparar caminhadas — Trilhário';}
@@ -235,6 +235,10 @@ function displayDeparture(e){
 function localPartidaLegivel(valor){
  let texto=String(valor??'').replace(/\s+/g,' ').trim();
  if(!texto)return '';
+ texto=texto.replace(/^Hor[aá]rio\s+IN[IÍ]CIO\s*:?\s*\d{1,2}:\d{2}\s*H?\s+FINAL\s*:?\s*\d{1,2}:\d{2}\s*H?\s*/i,'')
+            .replace(/^Ponto\s+de\s+encontro\s*[:\-–—]\s*/i,'')
+            .replace(/\s+\d{1,2}[:hH][0-5]\d\s*[–—-]\s*(?:In[ií]cio|Fim|Hora)\b.*$/i,'')
+            .replace(/\s+pelas\s+\d{1,2}\s*[hH:]\s*[0-5]\d\b.*$/i,'');
  texto=texto.split(/\b(?:Coordenadas(?:\s+GPS)?|GPS|Latitude|Longitude|Lat|Long|Hora\s+de\s+Fim|A\s+hora\s+de\s+fim|Hora\s+de\s+Início)\b\s*:?(?=\s|$|[-+0-9])/i)[0];
  // O agregador inclui ligações como texto dentro da localidade.
  texto=texto.replace(/\s*\(\s*Ver\s+no\s+Google\s+Maps\s*\)/gi,'')
@@ -246,7 +250,10 @@ function localPartidaLegivel(valor){
             .replace(/\bFundao\b/gi,'Fundão')
             .replace(/\bMelgaco\b/gi,'Melgaço')
             .replace(/\bTerras[\s-]*de[\s-]*bouro\b/gi,'Terras de Bouro');
- texto=texto.replace(/[\s,;:–—-]+$/g,'').replace(/\(\s*$/,'').trim();
+ if((texto.match(/\(/g)||[]).length>(texto.match(/\)/g)||[]).length)texto=texto.slice(0,texto.lastIndexOf('('));
+ texto=texto.replace(/[\s,;:–—-]+$/g,'').trim();
+ if(/^(?:Estacionamento|Em frente ao caf[eé]|Junto ao cruzeiro|Parque de Merendas|Pequeno largo em \w{1,2}|Estacionamento(?:\s+jun|\s+à\s+fa|\s+a\s+\d+))$/i.test(texto))return 'Por confirmar';
+ if(/^[\d\sº°'’′″”.,:NSEW+-]+$/i.test(texto)||/^(?:Hor[aá]rio|In[ií]cio:|Final:|Coordenadas)\b/i.test(texto))return 'Por confirmar';
  return texto||'Por confirmar';
 }
 // Fonte desactivada: o catálogo anterior confundiu 'EVENTO FECHADO' com títulos
@@ -599,7 +606,7 @@ function paintMap(){
   }else showGeoPopup(selectedEvent);
  }
 }
-function showGeoPopup(e){const pos=toScreen(e.lat,e.lon),w=$('map').clientWidth,h=$('map').clientHeight;if(pos.x<100||pos.x>w-100||pos.y<145||pos.y>h-20)return;const popup=document.createElement('div');popup.className='geo-popup';popup.id='geoPopup';popup.dataset.eventId=String(e.id);popup.style.left=pos.x+'px';popup.style.top=(pos.y-24)+'px';popup.innerHTML=`<button type="button" aria-label="Fechar" class="close" onclick="geo.picked=null;paintMap()">×</button><small>${esc(dateShort(e))} · Organizador: ${esc(e.organizer)}</small><h3>${esc(e.title)}</h3><p>Local de partida: ${esc(e.start||e.town)} · ${e.verified?'local confirmado':'localidade aproximada (a confirmar)'}</p><div class="popup-stats">${fmtN(e.km)} km · ${e.gain!=null?'+'+fmtN(e.gain)+' m D+':'D+ —'} · ${e.duration!=null?dur(e)+' h':'Tempo —'} · ${fmtP(e.price)}</div><div class="popup-actions">${e.url?`<a target="_blank" rel="noopener noreferrer" href="${esc(e.url)}">Inscrição ↗</a>`:''}</div>`;$('map').appendChild(popup)}
+function showGeoPopup(e){const pos=toScreen(e.lat,e.lon),w=$('map').clientWidth,h=$('map').clientHeight;if(pos.x<100||pos.x>w-100||pos.y<145||pos.y>h-20)return;const popup=document.createElement('div');popup.className='geo-popup';popup.id='geoPopup';popup.dataset.eventId=String(e.id);popup.style.left=pos.x+'px';popup.style.top=(pos.y-24)+'px';popup.innerHTML=`<button type="button" aria-label="Fechar" class="close" onclick="geo.picked=null;paintMap()">×</button><small>${esc(dateShort(e))} · Organizador: ${esc(e.organizer)}</small><h3>${esc(e.title)}</h3><p>Local de partida: ${esc(displayDeparture(e))} · ${e.verified?'local confirmado':'localidade aproximada (a confirmar)'}</p><div class="popup-stats">${fmtN(e.km)} km · ${e.gain!=null?'+'+fmtN(e.gain)+' m D+':'D+ —'} · ${e.duration!=null?dur(e)+' h':'Tempo —'} · ${fmtP(e.price)}</div><div class="popup-actions">${e.url?`<a target="_blank" rel="noopener noreferrer" href="${esc(e.url)}">Inscrição ↗</a>`:''}</div>`;$('map').appendChild(popup)}
 function mapFitTo(events){const ps=events.filter(hasCoords),root=$('map');if(!ps.length||!root.clientWidth)return;const midX=(Math.min(...ps.map(e=>worldX(e.lon,7)))+Math.max(...ps.map(e=>worldX(e.lon,7))))/2,midY=(Math.min(...ps.map(e=>worldY(e.lat,7)))+Math.max(...ps.map(e=>worldY(e.lat,7))))/2;let z=12;for(;z>5;z--){const xx=ps.map(e=>worldX(e.lon,z)),yy=ps.map(e=>worldY(e.lat,z));if(Math.max(...xx)-Math.min(...xx)<root.clientWidth-95 && Math.max(...yy)-Math.min(...yy)<root.clientHeight-100)break;}geo.zoom=z;const pt=toLatLon(midX*2**(z-7),midY*2**(z-7),z);geo.center=pt;paintMap()}
 function zoomTo(z,pivot){z=Math.max(5,Math.min(15,z));if(geo.zoom===z)return;const root=$('map'),p=pivot||{x:root.clientWidth/2,y:root.clientHeight/2},oldPos=coordsAt(p.x,p.y),oldZ=geo.zoom;geo.zoom=z;const nowPx=worldX(oldPos.lon,z),nowPy=worldY(oldPos.lat,z),cx=nowPx-(p.x-root.clientWidth/2),cy=nowPy-(p.y-root.clientHeight/2);geo.center=toLatLon(cx,cy,z);paintMap()}
 function initGeo(){if(geo.initialized)return;geo.initialized=true;const canvas=$('map');let dragging=null;
@@ -612,7 +619,7 @@ function initGeo(){if(geo.initialized)return;geo.initialized=true;const canvas=$
 }
 function downloadKml(){const es=selected().filter(hasCoords);if(!es.length){toast('Sem coordenadas disponíveis para exportar.');return};const xml=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');const content=`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Trilhário — Caminhadas filtradas</name><Style id="confirmed"><IconStyle><color>ff43aa42</color><scale>1.05</scale></IconStyle></Style><Style id="approx"><IconStyle><color>ff399bcf</color><scale>1.05</scale></IconStyle></Style>${es.map(e=>`<Placemark><name>${xml(e.title)}</name><description>${xml(`${e.date} · ${e.km??'—'} km · ${e.gain??'—'} m D+ · ${fmtP(e.price)} · ${e.organizer} · ${e.verified?'Ponto confirmado':'Ponto APROXIMADO — confirmar local exacto'}`)}</description><styleUrl>#${e.verified?'confirmed':'approx'}</styleUrl><Point><coordinates>${Number(e.lon)},${Number(e.lat)},0</coordinates></Point></Placemark>`).join('')}</Document></kml>`;saveBlob(new Blob([content],{type:'application/vnd.google-earth.kml+xml;charset=utf-8'}),'trilhario-caminhadas.kml');toast(`${es.length} pontos exportados em KML para Google Earth.`)}
 function renderMap(events){initGeo();const ps=events.filter(hasCoords),verified=ps.filter(x=>x.verified).length;$('mapCount').textContent=`${ps.length} pins · ${verified} confirmados`;
- $('mapSide').innerHTML=events.length?events.map(x=>`<button class="map-side-item ${geo.picked===x.id?'selected':''}" data-id="${esc(x.id)}" data-event-action="mapSelect" data-event-id="${esc(x.id)}" ${!hasCoords(x)?'disabled':''}><strong>${esc(x.title)}</strong><small>Organizador: ${esc(x.organizer)} · Local de partida: ${esc(x.start||x.town)}${x.verified?'':' (a confirmar)'}</small><span>${esc(dateShort(x))} · ${x.km!=null?fmtN(x.km)+' km':'km —'} · <span class="mapgain">${x.gain!=null?'+'+fmtN(x.gain)+' m D+':'D+ —'}</span> · ${fmtP(x.price)}</span><small>${x.duration!=null?(x.estimatedDuration?'≈ ':'')+dur(x)+' h':'Duração —'} · ${x.verified?'● início confirmado':'○ ponto aproximado'}</small></button>`).join(''):'<p class="map-side-item">Sem resultados. Altera os filtros.</p>';
+ $('mapSide').innerHTML=events.length?events.map(x=>`<button class="map-side-item ${geo.picked===x.id?'selected':''}" data-id="${esc(x.id)}" data-event-action="mapSelect" data-event-id="${esc(x.id)}" ${!hasCoords(x)?'disabled':''}><strong>${esc(x.title)}</strong><small>Organizador: ${esc(x.organizer)} · Local de partida: ${esc(displayDeparture(x))}${x.verified?'':' (a confirmar)'}</small><span>${esc(dateShort(x))} · ${x.km!=null?fmtN(x.km)+' km':'km —'} · <span class="mapgain">${x.gain!=null?'+'+fmtN(x.gain)+' m D+':'D+ —'}</span> · ${fmtP(x.price)}</span><small>${x.duration!=null?(x.estimatedDuration?'≈ ':'')+dur(x)+' h':'Duração —'} · ${x.verified?'● início confirmado':'○ ponto aproximado'}</small></button>`).join(''):'<p class="map-side-item">Sem resultados. Altera os filtros.</p>';
  requestAnimationFrame(()=>{if(!geo.selectionShown){geo.selectionShown=true;mapFitTo(events);}else paintMap()})}
 function mapSelect(id){const e=selected().find(x=>x.id===id);if(!e)return;if(!hasCoords(e)){toast('Este evento não tem coordenadas.');return}geo.picked=id;geo.zoom=Math.max(geo.zoom,10);geo.center={lat:Number(e.lat),lon:Number(e.lon)};$('mapSide').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.id===id));paintMap()}
 function focusEvent(id){const e=selected().find(x=>x.id===id);if(!e)return;state.view='map';render();requestAnimationFrame(()=>{mapSelect(id);$('mapView').scrollIntoView({behavior:'smooth',block:'start'})})}
@@ -781,7 +788,7 @@ function calendarIcs(e){
  const hhmm=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.time||''));
  const uid=String(e.id||'event').replace(/[^a-zA-Z0-9_-]/g,'_');
  const notes=[e.organizer,e.url||'',hhmm?'':'Hora de início por confirmar: evento criado como dia inteiro, sem horário inventado.'].filter(Boolean).join(' | ');
- const lines=['BEGIN:VCALENDAR','VERSION:2.0','CALSCALE:GREGORIAN','PRODID:-//Trilhario//Agenda//PT','BEGIN:VEVENT',`UID:${uid}@trilhario.local`,`DTSTAMP:${stamp}`,`SUMMARY:${safe(e.title)}`,`LOCATION:${safe(e.start||e.town)}`,`DESCRIPTION:${safe(notes)}`];
+ const lines=['BEGIN:VCALENDAR','VERSION:2.0','CALSCALE:GREGORIAN','PRODID:-//Trilhario//Agenda//PT','BEGIN:VEVENT',`UID:${uid}@trilhario.local`,`DTSTAMP:${stamp}`,`SUMMARY:${safe(e.title)}`,`LOCATION:${safe(displayDeparture(e))}`,`DESCRIPTION:${safe(notes)}`];
  if(!hhmm){
   const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);
   lines.push(`DTSTART;VALUE=DATE:${day}`,`DTEND;VALUE=DATE:${d.toISOString().slice(0,10).replaceAll('-','')}`,'TRANSP:TRANSPARENT');

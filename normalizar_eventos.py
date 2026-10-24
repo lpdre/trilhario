@@ -16,6 +16,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
 import time
+from localizacoes import limpar_local, normalizar_local_evento
 
 ROOT = Path(__file__).resolve().parent
 CATALOG = ROOT / 'eventos.json'
@@ -41,7 +42,7 @@ def location_identity(event):
     def clean(value):
         if not meaningful(value):
             return ''
-        return re.sub(r'[^a-z0-9]+', ' ', folded(value)).strip()
+        return re.sub(r'[^a-z0-9]+', ' ', folded(limpar_local(value) or '')).strip()
     return clean(event.get('start')), clean(event.get('town'))
 
 
@@ -680,6 +681,7 @@ def main():
                     if e.get(field)!=value:e[field]=value;changed+=1
             elif e.get('time')=='00:00':
                 e['time']='';changed+=1
+        changed += normalizar_local_evento(e)
         # Conservar valores antigos APENAS se a identidade do ponto de partida se mantiver.
         # Caso contrário não voltar a confirmar GPS do evento antigo com uma morada nova.
         if invalidate_stale_coordinates(e, old):
@@ -722,6 +724,8 @@ def main():
                         changed += 1
         if e.get('organizer')=='Clube de Montanhismo da Guarda' and e.get('time')=='00:00':
             e['time']='';changed+=1
+        # Evitar que a recuperação de campos antigos reintroduza horários ou GPS no local.
+        changed += normalizar_local_evento(e)
         # A consulta ao anúncio oficial pode ter actualizado o ponto após a
         # recuperação dos campos antigos. Verificar novamente antes de publicar.
         if invalidate_stale_coordinates(e,old):changed+=1
