@@ -923,7 +923,7 @@ function precomputedTravel(e){
  const row=precomputedRoutes.locations?.[key]?.routes?.[capital];
  if(!row||!Number.isFinite(row.km)||row.km<0||row.km>=1600||
     !Number.isFinite(row.minutes)||row.minutes<0||row.minutes>=10000)return null;
- const stamp=Date.parse(String(row.updated||'')+'T12:00:00Z');
+ const stamp=Date.parse(String(row.updated||'')+'T00:00:00Z');
  if(!timeValid(stamp,PRECALC_MAX_AGE_MS))return null;
  return {kmOne:row.km,kmBack:row.km,minutesOne:row.minutes,minutesBack:row.minutes,
   roundTripVersion:ROUNDTRIP_VERSION,geocoderVersion:GEOCODER_VERSION,
