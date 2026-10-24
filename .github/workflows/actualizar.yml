@@ -30,10 +30,21 @@ jobs:
           python-version: '3.12'
       - name: Instalar dependências
         run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
-      - name: Aplicar correcções da Fase 2 ao colector
+      - name: Validar código versionado e testes offline (sem migrações)
         run: |
-          python aplicar_fase2.py
-          python -m py_compile recolher.py normalizar_eventos.py
+          python -m py_compile recolher.py normalizar_eventos.py fontes_oficiais.py monitorizacao_fontes.py consolidar_catalogo.py
+          python - <<'PREFLIGHT'
+          import recolher
+          modes = {entry.get('mode') for entry in recolher.SOURCES}
+          assert {'rb', 'smile'} <= modes, 'Faltam fontes oficiais RB ou Smile no colector versionado'
+          assert not any(entry.get('mode') == 'agregador' for entry in recolher.SOURCES), 'O agregador antigo não pode estar activo'
+          for name in ('date_from', 'parse_meta', 'deduplicate', 'is_disallowed_aggregator_event'):
+              assert callable(getattr(recolher, name, None)), f'Colector sem a função {name}'
+          print('Colector validado; sem migrações automáticas.')
+          PREFLIGHT
+          python -m unittest discover -s testes -p 'test_monitorizacao.py' -v
+          python -m unittest discover -s testes -p 'test_catalogo_unico.py' -v
+          node testes/test_catalogo_browser.cjs
       - name: Verificar correcções de extracção sem consultar sites
         shell: bash
         run: |
@@ -51,22 +62,45 @@ jobs:
           assert len(recolher.deduplicate([a,b])) == 2
           print('Testes de integração Fase 2 OK')
           PYTEST
-      - name: Procurar eventos
-        run: python recolher.py
+      - name: Recolher eventos e diagnosticar cada fonte
+        run: python monitorizacao_fontes.py
       - name: Corrigir dados e validar catálogo
         run: python normalizar_eventos.py
-      - name: Publicar catálogo e correcções de código
+      - name: Verificar catálogo e garantir que o código não mudou
+        shell: bash
+        run: |
+          python - <<'VALIDATE'
+          import json
+          from datetime import date
+          from pathlib import Path
+          data = json.loads(Path('eventos.json').read_text(encoding='utf-8'))
+          assert isinstance(data, dict), 'Catálogo inválido: raiz não é objecto'
+          events = data.get('events')
+          assert isinstance(events, list) and events, 'Catálogo vazio: publicação bloqueada'
+          ids = set()
+          for event in events:
+              assert isinstance(event, dict), 'Evento não é objecto'
+              eid = event.get('id')
+              assert isinstance(eid, str) and eid, 'Evento sem ID válido'
+              assert eid not in ids, f'ID duplicado: {eid}'
+              ids.add(eid)
+              assert isinstance(event.get('title'), str) and event['title'].strip(), f'Evento {eid} sem título'
+              date.fromisoformat(event['date'])
+          print(f'Catálogo validado: {len(events)} eventos, {len(ids)} IDs únicos.')
+          VALIDATE
+          git diff --exit-code -- recolher.py normalizar_eventos.py fontes_oficiais.py monitorizacao_fontes.py consolidar_catalogo.py excepcoes_catalogo.json .github/workflows/actualizar.yml
+      - name: Publicar apenas o catálogo
         id: publicar
         shell: bash
         run: |
-          if [ -z "$(git status --porcelain -- eventos.json recolher.py)" ]; then
-            echo "Sem alterações no catálogo ou colector."
+          if [ -z "$(git status --porcelain -- eventos.json)" ]; then
+            echo "Sem alterações no catálogo."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add eventos.json recolher.py
-          git commit -m "Actualizar e validar agenda de caminhadas (Fase 2)"
+          git add -- eventos.json
+          git commit -m "Actualizar catálogo único e diagnóstico das fontes"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
       - name: Pedir nova publicação do GitHub Pages (se activado)

@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "purpose": "Correcções manuais verificadas e anúncios oficiais não recuperados pela recolha. Nunca substituir uma ficha recolhida pela fonte oficial.",
+  "corrections": [
+    {
+      "organizer": "GreenTrekker",
+      "slug": "caminhada-de-lua-cheia-em-sintras-12",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Caminhada de Lua Cheia em Sintra",
+        "start": "Lavadouro Público (Escola Primária), Malveira da Serra, Cascais",
+        "town": "Malveira da Serra, Cascais",
+        "time": "19:00",
+        "duration": 4.5,
+        "km": 11,
+        "price": 15,
+        "difficulty": 2
+      }
+    },
+    {
+      "organizer": "GreenTrekker",
+      "slug": "grande-rota-da-montanha-das-bruxas",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Grande Travessia da Montanha das Bruxas",
+        "start": "Associação Recreativa, Cultural e Desportiva da Mendiga, Rua Principal 110, 2480-215 Mendiga",
+        "town": "Mendiga, Porto de Mós",
+        "time": "10:00",
+        "duration": 7,
+        "km": 21,
+        "gain": 500,
+        "price": 20,
+        "difficulty": 3,
+        "lat": 39.49602778,
+        "lon": -8.85566667,
+        "verified": true
+      }
+    },
+    {
+      "organizer": "Mais Trilhos",
+      "slug": "aldeias-serranas-de-fafe",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Aldeias Serranas de Fafe",
+        "start": "Santuário Nossa Senhora das Neves, Fafe",
+        "town": "Lagoa, Fafe",
+        "time": "09:00",
+        "duration": 9,
+        "km": 20,
+        "gain": 700,
+        "price": 20,
+        "difficulty": 4
+      }
+    },
+    {
+      "organizer": "Mais Trilhos",
+      "slug": "vale-da-candeeira-208",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Vale da Candeeira",
+        "start": "Covão da Ametade, Manteigas",
+        "town": "Manteigas",
+        "time": "10:00",
+        "duration": 7,
+        "km": 11,
+        "gain": 800,
+        "price": 15,
+        "difficulty": 5
+      }
+    },
+    {
+      "organizer": "Mais Trilhos",
+      "slug": "ascensao-as-gralheiras",
+      "date": "2026-12-13",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "start": "Estacionamento da Rua das Chães, Pitões das Júnias",
+        "town": "Pitões das Júnias, Montalegre",
+        "time": "10:00",
+        "km": 17,
+        "duration": 6,
+        "gain": 650,
+        "price": 20,
+        "difficulty": 4
+      }
+    },
+    {
+      "organizer": "Mais Trilhos",
+      "slug": "a-magia-do-natal-na-serra-da-estrela-219",
+      "date": "2026-12-19",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "start": "Junto ao Café Império, Loriga",
+        "town": "Loriga, Seia",
+        "time": "10:00",
+        "km": 16,
+        "duration": 5,
+        "gain": 600,
+        "price": 15,
+        "difficulty": 3
+      }
+    },
+    {
+      "organizer": "Hike Land",
+      "slug": "pisao-e-nariz-do-mundo-entre-vales-da-serra-da-cabreira-cabeceiras-de-basto",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Pisão e Nariz do Mundo: Entre Vales da Serra da Cabreira | Cabeceiras de Basto",
+        "start": "Na aldeia de Moscoso, junto ao Restaurante \"Moscoso\"",
+        "gain": 610,
+        "duration": 6,
+        "price": 15,
+        "difficulty": 3
+      }
+    },
+    {
+      "organizer": "Hike Land",
+      "slug": "entre-a-serra-da-freita-e-a-serra-da-arada-vale-de-cambra",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Entre a Serra da Freita e a Serra da Arada | Vale de Cambra",
+        "start": "Parque de Merendas (perto da Mamoa 4 de Laceiras do Côvo), Vale de Cambra",
+        "lat": 40.8436,
+        "lon": -8.27295,
+        "verified": true,
+        "gain": 420,
+        "duration": 4.5,
+        "price": 12,
+        "difficulty": 2
+      }
+    },
+    {
+      "organizer": "Hike Land",
+      "slug": "pelos-trilhos-da-foz-do-nabao-tomar-7",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Pelos Trilhos da Foz do Nabão | Tomar",
+        "start": "Igreja Paroquial de Linhaceira (concelho de Tomar)",
+        "lat": 39.52097222,
+        "lon": -8.38111111,
+        "verified": true,
+        "gain": 400,
+        "duration": 5,
+        "price": 12,
+        "difficulty": 2
+      }
+    },
+    {
+      "organizer": "Hike Land",
+      "slug": "caminhada-de-lua-cheia-nos-miradouros-de-lisboa-3",
+      "date": "2026-10-25",
+      "verified_at": "2026-10-22",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Caminhada de Lua Cheia nos Miradouros de Lisboa",
+        "start": "Praça do Comércio (Terreiro do Paço), junto à estátua de D. José I",
+        "gain": 350,
+        "duration": 4,
+        "price": 12,
+        "difficulty": 2
+      }
+    }
+  ],
+  "fallback_events": [
+    {
+      "id": "caa-leca-20261114",
+      "verified_at": "2026-10-19",
+      "expires_on": "2026-11-14",
+      "origin": "https://clubearlivre.org/produto/o-porto-visto-do-rio-leca-i/",
+      "reason": "Anúncio oficial anteriormente confirmado; o colector ainda não o recupera",
+      "event": {
+        "id": "caa-leca-20261114",
+        "title": "O Porto visto do Rio Leça — Etapa Custió–Esposade",
+        "date": "2026-11-14",
+        "time": "10:00",
+        "town": "Matosinhos",
+        "start": "Estação CP de Campanhã (ponto de encontro da organização)",
+        "organizer": "CAAL — Clube de Actividades de Ar Livre",
+        "km": 12,
+        "gain": null,
+        "duration": null,
+        "price": 10,
+        "difficulty": null,
+        "description": "Caminhada pelo Corredor Verde do Leça, de Custió até Esposade.",
+        "url": "https://clubearlivre.org/produto/o-porto-visto-do-rio-leca-i/",
+        "tag": "Rio",
+        "last_seen_at": "2026-10-19",
+        "source_name": "excepcao_confirmada"
+      }
+    },
+    {
+      "id": "caminhando-monsanto-20261101",
+      "verified_at": "2026-10-23",
+      "expires_on": "2026-11-01",
+      "origin": "https://caminhando.pt/eventos/caminhando-por-trilhos-e-miradouros-de-monsanto-9kms/",
+      "reason": "Anúncio oficial anteriormente confirmado; o colector ainda não o recupera",
+      "event": {
+        "id": "caminhando-monsanto-20261101",
+        "title": "Caminhando por Trilhos e Miradouros de Monsanto - 11kms",
+        "date": "2026-11-01",
+        "time": "09:30",
+        "town": "Lisboa",
+        "start": "Parque de estacionamento, entrada do Parque Florestal de Monsanto, Campolide",
+        "organizer": "Caminhando.pt",
+        "km": 11,
+        "gain": null,
+        "duration": 3.75,
+        "price": 10,
+        "difficulty": null,
+        "description": "Passeio por trilhos e miradouros da mata de Monsanto.",
+        "url": "https://caminhando.pt/eventos/caminhando-por-trilhos-e-miradouros-de-monsanto-9kms/",
+        "tag": "Floresta",
+        "lat": 38.736361111111115,
+        "lon": -9.172516666666667,
+        "verified": true,
+        "gpsFromAnnouncement": true,
+        "endTime": "13:15",
+        "last_seen_at": "2026-10-23",
+        "source_name": "excepcao_confirmada"
+      }
+    },
+    {
+      "id": "pnm-ajuda-20261024",
+      "verified_at": "2026-10-23",
+      "expires_on": "2026-10-24",
+      "origin": "https://penomundo.pt/",
+      "reason": "Anúncio oficial anteriormente confirmado; o colector ainda não o recupera",
+      "event": {
+        "id": "pnm-ajuda-20261024",
+        "title": "Lisboa — Tapada da Ajuda",
+        "date": "2026-10-24",
+        "time": "09:30",
+        "town": "Lisboa",
+        "start": "Tapada da Ajuda (ponto exacto a confirmar)",
+        "organizer": "Pé no Mundo",
+        "km": 6.6,
+        "gain": 106,
+        "duration": 3,
+        "price": 10,
+        "difficulty": 1,
+        "description": "Caminhada na Tapada da Ajuda; confirmada na agenda do organizador.",
+        "url": "https://penomundo.pt/",
+        "tag": "Natureza",
+        "last_seen_at": "2026-10-23",
+        "source_name": "excepcao_confirmada"
+      }
+    },
+    {
+      "id": "geres-bruxas-20261031",
+      "verified_at": "2026-10-23",
+      "expires_on": "2026-10-31",
+      "origin": "https://geres.pt/trilhodasbruxas2026/",
+      "reason": "Anúncio oficial anteriormente confirmado; o colector ainda não o recupera",
+      "event": {
+        "id": "geres-bruxas-20261031",
+        "title": "Trilho das Bruxas",
+        "date": "2026-10-31",
+        "time": "20:00",
+        "town": "Campo do Gerês, Terras de Bouro",
+        "start": "Porta de Campo do Gerês (Núcleo Museológico de Vilarinho das Furnas)",
+        "organizer": "Gerês Viver Turismo",
+        "km": 5,
+        "gain": null,
+        "duration": 3,
+        "price": 17.5,
+        "difficulty": 2,
+        "description": "Caminhada especial anunciada no Programa Anual de Caminhadas Guiadas 2026. Consultar os detalhes e inscrições.",
+        "url": "https://geres.pt/trilhodasbruxas2026/",
+        "tag": "Caminhada",
+        "endTime": "23:00",
+        "last_seen_at": "2026-10-23",
+        "source_name": "excepcao_confirmada"
+      }
+    }
+  ]
+}

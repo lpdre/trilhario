@@ -60,7 +60,8 @@ def invalidate_stale_coordinates(event, old):
     coords_new = (meaningful(event.get('lat')) and meaningful(event.get('lon')))
     coords_old = (meaningful(old.get('lat')) and meaningful(old.get('lon')))
     new_gps = (coords_new and event.get('verified') is True and
-               (not coords_old or (str(event['lat']),str(event['lon'])) !=
+               (event.get('gpsFromAnnouncement') is True or
+                not coords_old or (str(event['lat']),str(event['lon'])) !=
                 (str(old['lat']),str(old['lon']))))
     if new_gps:
         return False
@@ -294,36 +295,7 @@ def report(lines):
 
 # Valores confirmados em 22-10-2026 nas páginas oficiais indicadas. Aplicados
 # apenas a estas edições para evitar usar preços/horários antigos em anos futuros.
-VERIFIED_2026_EVENTS = {
-    ('GreenTrekker', 'caminhada-de-lua-cheia-em-sintras-12', '2026-10-25'): {
-        'title':'Caminhada de Lua Cheia em Sintra',
-        'start':'Lavadouro Público (Escola Primária), Malveira da Serra, Cascais',
-        'town':'Malveira da Serra, Cascais', 'time':'19:00', 'duration':4.5,
-        'km':11, 'price':15, 'difficulty':2},
-    ('GreenTrekker', 'grande-rota-da-montanha-das-bruxas', '2026-10-25'): {
-        'title':'Grande Travessia da Montanha das Bruxas',
-        'start':'Associação Recreativa, Cultural e Desportiva da Mendiga, Rua Principal 110, 2480-215 Mendiga',
-        'town':'Mendiga, Porto de Mós', 'time':'10:00', 'duration':7,
-        'km':21,'gain':500,'price':20,'difficulty':3,
-        'lat':39.49602778,'lon':-8.85566667,'verified':True},
-    ('Mais Trilhos', 'aldeias-serranas-de-fafe', '2026-10-25'): {
-        'title':'Aldeias Serranas de Fafe', 'start':'Santuário Nossa Senhora das Neves, Fafe',
-        'town':'Lagoa, Fafe', 'time':'09:00', 'duration':9,
-        'km':20,'gain':700,'price':20,'difficulty':4},
-    ('Mais Trilhos', 'vale-da-candeeira-208', '2026-10-25'): {
-        'title':'Vale da Candeeira', 'start':'Covão da Ametade, Manteigas',
-        'town':'Manteigas','time':'10:00','duration':7,
-        'km':11,'gain':800,'price':15,'difficulty':5},
-    # Mais Trilhos — edições de Dezembro de 2026, verificadas nos anúncios oficiais.
-    ('Mais Trilhos', 'ascensao-as-gralheiras', '2026-12-13'): {
-        'start': 'Estacionamento da Rua das Chães, Pitões das Júnias',
-        'town': 'Pitões das Júnias, Montalegre', 'time': '10:00',
-        'km': 17, 'duration': 6, 'gain': 650, 'price': 20, 'difficulty': 4},
-    ('Mais Trilhos', 'a-magia-do-natal-na-serra-da-estrela-219', '2026-12-19'): {
-        'start': 'Junto ao Café Império, Loriga', 'town': 'Loriga, Seia',
-        'time': '10:00', 'km': 16, 'duration': 5, 'gain': 600,
-        'price': 15, 'difficulty': 3},
-}
+# As correcções verificadas estão em excepcoes_catalogo.json.
 
 OFFICIAL_DOMAINS = {'greentrekker.pt':'GreenTrekker',
                     'maistrilhos.pt':'Mais Trilhos',
@@ -625,6 +597,11 @@ def main():
     events[:]=remove_aggregator_duplicates([e for e in events if isinstance(e,dict)
         and not is_trilhos_caminhadas_record(e) and not suppress_non_walks(e)])
     removed_aggregator=initial_count-len(events)
+    # Só aqui entram as excepções antigas que continuam confirmadas. Nunca
+    # acrescentar dados por JavaScript depois de publicar o JSON.
+    from consolidar_catalogo import integrate, load_registry
+    events[:], verified_corrections, exception_report = integrate(events, load_registry())
+    events[:]=remove_aggregator_duplicates(events)
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
     previous = git_previous()
@@ -673,7 +650,7 @@ def main():
         if not e.get('url', '').startswith(('https://', 'http://')):
             errors.append('Ligação inválida: '+str(ident))
         official_key=(e.get('organizer'), urlsplit(str(e.get('url') or '')).path.rstrip('/').split('/')[-1])
-        verified=VERIFIED_2026_EVENTS.get((*official_key, str(e.get('date') or '')))
+        verified=verified_corrections.get((*official_key, str(e.get('date') or '')))
         if verified:
             for field,value in verified.items():
                 if e.get(field)!=value:
@@ -807,7 +784,8 @@ def main():
     health=data.get('sources_health') or {}
     state_counts={name:sum(1 for item in health.values() if isinstance(item,dict) and item.get('state')==name)
                   for name in ('com_eventos','sem_eventos_ou_indisponivel','erro')}
-    lines = [f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
+    lines = [f'Excepções verificadas: {exception_report["added"]} importadas; {exception_report["already_collected"]} já presentes; {exception_report["expired"]} caducadas',
+             f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
              f'Limpeza de anúncios: {removed_aggregator} duplicados, não caminhadas e registos de agregador retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
              f'Fotografias nos primeiros {PHOTO_FIRST_EVENTS} eventos futuros: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
