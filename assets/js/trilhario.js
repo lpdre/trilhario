@@ -492,7 +492,7 @@ function eventRow(x){
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
    ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="114" height="99" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'v51-no-photo',textContent:'↗'}))">`:'<div class="v51-no-photo" aria-hidden="true">↗</div>'}
-   <h3>${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="Abrir evento no site do organizador">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
+   <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}<span class="tiny-external" aria-hidden="true"> ↗</span></a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
@@ -915,24 +915,19 @@ function tripCalc(e){
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
- const key=routeCacheKey(e),error=tripProblems.get(key),queued=tripJobsSet.has(key)||tripActiveKey===key;
+ const key=routeCacheKey(e),error=tripProblems.get(key);
  const unavailable=!departureCandidates(e).length;
  let body,action='';
  if(t){
-  const total=t.total!=null&&t.fee!=null?t.total+t.fee:null;
-  const approx=route?.precision&&route.precision!=='gps'?' <span class="v53-trip-approx" title="Local aproximado">aprox.</span>':'';
-  body=`<div class="v53-trip-data">
-    <div class="v53-trip-stats" aria-label="Deslocação desde ${esc(travelPrefs.origin)}, ida e volta">
-      <span class="v53-trip-stat"><strong>${fmtN(t.km)} km</strong><small>Carro · i/v${approx}</small></span>
-      <span class="v53-trip-stat"><strong>${timeStr(t.minutes)}</strong><small>Tempo · i/v</small></span>
-      <span class="v53-trip-stat"><strong>${travelMoney(t.fuel)}</strong><small>Combustível</small></span>
-    </div>
-    <div class="v53-trip-bottom">
-      <div class="v53-trip-details"><span>Portagens <strong>${t.toll==null?'Por calcular':travelMoney(t.toll)}</strong></span><span>Inscrição <strong>${t.fee==null?'Por confirmar':travelMoney(t.fee)}</strong></span><span>Viagem <strong>${t.total==null?'Por calcular':travelMoney(t.total)}</strong></span></div>
-      <div class="v53-trip-total"><small>Custo total</small><strong>${total==null?'—':travelMoney(total)}</strong></div>
-    </div>
+  const approx=route?.precision&&route.precision!=='gps'?' · aprox.':'';
+  // A inscrição já figura nas métricas do trilho: não integra o total da viagem.
+  body=`<div class="v53-trip-compact" aria-label="Deslocação de ida e volta desde ${esc(travelPrefs.origin)}">
+    <span class="v53-trip-item v53-trip-distance"><small>Deslocação · i/v${approx}</small><strong>${fmtN(t.km)} km</strong><small>${timeStr(t.minutes)}</small></span>
+    <span class="v53-trip-item"><small>Combustível</small><strong>${travelMoney(t.fuel)}</strong></span>
+    <span class="v53-trip-item"><small>Portagens</small><strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
+    <span class="v53-trip-item v53-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}><small>Total viagem</small><strong>${t.total==null?'—':travelMoney(t.total)}</strong></span>
    </div>`;
-  if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Tentar novamente</button>`;
+  if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Repetir portagens</button>`;
  }else{
   const status=!hasOrigin?'Define a origem acima para calcular a deslocação.':
    unavailable?(ambiguousDeparture(e)?'Vários pontos de encontro ou travessia de barco · sem cálculo rodoviário.':'Local de partida por confirmar · sem cálculo.'):
