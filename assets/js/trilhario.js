@@ -1030,10 +1030,14 @@ function editTripOrigin(){
 }
 function openTravelPanel(){editTripOrigin();}
 function cancelTripOrigin(){originEditing=false;updateTravelHeader();}
+function cancelCarEditor(which){
+ if(which==='consumption'||!which){$('consumptionForm').hidden=true;$('tripConsumptionEdit').hidden=false;}
+ if(which==='fuel'||!which){$('fuelPriceForm').hidden=true;$('priceDisplay').hidden=false;}
+}
 function toggleTravelPanel(){
  const p=$('travelPanel');p.hidden=!p.hidden;
  $('travelToggle').setAttribute('aria-expanded',String(!p.hidden));
- if(!p.hidden)$('tripConsumption').focus();
+ if(p.hidden)cancelCarEditor();
 }
 function applyOrigin(event){
  if(event)event.preventDefault();
@@ -1044,8 +1048,6 @@ function applyOrigin(event){
  travelPrefs={...travelPrefs,origin};
  originEditing=false;tripOriginProblem='';
  if(changed||previousOriginError){tripJobs=[];tripJobsSet.clear();tripFilterSignature='';}
- // Voltar a premir «Aplicar» depois de um erro da origem deve permitir nova tentativa,
- // mesmo que a localidade não tenha mudado.
  if(previousOriginError){
   geoMisses.clear();
   const prefix=origin.toLocaleLowerCase('pt-PT')+'|';
@@ -1056,36 +1058,77 @@ function applyOrigin(event){
  updateTravelHeader();render();renderTravelProgress();
  if(!saved)toast('Origem aplicada nesta sessão, mas não foi possível guardá-la no navegador.');
 }
-function applyTravel(){
- const consumption=Number($('tripConsumption').value),kind=$('tripFuelKind').value;
- const override=$('tripFuelOverride').checked,manual=Number($('tripFuel').value);
- const automatic=currentFuelPrice(kind)?.value,fuel=override?manual:automatic;
- if(!(consumption>0&&consumption<=35)||!(fuel>0&&fuel<5)){toast('Confirma o consumo e o preço do combustível.');return;}
- travelPrefs={...travelPrefs,consumption,kind,fuelOverride:override?manual:null,fuel};
+function saveCarPreference(changes){
+ travelPrefs={...travelPrefs,...changes};
  const saved=persistTravel(true);
- $('travelPanel').hidden=true;$('travelToggle').setAttribute('aria-expanded','false');
  updateTravelHeader();render();renderTravelProgress();
- if(!saved)toast('Definições aplicadas nesta sessão, mas não foi possível guardá-las no navegador.');
+ if(!saved)toast('Alteração aplicada nesta sessão, mas não foi possível guardá-la no navegador.');
+}
+function applyConsumption(event){
+ event.preventDefault();
+ const consumption=Number($('tripConsumption').value);
+ if(!Number.isFinite(consumption)||consumption<1||consumption>35){
+  toast('Indica um consumo entre 1 e 35 L/100 km.');$('tripConsumption').focus();return;
+ }
+ cancelCarEditor('consumption');saveCarPreference({consumption});
+}
+function applyFuelPrice(event){
+ event.preventDefault();
+ const fuel=Number($('tripFuel').value);
+ if(!Number.isFinite(fuel)||fuel<=0.1||fuel>=5){
+  toast('Indica um preço entre 0,10 e 5 €/L.');$('tripFuel').focus();return;
+ }
+ cancelCarEditor('fuel');saveCarPreference({fuelOverride:fuel,fuel});
+}
+function editConsumption(){
+ cancelCarEditor('fuel');
+ $('tripConsumption').value=String(travelPrefs.consumption);
+ $('tripConsumptionEdit').hidden=true;$('consumptionForm').hidden=false;
+ $('tripConsumption').focus();$('tripConsumption').select();
+}
+function editFuelPrice(){
+ cancelCarEditor('consumption');
+ $('tripFuel').value=Number(travelPrefs.fuelOverride??currentFuelPrice(travelPrefs.kind)?.value??travelPrefs.fuel).toFixed(3);
+ $('priceDisplay').hidden=true;$('fuelPriceForm').hidden=false;
+ $('tripFuel').focus();$('tripFuel').select();
+}
+function changeFuelKind(){
+ const kind=$('tripFuelKind').value;
+ const fuel=currentFuelPrice(kind)?.value;
+ if(!(Number.isFinite(fuel)&&fuel>0)){toast('Preço médio indisponível.');$('tripFuelKind').value=travelPrefs.kind;return;}
+ cancelCarEditor();
+ saveCarPreference({kind,fuelOverride:null,fuel});
+}
+function resetFuelPrice(){
+ const fuel=currentFuelPrice(travelPrefs.kind)?.value;
+ if(!(Number.isFinite(fuel)&&fuel>0)){toast('Preço médio indisponível.');return;}
+ cancelCarEditor('fuel');saveCarPreference({fuelOverride:null,fuel});
 }
 function fuelKindLabel(kind){return kind==='gasolina'?'gasolina 95':'gasóleo';}
-function prettyFuelDate(date){const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(date||'—');}
+function prettyFuelDate(date){const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(m[3]+'/'+m[2]+'/'+m[1]):String(date||'—');}
 function updateTravelHeader(){
  const hasOrigin=!!String(travelPrefs.origin||'').trim(),showForm=!hasOrigin||originEditing;
- const form=$('originForm'),saved=$('originSaved');
- if(form)form.hidden=!showForm;
- if(saved)saved.hidden=showForm;
- if($('originCurrent'))$('originCurrent').textContent=travelPrefs.origin||'';
- if($('originCancel'))$('originCancel').hidden=!hasOrigin;
- if(!originEditing&&$('tripOrigin'))$('tripOrigin').value=travelPrefs.origin||'';
- if($('travelSub'))$('travelSub').textContent=`${fuelKindLabel(travelPrefs.kind)} · ${fmtN(travelPrefs.consumption)} L/100 km${travelPrefs.fuelOverride!=null?' · preço manual':''}`;
+ $('originEditor').hidden=!showForm;
+ $('originCurrent').textContent=hasOrigin?travelPrefs.origin:'Definir partida';
+ $('originCancel').hidden=!hasOrigin;
+ if(!originEditing)$('tripOrigin').value=travelPrefs.origin||'';
+ $('travelSub').textContent=fmtN(travelPrefs.consumption)+' L/100 km';
+ $('tripConsumptionValue').textContent=fmtN(travelPrefs.consumption)+' L/100 km';
+ $('tripFuelKind').value=travelPrefs.kind;
+ updateFuelInput();
 }
 function currentFuelPrice(kind){return fuelPrices[kind]||FUEL_OFFICIAL_REFERENCE[kind]||null;}
-function updateFuelInput(){const kind=$('tripFuelKind').value, manual=$('tripFuelOverride').checked,rec=currentFuelPrice(kind),f=$('tripFuel');
- f.readOnly=!manual;
- if(!manual)f.value=rec&&rec.value>0?Number(rec.value).toFixed(3):'';
- const state=$('fuelPriceStatus');
- if(manual){state.textContent='Valor personalizado; podes regressar à média desmarcando a opção.';return;}
- state.textContent=rec?`Média diária DGEG de ${prettyFuelDate(rec.date)} · ${Number(rec.value).toFixed(3).replace('.',',')} €/L${rec.date==='2026-10-11'?' · último valor de referência disponível neste ficheiro':''}`:'Preço médio indisponível; podes introduzir manualmente.';
+function updateFuelInput(){
+ const rec=currentFuelPrice(travelPrefs.kind);
+ const manual=travelPrefs.fuelOverride!=null;
+ const price=manual?Number(travelPrefs.fuelOverride):rec?.value;
+ $('tripPriceLabel').textContent=manual?'Preço personalizado':'Preço médio';
+ $('tripFuelValue').textContent=Number.isFinite(price)?Number(price).toLocaleString('pt-PT',{minimumFractionDigits:3,maximumFractionDigits:3})+' €/L':'— €/L';
+ $('tripFuelReset').hidden=!manual;
+ if($('fuelPriceForm').hidden&&Number.isFinite(price))$('tripFuel').value=Number(price).toFixed(3);
+ $('fuelPriceStatus').textContent=rec
+  ?'Média DGEG de '+prettyFuelDate(rec.date)+': '+Number(rec.value).toLocaleString('pt-PT',{minimumFractionDigits:3,maximumFractionDigits:3})+' €/L.'+(manual?' Estás a utilizar um preço personalizado.':'')
+  :'Preço médio indisponível. Podes introduzir um valor personalizado.';
 }
 function parseDgegPrice(s){const n=Number(String(s??'').replace(/[€\s]/g,'').replace(',','.'));return Number.isFinite(n)&&n>0.3&&n<5?n:null;}
 function normalizeFuelDay(s){const text=String(s||'');const iso=text.match(/(\d{4})-(\d{2})-(\d{2})/);if(iso)return `${iso[1]}-${iso[2]}-${iso[3]}`;const pt=text.match(/(\d{2})[\/-](\d{2})[\/-](\d{4})/);return pt?`${pt[3]}-${pt[2]}-${pt[1]}`:null;}
@@ -1623,14 +1666,25 @@ function updateSortLabel(){
  container.title=label;select.title=label;
 }
 updateSortLabel();
-$('tripOrigin').value=travelPrefs.origin||'';$('tripConsumption').value=travelPrefs.consumption;
-$('tripFuelKind').value=travelPrefs.kind;$('tripFuelOverride').checked=travelPrefs.fuelOverride!=null;
-if(travelPrefs.fuelOverride!=null)$('tripFuel').value=Number(travelPrefs.fuelOverride).toFixed(3);
-updateFuelInput();updateTravelHeader();
-$('tripFuelKind').addEventListener('change',()=>{if(!$('tripFuelOverride').checked)updateFuelInput();else $('fuelPriceStatus').textContent='Valor personalizado; muda para a média desmarcando «Personalizar €/L».';});
-$('tripFuelOverride').addEventListener('change',()=>{if($('tripFuelOverride').checked)$('tripFuel').value=Number(travelPrefs.fuel||currentFuelPrice($('tripFuelKind').value)?.value||0).toFixed(3);updateFuelInput();});
-$('travelToggle').addEventListener('click',toggleTravelPanel);$('travelApply').addEventListener('click',applyTravel);
-$('originForm').addEventListener('submit',applyOrigin);$('originEdit').addEventListener('click',editTripOrigin);$('originCancel').addEventListener('click',cancelTripOrigin);$('travelSort').addEventListener('change',()=>{updateSortLabel();render();});
+$('tripOrigin').value=travelPrefs.origin||'';
+updateTravelHeader();
+$('tripFuelKind').addEventListener('change',changeFuelKind);
+$('tripConsumptionEdit').addEventListener('click',editConsumption);
+$('tripFuelEdit').addEventListener('click',editFuelPrice);
+$('consumptionForm').addEventListener('submit',applyConsumption);
+$('fuelPriceForm').addEventListener('submit',applyFuelPrice);
+$('consumptionCancel').addEventListener('click',()=>cancelCarEditor('consumption'));
+$('fuelPriceCancel').addEventListener('click',()=>cancelCarEditor('fuel'));
+$('tripFuelReset').addEventListener('click',resetFuelPrice);
+$('travelToggle').addEventListener('click',toggleTravelPanel);
+$('travelInfoToggle').addEventListener('click',()=>{
+ const panel=$('travelInfo');panel.hidden=!panel.hidden;
+ $('travelInfoToggle').setAttribute('aria-expanded',String(!panel.hidden));
+});
+$('originForm').addEventListener('submit',applyOrigin);
+$('originEdit').addEventListener('click',editTripOrigin);
+$('originCancel').addEventListener('click',cancelTripOrigin);
+$('travelSort').addEventListener('change',()=>{updateSortLabel();render();});
 $('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(compared.size<2)e.preventDefault();});
 window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_COMPARE_KEY){compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}if(e.key==='trilhario_custom_v1'){custom=storage('trilhario_custom_v1',[]);populateOrganizers();render()}});
 
