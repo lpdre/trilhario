@@ -59,6 +59,14 @@ jobs:
           recolher.parse_meta(BeautifulSoup('<main>Duração: 3h30. Crianças 5 €. Preço por participante 20 €</main>','html.parser'),e)
           assert e.get('price') == 20, e
           assert e.get('duration') == 3.5, e
+          # Um texto genérico com "gratuita" não prova que a caminhada é gratuita.
+          unknown={'price':None}
+          recolher.parse_meta(BeautifulSoup('<main>Newsletter gratuita e condições gerais</main>','html.parser'),unknown)
+          assert unknown.get('price') is None, unknown
+          # O preço da reserva oficial prevalece sobre um zero indevido anterior.
+          paid={'price':0}
+          recolher.extra_source_meta(BeautifulSoup('<main>Faça Já A Sua Reserva 15,00€ Por pessoa</main>','html.parser'),paid,'GreenTrekker')
+          assert paid.get('price') == 15, paid
           a={'id':'a','title':'Trilho das Fragas','date':'2026-11-01','organizer':'X','url':'https://site.pt/agenda'}
           b={'id':'b','title':'Trilho do Rio','date':'2026-11-01','organizer':'X','url':'https://site.pt/agenda'}
           assert len(recolher.deduplicate([a,b])) == 2
