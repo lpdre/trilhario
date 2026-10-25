@@ -977,16 +977,20 @@ function travelRow(e){
   const approx=route?.precision&&route.precision!=='gps'?' (aprox.)':'';
   // A inscrição já figura nas métricas do trilho: não integra o total da viagem.
   // Identificar a viagem com um carro lateral, mantendo duas linhas compactas de custo.
-  body=`<div class="v73-trip-summary" aria-label="Viagem de ida e volta desde ${esc(travelPrefs.origin)}">
-    <div class="v73-trip-route">
-     <span class="v73-trip-brand"><svg class="v66-trip-car" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg><strong>Viagem</strong></span>
-     <span class="v73-trip-distance"><strong>${fmtN(t.km)} km</strong> <small>ida e volta${approx}</small></span>
-     <span class="v73-trip-duration"><strong>${timeStr(t.minutes)}</strong></span>
+  body=`<div class="v74-trip-summary" aria-label="Estimativa da viagem de ida e volta desde ${esc(travelPrefs.origin)}">
+    <div class="v74-trip-line v74-trip-route">
+     <span class="v74-trip-brand"><svg class="v66-trip-car" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg><strong>Viagem</strong></span>
+     <span class="v74-trip-divider" aria-hidden="true">|</span>
+     <strong>${fmtN(t.km)} km${approx}</strong>
+     <span class="v74-trip-divider" aria-hidden="true">|</span>
+     <strong>${timeStr(t.minutes)}</strong>
     </div>
-    <div class="v73-trip-costs">
-     <span class="v73-trip-cost"><span class="v73-trip-label">Combustível</span><strong>${travelMoney(t.fuel)}</strong></span>
-     <span class="v73-trip-cost"><span class="v73-trip-label">Portagens</span><strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
-     <span class="v73-trip-cost v73-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}><span class="v73-trip-label">Total</span><strong>${t.total==null?'—':travelMoney(t.total)}</strong></span>
+    <div class="v74-trip-line v74-trip-prices">
+     <span class="v74-trip-piece">Combustível <strong>${travelMoney(t.fuel)}</strong></span>
+     <span class="v74-trip-divider" aria-hidden="true">|</span>
+     <span class="v74-trip-piece">Portagens <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
+     <span class="v74-trip-divider" aria-hidden="true">|</span>
+     <span class="v74-trip-piece v74-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong> <small>(ida e volta)</small></span>
     </div>
    </div>`;
   if(t.toll==null&&route?.precomputed)action=`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}" title="Calcular também as portagens">Calcular portagens</button>`;
