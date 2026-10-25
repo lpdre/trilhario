@@ -1806,3 +1806,69 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .results .v51-quick-filters.v64-quick-filters .v81-distance-buttons,
  .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{gap:3px;}
 }
+
+/* v82 — tipografia contida na caixa «Partida / O meu carro».
+   Preservar os tamanhos dos campos de introdução e a área táctil de edição. */
+.v67-travel-box .v67-travel-label{
+ font-size:8.5px;
+ line-height:1.15;
+ letter-spacing:.045em;
+}
+.v67-travel-box .v67-value-button,
+.v67-travel-box .v67-value-button strong{
+ font-size:10.5px;
+ line-height:1.3;
+}
+.v67-travel-box .v67-value-button{gap:4px;}
+.v67-travel-box .v67-value-button>svg:first-child{width:16px;height:16px;}
+.v67-travel-box .v67-value-button .v68-trip-car{width:17px;height:17px;}
+.v67-travel-box .v67-value-button .v67-edit-icon{width:11px;height:11px;}
+.v67-travel-box .v67-value-button .v67-chevron{width:12px;height:12px;}
+@media(max-width:540px){
+ .v67-travel-box .v67-travel-label{font-size:8.2px;}
+ .v67-travel-box .v67-value-button,
+ .v67-travel-box .v67-value-button strong{font-size:10px;}
+ .v67-travel-box .v67-value-button .v68-trip-car{width:16px;height:16px;}
+}
+
+/* v82 — banda horizontal deslocável com 12 fins de semana; três botões visíveis.
+   Mantém a mesma altura e intervalo da linha de distâncias. */
+.results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{
+ display:flex;
+ flex-wrap:nowrap;
+ gap:5px;
+ overflow-x:auto;
+ overflow-y:hidden;
+ overscroll-behavior-inline:contain;
+ scroll-snap-type:x mandatory;
+ scroll-padding-inline:0;
+ -webkit-overflow-scrolling:touch;
+ scrollbar-width:none;
+ min-width:0;
+ max-width:100%;
+}
+.results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons::-webkit-scrollbar{
+ display:none;
+}
+.results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons > button{
+ flex:0 0 calc((100% - 10px)/3);
+ width:calc((100% - 10px)/3);
+ max-width:calc((100% - 10px)/3);
+ scroll-snap-align:start;
+}
+@media(max-width:540px){
+ .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{gap:4px;}
+ .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons > button{
+  flex-basis:calc((100% - 8px)/3);
+  width:calc((100% - 8px)/3);
+  max-width:calc((100% - 8px)/3);
+ }
+}
+@media(max-width:365px){
+ .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{gap:3px;}
+ .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons > button{
+  flex-basis:calc((100% - 6px)/3);
+  width:calc((100% - 6px)/3);
+  max-width:calc((100% - 6px)/3);
+ }
+}
