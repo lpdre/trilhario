@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-10-25T11:17:42+00:00",
+  "updated_at": "2026-10-25T20:19:48+00:00",
   "sources_health": {
     "Amigos da Montanha": {
       "state": "erro_parcial",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 3,
       "http_errors": 2,
       "network_errors": 0,
@@ -17,7 +17,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -28,7 +28,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -39,7 +39,7 @@
       "state": "erro_http",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 2,
       "http_errors": 2,
       "network_errors": 0,
@@ -50,8 +50,8 @@
     "Caminhadas Smile": {
       "state": "com_eventos",
       "count": 11,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 34,
       "http_errors": 0,
       "network_errors": 0,
@@ -59,22 +59,21 @@
       "pages_unreadable": 0
     },
     "Caminhando.pt": {
-      "state": "erro_http",
+      "state": "erro_parcial",
       "count": 0,
       "last_success": "2026-10-24T23:50:28+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 2,
-      "http_errors": 2,
-      "network_errors": 0,
-      "pages_read": 0,
-      "pages_unreadable": 2,
-      "last_http_error": 502
+      "http_errors": 0,
+      "network_errors": 1,
+      "pages_read": 1,
+      "pages_unreadable": 1
     },
     "Clube de Montanhismo da Guarda": {
       "state": "com_eventos",
       "count": 4,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 5,
       "http_errors": 0,
       "network_errors": 0,
@@ -84,8 +83,8 @@
     "DRenergies": {
       "state": "com_eventos",
       "count": 4,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -96,7 +95,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -106,8 +105,8 @@
     "GreenTrekker": {
       "state": "recolha_parcial",
       "count": 73,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 75,
       "http_errors": 1,
       "network_errors": 0,
@@ -117,20 +116,20 @@
     },
     "Hike Land": {
       "state": "com_eventos",
-      "count": 44,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
-      "requests": 46,
+      "count": 40,
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
+      "requests": 42,
       "http_errors": 0,
       "network_errors": 0,
-      "pages_read": 46,
+      "pages_read": 42,
       "pages_unreadable": 0
     },
     "Hiking Around Adventures": {
       "state": "com_eventos",
       "count": 7,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 27,
       "http_errors": 0,
       "network_errors": 0,
@@ -140,8 +139,8 @@
     "Indoeu": {
       "state": "com_eventos",
       "count": 3,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 4,
       "http_errors": 0,
       "network_errors": 0,
@@ -151,8 +150,8 @@
     "Mais Trilhos": {
       "state": "com_eventos",
       "count": 14,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 15,
       "http_errors": 0,
       "network_errors": 0,
@@ -162,8 +161,8 @@
     "Montanhas Dentro": {
       "state": "com_eventos",
       "count": 2,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 6,
       "http_errors": 0,
       "network_errors": 0,
@@ -173,8 +172,8 @@
     "Montanhas do Norte": {
       "state": "com_eventos",
       "count": 7,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 8,
       "http_errors": 0,
       "network_errors": 0,
@@ -185,7 +184,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -196,7 +195,7 @@
       "state": "erro_rede",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 1,
@@ -207,7 +206,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -217,8 +216,8 @@
     "RB Hiking & Trekking": {
       "state": "com_eventos",
       "count": 8,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 12,
       "http_errors": 0,
       "network_errors": 0,
@@ -226,21 +225,21 @@
       "pages_unreadable": 0
     },
     "SAL — Sistemas de Ar Livre": {
-      "state": "com_eventos",
-      "count": 1,
+      "state": "erro_rede",
+      "count": 0,
       "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
-      "requests": 2,
+      "last_checked": "2026-10-25T20:19:48+00:00",
+      "requests": 1,
       "http_errors": 0,
-      "network_errors": 0,
-      "pages_read": 2,
-      "pages_unreadable": 0
+      "network_errors": 1,
+      "pages_read": 0,
+      "pages_unreadable": 1
     },
     "Trekkin": {
       "state": "com_eventos",
       "count": 1,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 4,
       "http_errors": 0,
       "network_errors": 0,
@@ -250,8 +249,8 @@
     "Trekking Roots": {
       "state": "com_eventos",
       "count": 10,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 12,
       "http_errors": 0,
       "network_errors": 0,
@@ -261,8 +260,8 @@
     "Trilhos Nocturnos": {
       "state": "com_eventos",
       "count": 2,
-      "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-10-25T11:17:42+00:00",
+      "last_success": "2026-10-25T20:19:48+00:00",
+      "last_checked": "2026-10-25T20:19:48+00:00",
       "requests": 3,
       "http_errors": 0,
       "network_errors": 0,
@@ -293,7 +292,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Clube de Montanhismo da Guarda",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "endTime": "12:45",
       "image": "https://www.montanhismo-guarda.pt/portal/wp-content/uploads/2026/01/Cartaz-MarchaOutubro2026-scaled.jpg",
       "image_checked_at": "2026-10-22"
@@ -318,7 +317,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://maistrilhos.pt/images/servicos/aldeias-serranas-de-fafe-1.jpg",
       "image_checked_at": "2026-10-22"
     },
@@ -434,7 +433,7 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://trekkingroots.pt/assets/images/caminhadas/6a30520b2ffd9.jpg",
       "image_checked_at": "2026-10-22"
     },
@@ -460,29 +459,6 @@
       "image": "https://www.hikeland.pt/wp-content/uploads/2019/09/IMG_4085´-e1587208110284.jpg"
     },
     {
-      "id": "web-c94869f7cf49c21",
-      "title": "Rota da Peninha",
-      "date": "2026-10-25",
-      "organizer": "SAL — Sistemas de Ar Livre",
-      "url": "https://www.sal.pt/cascais/p1_cascais_pp_rotadapeninha.shtml",
-      "town": "Por confirmar",
-      "start": "Capela de Malveira da Serra",
-      "region": "",
-      "area": "",
-      "time": "09:30",
-      "km": 9.5,
-      "gain": 476,
-      "duration": null,
-      "price": 0,
-      "difficulty": 2,
-      "description": "Consultar informações e inscrições junto do organizador.",
-      "tag": "Caminhada",
-      "last_seen_at": "2026-10-25",
-      "source_name": "SAL — Sistemas de Ar Livre",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-23"
-    },
-    {
       "id": "web-10b282ac8f38c75",
       "title": "Reconexao Com a Natureza Parque Natural do Pisao Concerto Leiria",
       "date": "2026-10-25",
@@ -504,6 +480,29 @@
       "source_name": "Hike Land",
       "last_confirmed_at": "2026-10-25T11:17:42+00:00",
       "image": "https://www.hikeland.pt/wp-content/uploads/2021/05/IMG_4188_site-e1620297427299.jpg",
+      "image_checked_at": "2026-10-23"
+    },
+    {
+      "id": "web-c94869f7cf49c21",
+      "title": "Rota da Peninha",
+      "date": "2026-10-25",
+      "organizer": "SAL — Sistemas de Ar Livre",
+      "url": "https://www.sal.pt/cascais/p1_cascais_pp_rotadapeninha.shtml",
+      "town": "Por confirmar",
+      "start": "Capela de Malveira da Serra",
+      "region": "",
+      "area": "",
+      "time": "09:30",
+      "km": 9.5,
+      "gain": 476,
+      "duration": null,
+      "price": 0,
+      "difficulty": 2,
+      "description": "Consultar informações e inscrições junto do organizador.",
+      "tag": "Caminhada",
+      "last_seen_at": "2026-10-25",
+      "source_name": "SAL — Sistemas de Ar Livre",
+      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
       "image_checked_at": "2026-10-23"
     },
     {
@@ -581,6 +580,33 @@
       "lon": -8.5147214
     },
     {
+      "id": "web-7a28a2d88e2469c",
+      "title": "Entre a Serra da Freita e a Serra da Arada | Vale de Cambra",
+      "date": "2026-10-25",
+      "organizer": "Hike Land",
+      "url": "https://www.hikeland.pt/eventos/entre-a-serra-da-freita-e-a-serra-da-arada-vale-de-cambra",
+      "town": "Por confirmar",
+      "start": "Parque de Merendas (perto da Mamoa 4 de Laceiras do Côvo), Vale de Cambra",
+      "region": "",
+      "area": "",
+      "time": "10:00",
+      "km": 10.0,
+      "gain": 420,
+      "duration": 4.5,
+      "price": 12,
+      "difficulty": 2,
+      "description": "Consultar os detalhes na página do organizador.",
+      "tag": "Caminhada",
+      "last_seen_at": "2026-10-25",
+      "source_name": "Hike Land",
+      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "lat": 40.8436,
+      "lon": -8.27295,
+      "verified": true,
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/IMG_4418-e1790090000419.jpg",
+      "image_checked_at": "2026-10-22"
+    },
+    {
       "id": "web-a307f7470a9b2f5",
       "title": "Floresta de cedros da encosta do castelo",
       "date": "2026-10-25",
@@ -600,7 +626,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://montanhasdonorte.pt/wp-content/uploads/2026/09/DSC_0077.jpg",
       "image_checked_at": "2026-10-22"
     },
@@ -682,6 +708,30 @@
       "image_checked_at": "2026-10-22"
     },
     {
+      "id": "web-6993240c385a2ec",
+      "title": "Pisão e Nariz do Mundo: Entre Vales da Serra da Cabreira | Cabeceiras de Basto",
+      "date": "2026-10-25",
+      "organizer": "Hike Land",
+      "url": "https://www.hikeland.pt/eventos/pisao-e-nariz-do-mundo-entre-vales-da-serra-da-cabreira-cabeceiras-de-basto",
+      "town": "Na aldeia de Moscoso",
+      "start": "Na aldeia de Moscoso, junto ao Restaurante \"Moscoso\"",
+      "region": "",
+      "area": "",
+      "time": "10:00",
+      "km": 12.5,
+      "gain": 610,
+      "duration": 6,
+      "price": 15,
+      "difficulty": 3,
+      "description": "Consultar os detalhes na página do organizador.",
+      "tag": "Caminhada",
+      "last_seen_at": "2026-10-25",
+      "source_name": "Hike Land",
+      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2021/02/DSCF4022-e1790096251116.jpg",
+      "image_checked_at": "2026-10-23"
+    },
+    {
       "id": "web-787c74b9df18879",
       "title": "Street Art Tour na Póvoa de Santa Iria",
       "date": "2026-10-25",
@@ -702,6 +752,30 @@
       "last_seen_at": "2026-10-23",
       "source_name": "GreenTrekker",
       "image": "https://www.greentrekker.pt/site/assets/files/204407/17342985_10202868208581615_601296573323783893_n.700x700.jpg",
+      "image_checked_at": "2026-10-23"
+    },
+    {
+      "id": "web-38473ccf68a7900",
+      "title": "Trilho dos 3 Conventos Perdidos de Palmela",
+      "date": "2026-10-25",
+      "organizer": "Hike Land",
+      "url": "https://www.hikeland.pt/eventos/trilho-dos-3-conventos-perdidos-de-palmela-3",
+      "town": "Miradouro de Palmela",
+      "start": "Miradouro de Palmela",
+      "region": "",
+      "area": "",
+      "time": "10:00",
+      "km": 12.0,
+      "gain": null,
+      "duration": null,
+      "price": null,
+      "difficulty": 2,
+      "description": "Consultar os detalhes na página do organizador.",
+      "tag": "Caminhada",
+      "last_seen_at": "2026-10-25",
+      "source_name": "Hike Land",
+      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2023/09/P5290040-e1693827013341.jpg",
       "image_checked_at": "2026-10-23"
     },
     {
@@ -752,81 +826,6 @@
       "image_checked_at": "2026-10-23"
     },
     {
-      "id": "web-6993240c385a2ec",
-      "title": "Pisão e Nariz do Mundo: Entre Vales da Serra da Cabreira | Cabeceiras de Basto",
-      "date": "2026-10-25",
-      "organizer": "Hike Land",
-      "url": "https://www.hikeland.pt/eventos/pisao-e-nariz-do-mundo-entre-vales-da-serra-da-cabreira-cabeceiras-de-basto",
-      "town": "Na aldeia de Moscoso",
-      "start": "Na aldeia de Moscoso, junto ao Restaurante \"Moscoso\"",
-      "region": "",
-      "area": "",
-      "time": "10:00",
-      "km": 12.5,
-      "gain": 610,
-      "duration": 6,
-      "price": 15,
-      "difficulty": 3,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "last_seen_at": "2026-10-25",
-      "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2021/02/DSCF4022-e1790096251116.jpg",
-      "image_checked_at": "2026-10-23"
-    },
-    {
-      "id": "web-7a28a2d88e2469c",
-      "title": "Entre a Serra da Freita e a Serra da Arada | Vale de Cambra",
-      "date": "2026-10-25",
-      "organizer": "Hike Land",
-      "url": "https://www.hikeland.pt/eventos/entre-a-serra-da-freita-e-a-serra-da-arada-vale-de-cambra",
-      "town": "Por confirmar",
-      "start": "Parque de Merendas (perto da Mamoa 4 de Laceiras do Côvo), Vale de Cambra",
-      "region": "",
-      "area": "",
-      "time": "10:00",
-      "km": 10.0,
-      "gain": 420,
-      "duration": 4.5,
-      "price": 12,
-      "difficulty": 2,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "last_seen_at": "2026-10-25",
-      "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "lat": 40.8436,
-      "lon": -8.27295,
-      "verified": true,
-      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/IMG_4418-e1790090000419.jpg",
-      "image_checked_at": "2026-10-22"
-    },
-    {
-      "id": "web-38473ccf68a7900",
-      "title": "Trilho dos 3 Conventos Perdidos de Palmela",
-      "date": "2026-10-25",
-      "organizer": "Hike Land",
-      "url": "https://www.hikeland.pt/eventos/trilho-dos-3-conventos-perdidos-de-palmela-3",
-      "town": "Miradouro de Palmela",
-      "start": "Miradouro de Palmela",
-      "region": "",
-      "area": "",
-      "time": "10:00",
-      "km": 12.0,
-      "gain": null,
-      "duration": null,
-      "price": null,
-      "difficulty": 2,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "last_seen_at": "2026-10-25",
-      "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2023/09/P5290040-e1693827013341.jpg",
-      "image_checked_at": "2026-10-23"
-    },
-    {
       "id": "web-2573b205e87e9e9",
       "title": "Uma Caminhada pelos Caminhos do Mistério",
       "date": "2026-10-25",
@@ -852,7 +851,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://www.caminhadassmile.pt/wp-content/uploads/2026/09/Entre-Lendas-e-Sombras-a-Luz-dos-Mitos.jpg",
       "image_checked_at": "2026-10-23"
     },
@@ -948,7 +947,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://www.hikeland.pt/wp-content/uploads/2023/03/DSC07889_Site-e1680213344344.jpg",
       "image_checked_at": "2026-10-24"
     },
@@ -973,7 +972,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas Dentro",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://montanhasdentro.pt/evento/109/imagem.jpg?larga&v=1173",
       "image_checked_at": "2026-10-23",
       "lat": 41.1878001,
@@ -1046,9 +1045,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.greentrekker.pt/site/assets/files/195270/2583856737547g.700x700.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.greentrekker.pt/site/assets/files/195270/2583856737547g.700x700.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-785308bf3954e7a",
@@ -1072,9 +1071,9 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://static.wixstatic.com/media/1cceb1_98412a4725cc4b2481b8c9ed61b6b51a~mv2.jpeg/v1/fill/w_4066,h_4066,al_c,q_90/1cceb1_98412a4725cc4b2481b8c9ed61b6b51a~mv2.jpeg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://static.wixstatic.com/media/1cceb1_98412a4725cc4b2481b8c9ed61b6b51a~mv2.jpeg/v1/fill/w_4066,h_4066,al_c,q_90/1cceb1_98412a4725cc4b2481b8c9ed61b6b51a~mv2.jpeg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-65a4cddf7512a2f",
@@ -1096,9 +1095,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Indoeu",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://indoeu.pt/wp-content/uploads/elementor/thumbs/Cambalhao_Capa_MA-rsgzdu1ru4n8nbwwc2etwq5ya82nv7ojmp13atmspw.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://indoeu.pt/wp-content/uploads/elementor/thumbs/Cambalhao_Capa_MA-rsgzdu1ru4n8nbwwc2etwq5ya82nv7ojmp13atmspw.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-f34ca2a61cbd916",
@@ -1209,9 +1208,9 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://trekkingroots.pt/assets/images/caminhadas/6ad2423c3db5a.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6ad2423c3db5a.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-f8d28479f63ecc9",
@@ -1233,9 +1232,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2026/10/IMG_5662-e1791394530925.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/10/IMG_5662-e1791394530925.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-8d6294dead035e9",
@@ -1263,9 +1262,9 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.caminhadassmile.pt/wp-content/uploads/2026/09/Passadicos-da-Crismina.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.caminhadassmile.pt/wp-content/uploads/2026/09/Passadicos-da-Crismina.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-7e0ccb9e71fa07d",
@@ -1293,9 +1292,9 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.caminhadassmile.pt/wp-content/uploads/2025/03/Sintra-Vila-Sassetti-Capa.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.caminhadassmile.pt/wp-content/uploads/2025/03/Sintra-Vila-Sassetti-Capa.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-562d0ac5bddb20b",
@@ -1317,9 +1316,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2020/10/DSC03486_Site_1-e1790675760914.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2020/10/DSC03486_Site_1-e1790675760914.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-5907b5726d0da21",
@@ -1341,9 +1340,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://maistrilhos.pt/images/servicos/descobrindo-o-alto-da-braganda.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://maistrilhos.pt/images/servicos/descobrindo-o-alto-da-braganda.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-8bde9933cd0ecb9",
@@ -1365,9 +1364,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2026/03/DSC08428-e1773144759227.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/03/DSC08428-e1773144759227.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-19d6579d3efe163",
@@ -1389,9 +1388,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://maistrilhos.pt/images/servicos/vinhas-do-corgo-cores-de-outono-1.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://maistrilhos.pt/images/servicos/vinhas-do-corgo-cores-de-outono-1.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "geres-bruxas-20261031",
@@ -1411,7 +1410,9 @@
       "tag": "Caminhada",
       "endTime": "23:00",
       "last_seen_at": "2026-10-23",
-      "source_name": "excepcao_confirmada"
+      "source_name": "excepcao_confirmada",
+      "image_checked_at": "2026-10-25",
+      "image": "https://geres.pt/wp-content/uploads/2026/09/Banner_Trilho-das-Bruxas-1-2.png"
     },
     {
       "id": "web-5a6b1f8e0079be5",
@@ -1428,12 +1429,14 @@
       "gain": null,
       "duration": null,
       "price": null,
-      "difficulty": 2,
+      "difficulty": null,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2024/10/Halloween-no-Castelo-de-Ourém-e1727778767136.jpg"
     },
     {
       "id": "web-5dde759511d3783",
@@ -1460,7 +1463,8 @@
       "lat": 38.71398333,
       "lon": -9.195125,
       "verified": true,
-      "gps_checked_at": "2026-10-22"
+      "gps_checked_at": "2026-10-22",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-a85062880da9163",
@@ -1487,7 +1491,8 @@
       "lat": 38.57069222,
       "lon": -8.90597028,
       "verified": true,
-      "gps_checked_at": "2026-10-24"
+      "gps_checked_at": "2026-10-24",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-a057473a308be20",
@@ -1509,7 +1514,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2019/10/iStock-808369484-e1570524821524.jpg"
     },
     {
       "id": "web-25753fd704cf92c",
@@ -1531,7 +1538,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2019/09/71248328_421519431833048_3083460612114612224_n-e1569928978624.jpg"
     },
     {
       "id": "web-9a44d5f607ea7ab",
@@ -1553,9 +1562,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.greentrekker.pt/site/assets/files/203496/watermarked_img_8457254497542604988.700x700.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.greentrekker.pt/site/assets/files/203496/watermarked_img_8457254497542604988.700x700.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-30f070f6b23f77f",
@@ -1577,12 +1586,12 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.greentrekker.pt/site/assets/files/203705/watermarked_img_6487803955031480677.700x700.jpg",
+      "image_checked_at": "2026-10-25",
       "lat": 39.35788889,
       "lon": -9.15741667,
-      "verified": true,
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.greentrekker.pt/site/assets/files/203705/watermarked_img_6487803955031480677.700x700.jpg"
+      "verified": true
     },
     {
       "id": "web-a9348e951cbf66e",
@@ -1604,9 +1613,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.greentrekker.pt/site/assets/files/203700/watermarked_img_12699130968048268714.700x700.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.greentrekker.pt/site/assets/files/203700/watermarked_img_12699130968048268714.700x700.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-4f1e3acf4843f88",
@@ -1628,7 +1637,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/203675/watermarked_img_13123369392321402024.700x700.jpg"
     },
     {
       "id": "web-47ff121107f9ac3",
@@ -1650,7 +1661,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "DRenergies",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image_checked_at": "2026-10-25"
     },
     {
@@ -1673,9 +1684,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.greentrekker.pt/site/assets/files/203524/p1010851_-_copia.700x700.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.greentrekker.pt/site/assets/files/203524/p1010851_-_copia.700x700.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-a97f3fa3f691eaf",
@@ -1697,9 +1708,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
-      "image_checked_at": "2026-10-25",
-      "image": "https://www.greentrekker.pt/site/assets/files/203580/19247926_1708529005851829_7107840143949142554_n.700x700.jpg"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image": "https://www.greentrekker.pt/site/assets/files/203580/19247926_1708529005851829_7107840143949142554_n.700x700.jpg",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "caminhando-monsanto-20261101",
@@ -1723,7 +1734,8 @@
       "gpsFromAnnouncement": true,
       "endTime": "13:15",
       "last_seen_at": "2026-10-23",
-      "source_name": "excepcao_confirmada"
+      "source_name": "excepcao_confirmada",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-a8dccd99cc20edc",
@@ -1750,7 +1762,9 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6ad24422465bf.jpg"
     },
     {
       "id": "web-663ea010d3e8a0a",
@@ -1772,7 +1786,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2023/05/20230421_152024_foto-de-capa-1-e1683659061489.jpg"
     },
     {
       "id": "web-a94e2bb1efd33b6",
@@ -1794,7 +1810,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://montanhasdonorte.pt/wp-content/uploads/2026/09/DSC_0109.jpg"
     },
     {
       "id": "web-374b488c8f448af",
@@ -1816,7 +1834,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://maistrilhos.pt/images/servicos/outono-nas-vinhas-do-varosa.jpg"
     },
     {
       "id": "web-5f62f9fde526df5",
@@ -1838,7 +1858,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://maistrilhos.pt/images/servicos/outono-no-corno-do-bico.jpg"
     },
     {
       "id": "web-c224389403f1aea",
@@ -1862,7 +1884,9 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://static.wixstatic.com/media/1cceb1_2997a0787e654cbdbfd1e043c5058e85~mv2.jpg/v1/fill/w_2268,h_4032,al_c,q_90/1cceb1_2997a0787e654cbdbfd1e043c5058e85~mv2.jpg"
     },
     {
       "id": "web-9c36e7f41267b24",
@@ -1884,7 +1908,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/10/P1100595_Site-e1791295736313.jpg"
     },
     {
       "id": "web-f3c1bcd613c2ee4",
@@ -1906,7 +1932,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/06/20260529_134605_Site-e1780398657215.jpg"
     },
     {
       "id": "web-0a65f35f06fff94",
@@ -1928,7 +1956,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/10/IMG_1880-e1791480604245.jpg"
     },
     {
       "id": "web-dcf801e84ebe3d7",
@@ -1950,7 +1980,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/203939/p3140358-2.700x700.jpg"
     },
     {
       "id": "web-5d5dde227fd84df",
@@ -1972,7 +2004,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204419/10678523_10201122905830137_7977324715874453934_n.700x700.jpg"
     },
     {
       "id": "web-4bc5bf0fcfdcd45",
@@ -1994,7 +2028,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204282/p1030882.700x700.jpg"
     },
     {
       "id": "web-dc90a0c4cd59d5a",
@@ -2016,7 +2052,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/203444/10929187_10203489265182545_7193078427204818472_n.700x700.jpg"
     },
     {
       "id": "web-165f4adc983a138",
@@ -2038,10 +2076,10 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "verified": false,
       "lat": 41.54038333,
-      "lon": -6.26425556,
-      "verified": true
+      "lon": -6.26425556
     },
     {
       "id": "web-e4ed9df2552123a",
@@ -2063,7 +2101,8 @@
       "tag": "Caminhada",
       "lat": 41.162813,
       "lon": -8.592803,
-      "verified": true
+      "verified": true,
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-303eb1830aa77ad",
@@ -2087,7 +2126,9 @@
       "start_raw": "Tourém (Localização: 41°54’30.10″N 7°53’53.01″W) 08h30 – Transfer para Outeiro",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://barbosa-trekking.pt/wp-content/uploads/2021/12/GR-50-Etapa-18-e-19_07_NOV_26-009259.jpg"
     },
     {
       "id": "web-7b9bbb247597a1d",
@@ -2109,7 +2150,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Indoeu",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://indoeu.pt/wp-content/uploads/elementor/thumbs/Bico_Capa_MA-rtczsqztcp3rtpurw0ik6nc6bscld1uxjuyw8gkjj8.jpg"
     },
     {
       "id": "web-a669628a610a168",
@@ -2131,7 +2174,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2023/09/IMG_5657´-e1694866049707.jpg"
     },
     {
       "id": "web-a99fa39f7267128",
@@ -2158,7 +2203,9 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6ad244a82b975.jpg"
     },
     {
       "id": "web-fb9d76395ef3a5b",
@@ -2186,7 +2233,9 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.caminhadassmile.pt/wp-content/uploads/2025/07/Caminhar-por-Prados-Verdejantes.jpg"
     },
     {
       "id": "web-572a1ee51b8bc33",
@@ -2208,7 +2257,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://montanhasdonorte.pt/wp-content/uploads/2026/09/DSC_0984-scaled.jpg"
     },
     {
       "id": "web-d075eba185aef7e",
@@ -2230,7 +2281,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://maistrilhos.pt/images/servicos/pelos-trilhos-do-carvao.jpg"
     },
     {
       "id": "web-5864b1ed81a813b",
@@ -2252,7 +2305,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2023/01/DSC03939_Site-e1675026546785.jpg"
     },
     {
       "id": "web-3c6650ff3855c46",
@@ -2274,7 +2329,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/10/IMG_20260825_103246_Site-e1791796613967.jpg"
     },
     {
       "id": "web-8fd55b6d70215c0",
@@ -2296,7 +2353,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2025/08/IMG_5655´-e1756409615884.jpg"
     },
     {
       "id": "web-232b23e3a3c7edc",
@@ -2318,7 +2377,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/201566/image_2.700x700.jpg"
     },
     {
       "id": "web-cbde7f75d44dbef",
@@ -2340,7 +2401,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204177/13407038_495692447303187_1414517776019606100_n-1.700x700.jpg"
     },
     {
       "id": "web-55c2dc84491940b",
@@ -2362,7 +2425,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204591/p1014317-1.700x700.jpg"
     },
     {
       "id": "web-4810854c6c49411",
@@ -2384,7 +2449,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204662/img_20231107_110320-1.700x700.jpg"
     },
     {
       "id": "web-4f14b363c5c2be5",
@@ -2406,7 +2473,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204200/p1014395_1.700x700.jpg"
     },
     {
       "id": "web-531a3a9929748e9",
@@ -2430,7 +2499,9 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Clube de Montanhismo da Guarda",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.montanhismo-guarda.pt/portal/wp-content/uploads/2026/01/Cartaz-Magusto-2026-1-scaled.jpg"
     },
     {
       "id": "web-dbbaa0147b0e769",
@@ -2454,7 +2525,9 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://static.wixstatic.com/media/1cceb1_27d39deb29cb4d2f8c055cb22e40fd60~mv2.jpeg/v1/fill/w_2870,h_2870,al_c,q_90/1cceb1_27d39deb29cb4d2f8c055cb22e40fd60~mv2.jpeg"
     },
     {
       "id": "web-98a4f85105bbbc5",
@@ -2481,7 +2554,9 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6ad24e99a3e36.jpg"
     },
     {
       "id": "web-0463ac9a8ddce21",
@@ -2508,7 +2583,9 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://trekkingroots.pt/assets/images/caminhadas/6916357922cb0.jpg"
     },
     {
       "id": "web-fa4e82442b95c3f",
@@ -2530,7 +2607,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2026/09/ChatGPT-Image-16_09_2026-16_52_13-1024x683.png"
     },
     {
       "id": "web-c665653d8e64c21",
@@ -2552,7 +2631,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2025/08/IMG_5656´-e1756409624440.jpg"
     },
     {
       "id": "web-084479be543e6ae",
@@ -2574,7 +2655,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2022/10/Magusto-São-Martinho-e1665739870110.jpg"
     },
     {
       "id": "web-bdeac237226731a",
@@ -2596,7 +2679,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.hikeland.pt/wp-content/uploads/2021/05/DSCF9553_Site-e1619963444662.jpg"
     },
     {
       "id": "web-824e4504c5f2c76",
@@ -2618,7 +2703,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://montanhasdonorte.pt/wp-content/uploads/2026/09/657245196_26060474180229599_2057309329909099909_n.jpg"
     },
     {
       "id": "web-ab165b831aee23a",
@@ -2640,7 +2727,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://maistrilhos.pt/images/servicos/rota-outonal-pelas-faias-1.jpg"
     },
     {
       "id": "web-175b4014600e8ae",
@@ -2663,9 +2752,11 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas Dentro",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "lat": 40.4005233,
-      "lon": -7.5413515
+      "lon": -7.5413515,
+      "image_checked_at": "2026-10-25",
+      "image": "https://montanhasdentro.pt/evento/110/imagem.jpg?larga&v=1235"
     },
     {
       "id": "web-259462154139695",
@@ -2687,7 +2778,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204595/p1010033-1.700x700.jpg"
     },
     {
       "id": "web-824ee3a7c89b8ba",
@@ -2709,7 +2802,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204887/01_vale_magoito_capa-1.700x700.jpg"
     },
     {
       "id": "web-6bae30ed4064751",
@@ -2731,7 +2826,8 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "DRenergies",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25"
     },
     {
       "id": "web-6104d4e2d5de3b2",
@@ -2753,7 +2849,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204717/687040815_2169262470528094_5781148536531440932_n.700x700.jpg"
     },
     {
       "id": "web-970d9175440df56",
@@ -2775,7 +2873,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/203613/p1080629.700x700.jpg"
     },
     {
       "id": "web-dddf49a97bbf4f3",
@@ -2797,7 +2897,9 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
+      "image_checked_at": "2026-10-25",
+      "image": "https://www.greentrekker.pt/site/assets/files/204290/p1020564-1.700x700.jpg"
     },
     {
       "id": "web-39c5b43c8602d1c",
@@ -2819,7 +2921,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-a8d7cc9bc8f0e94",
@@ -2841,7 +2943,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-1b161dadcca1441",
@@ -2863,7 +2965,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-707bac34e104e0f",
@@ -2885,7 +2987,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5b4218700508ce0",
@@ -2907,7 +3009,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-865d8228ba65c0c",
@@ -2934,7 +3036,7 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-b4b277987a31523",
@@ -2959,7 +3061,7 @@
       "alias_ids": [
         "web-ebf2dec1da3e404"
       ],
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-be7022f993346b8",
@@ -2987,7 +3089,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-ed2785f8ab5a1d8",
@@ -3009,7 +3111,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-3ffb13a09f2b249",
@@ -3031,7 +3133,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "caa-leca-20261114",
@@ -3072,7 +3174,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6251d844520ebad",
@@ -3094,7 +3196,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-1355d505a1b682d",
@@ -3116,7 +3218,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-4425abb13ba508e",
@@ -3138,7 +3240,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-90e268a8e812968",
@@ -3160,7 +3262,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-d68de7bf1e85f97",
@@ -3182,7 +3284,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "DRenergies",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5397f6c4f2e5e5b",
@@ -3195,16 +3297,16 @@
       "region": "",
       "area": "",
       "time": "",
-      "km": 12.0,
+      "km": 17.0,
       "gain": 430,
-      "duration": 4.0,
+      "duration": 5.0,
       "price": null,
       "difficulty": 3,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-a74b4f21011f0ee",
@@ -3226,7 +3328,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-7feda53c1c3b24a",
@@ -3248,7 +3350,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Indoeu",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-527a54364082a27",
@@ -3275,7 +3377,7 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5d310637c8bf144",
@@ -3299,7 +3401,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-00cd1dbc446c7e7",
@@ -3327,7 +3429,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-936d10de80dd38e",
@@ -3349,7 +3451,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-f5e02085d196470",
@@ -3371,7 +3473,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-c66dd3f8cd73dc4",
@@ -3393,7 +3495,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-e5c75d1c0a3e5bf",
@@ -3415,7 +3517,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-02b2939860575b5",
@@ -3439,7 +3541,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Trekkin",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-7148f733aebbcd0",
@@ -3461,7 +3563,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-18243372b552a67",
@@ -3483,7 +3585,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-f5688e63e139e8b",
@@ -3505,7 +3607,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-036b825989e0938",
@@ -3527,7 +3629,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6723a578d9c1e62",
@@ -3549,7 +3651,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-aece5cc05752073",
@@ -3572,7 +3674,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6eb4377c0e5dd60",
@@ -3594,7 +3696,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-dbdbb8b86fe9931",
@@ -3621,7 +3723,7 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-e1ac7399edeed5b",
@@ -3649,7 +3751,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-bf99dc290edef70",
@@ -3677,7 +3779,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-3b4aa4d736249ca",
@@ -3699,7 +3801,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-fe8fb218987e7b4",
@@ -3721,7 +3823,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-8feca050717e902",
@@ -3743,7 +3845,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5aba11ea9109328",
@@ -3765,7 +3867,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-afc08081ee0b625",
@@ -3780,14 +3882,14 @@
       "time": "",
       "km": 6.0,
       "gain": 350,
-      "duration": 3.0,
+      "duration": 4.0,
       "price": null,
       "difficulty": 2,
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-4f1f13d933b0265",
@@ -3809,7 +3911,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-0568c988939f7ac",
@@ -3831,7 +3933,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-bef8498770555bf",
@@ -3853,7 +3955,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5f7444cfb63ff1b",
@@ -3875,7 +3977,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-64ac331c71356cf",
@@ -3899,7 +4001,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Trilhos Nocturnos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-de91b2ded6045a0",
@@ -3923,7 +4025,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Clube de Montanhismo da Guarda",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-aff6d90176c3563",
@@ -3945,7 +4047,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-099365052884571",
@@ -3967,9 +4069,31 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://www.hikeland.pt/wp-content/uploads/2024/09/IMG_0131-e1725902699307.jpg",
       "image_checked_at": "2026-10-22"
+    },
+    {
+      "id": "web-99c70243bb55c60",
+      "title": "Pelos Trilhos da Mata Nacional da Machada Barreiro",
+      "date": "2026-11-22",
+      "organizer": "Hike Land",
+      "url": "https://www.hikeland.pt/eventos/pelos-trilhos-da-mata-nacional-da-machada-barreiro",
+      "town": "Parque de estacionamento da Mata Nacional da Machada",
+      "start": "Parque de estacionamento da Mata Nacional da Machada",
+      "region": "",
+      "area": "",
+      "time": "10:00",
+      "km": 10.0,
+      "gain": null,
+      "duration": null,
+      "price": null,
+      "difficulty": 2,
+      "description": "Consultar os detalhes na página do organizador.",
+      "tag": "Caminhada",
+      "last_seen_at": "2026-10-25",
+      "source_name": "Hike Land",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-d6d5bacc9dd2f93",
@@ -3991,7 +4115,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5d611901a925649",
@@ -4013,7 +4137,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-3e1ec713b1ac576",
@@ -4035,7 +4159,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-442fbbeef83c5c3",
@@ -4057,7 +4181,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-a36ab3c8ae4ffa5",
@@ -4079,7 +4203,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-4bffbc456a993c3",
@@ -4101,7 +4225,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-75eaa4c00a44d05",
@@ -4123,7 +4247,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-a384894aaf1d27d",
@@ -4146,7 +4270,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-96fb104bed34971",
@@ -4173,7 +4297,7 @@
       "verified": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6faf631595b6943",
@@ -4195,7 +4319,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-b0b77ab69b77e99",
@@ -4217,7 +4341,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-9a9adc9fc31a7c6",
@@ -4239,7 +4363,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-2150458d614ac40",
@@ -4261,7 +4385,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-1caa8a7763b6145",
@@ -4283,7 +4407,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6bc0ff449ab7f40",
@@ -4305,7 +4429,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5d3f28e86292ccf",
@@ -4327,7 +4451,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-4d8af3bb1b10340",
@@ -4350,7 +4474,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-dad4500651efc30",
@@ -4378,7 +4502,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-fba8faaaaa1efb8",
@@ -4400,7 +4524,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-99117c5168f82eb",
@@ -4422,7 +4546,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-7eb9a9819aafa4c",
@@ -4444,7 +4568,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-ed561b432025a05",
@@ -4466,7 +4590,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-c59724664c825ad",
@@ -4488,7 +4612,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://www.greentrekker.pt/site/assets/files/143251/883622.700x700.jpg",
       "image_checked_at": "2026-10-22"
     },
@@ -4512,7 +4636,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-dbaca611102c5cf",
@@ -4534,7 +4658,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-a50eab8eace583d",
@@ -4557,7 +4681,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-66d442cdebcd5a4",
@@ -4579,7 +4703,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-988addf31348f01",
@@ -4607,7 +4731,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-e041066fafc1ac7",
@@ -4630,7 +4754,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5c4aeebd6f3a266",
@@ -4652,7 +4776,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Montanhas do Norte",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-b628cb891c08aa6",
@@ -4674,7 +4798,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-d9cdbf9e1d28aa5",
@@ -4696,7 +4820,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-4ad43fb49334036",
@@ -4718,7 +4842,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00",
       "image": "https://www.greentrekker.pt/site/assets/files/204196/dsc_0941_1.700x700.jpg",
       "image_checked_at": "2026-10-22",
       "verified": false
@@ -4743,7 +4867,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "DRenergies",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-81dd507f327a995",
@@ -4765,7 +4889,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-3fe42677d62347e",
@@ -4787,7 +4911,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-e25ff76804d87ac",
@@ -4810,7 +4934,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-98567d51b94f88f",
@@ -4832,7 +4956,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-250f25812f1fba2",
@@ -4854,7 +4978,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-67861b1603aeff8",
@@ -4876,7 +5000,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-394784ddc352401",
@@ -4899,7 +5023,7 @@
       "date_verified": "official_detail",
       "last_seen_at": "2026-10-25",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-0b5d4694e41c4d2",
@@ -4923,7 +5047,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Clube de Montanhismo da Guarda",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-5cc14b80ea4a64c",
@@ -4947,7 +5071,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-9c8827b1c799278",
@@ -4969,7 +5093,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-402121a2e0aee00",
@@ -4991,7 +5115,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-1ee272cc1d22a90",
@@ -5013,7 +5137,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-d6d38981ff7e4ce",
@@ -5035,7 +5159,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-cc769ada5bb95a9",
@@ -5057,7 +5181,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-fe2a4bc782da781",
@@ -5079,7 +5203,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-1616e381933d4f6",
@@ -5103,7 +5227,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-c2679bdbf2accdc",
@@ -5131,7 +5255,7 @@
       "gpsFromAnnouncement": true,
       "last_seen_at": "2026-10-25",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-efc1930727f2fd0",
@@ -5153,7 +5277,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-376320e59e205bf",
@@ -5175,7 +5299,29 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
+    },
+    {
+      "id": "web-90abd02a2a17ae1",
+      "title": "Caminhada de Natal em família no Bosque do Silêncio",
+      "date": "2026-12-13",
+      "organizer": "GreenTrekker",
+      "url": "https://www.greentrekker.pt/agenda/caminhada-em-familia-no-bosque-do-silencio-12",
+      "town": "Por confirmar",
+      "start": "Parque de Estacionamento da Peninha",
+      "region": "",
+      "area": "",
+      "time": "",
+      "km": 6.0,
+      "gain": null,
+      "duration": 3.0,
+      "price": null,
+      "difficulty": 1,
+      "description": "Consultar os detalhes na página do organizador.",
+      "tag": "Caminhada",
+      "last_seen_at": "2026-10-25",
+      "source_name": "GreenTrekker",
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6b9d8260b6b8eb6",
@@ -5197,7 +5343,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-9b42c6c94539827",
@@ -5219,7 +5365,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-686caa51525011f",
@@ -5241,7 +5387,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Mais Trilhos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-6df49d4e48c7afe",
@@ -5263,7 +5409,7 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-10-25",
       "source_name": "Hike Land",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-3e38c919713d520",
@@ -5287,7 +5433,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     },
     {
       "id": "web-c284eb348a1070a",
@@ -5330,7 +5476,7 @@
       "status_checked_at": "2026-10-25",
       "last_seen_at": "2026-10-25",
       "source_name": "Trilhos Nocturnos",
-      "last_confirmed_at": "2026-10-25T11:17:42+00:00"
+      "last_confirmed_at": "2026-10-25T20:19:48+00:00"
     }
   ]
 }
