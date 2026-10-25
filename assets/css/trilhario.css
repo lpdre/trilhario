@@ -1682,25 +1682,41 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  }
 }
 
-/* v75 — datas na mesma barra dos filtros rápidos; agrupadas em ecrãs estreitos. */
+/* v76 — duas linhas compactas: distâncias e três próximos fins de semana. */
+.results .v51-quick-filters.v64-quick-filters{
+ display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-bottom:8px;
+}
 .results .v64-quick-filters .v75-distance-group,
 .results .v64-quick-filters .v75-weekend-group{
- display:flex;align-items:center;gap:5px;flex-wrap:nowrap;white-space:nowrap;min-width:0;
+ display:flex;align-items:center;gap:5px;flex-wrap:nowrap;white-space:nowrap;
+ width:100%;min-width:0;margin:0;padding:0;border:0;
 }
-.results .v64-quick-filters .v75-distance-caption{
- margin:0 5px 0 0;color:#35523e;font-size:var(--ui-caption);
- font-weight:750;letter-spacing:.05px;
+.results .v64-quick-filters .v75-distance-caption,
+.results .v64-quick-filters .v75-weekend-caption{
+ flex:0 0 126px;margin:0;color:#35523e;
+ font-size:var(--ui-caption);font-weight:750;letter-spacing:.05px;
 }
-.results .v64-quick-filters .v75-weekend-group{
- margin-left:auto;padding-left:10px;border-left:1px solid #b8cbbd;
+.results .v64-quick-filters .v75-weekend-group button{flex:0 0 auto;}
+@media(max-width:540px){
+ .results .v51-quick-filters.v64-quick-filters{gap:5px;margin-bottom:7px;}
+ .results .v64-quick-filters .v75-distance-group,
+ .results .v64-quick-filters .v75-weekend-group{gap:4px;}
+ .results .v64-quick-filters .v75-distance-caption,
+ .results .v64-quick-filters .v75-weekend-caption{
+  flex-basis:113px;font-size:9.6px;letter-spacing:0;
+ }
+ .results .v64-quick-filters button{padding:4px 7px;font-size:9.3px;}
 }
-@media(max-width:700px){
- .results .v51-quick-filters.v64-quick-filters{column-gap:7px;row-gap:5px;}
- .results .v64-quick-filters .v75-weekend-group{margin-left:0;padding-left:0;border-left:0;}
-}
-@media(max-width:370px){
+@media(max-width:390px){
+ .results .v64-quick-filters .v75-distance-caption,
+ .results .v64-quick-filters .v75-weekend-caption{flex-basis:104px;font-size:9px;}
+ .results .v64-quick-filters button{padding:4px 6px;font-size:9px;}
  .results .v64-quick-filters .v75-distance-group,
  .results .v64-quick-filters .v75-weekend-group{gap:3px;}
- .results .v64-quick-filters .v75-distance-caption{font-size:9px;margin-right:3px;}
- .results .v64-quick-filters button{padding:4px 6px;font-size:9px;}
+}
+@media(max-width:340px){
+ .results .v64-quick-filters .v75-distance-caption,
+ .results .v64-quick-filters .v75-weekend-caption{flex-basis:94px;font-size:8.6px;}
+ .results .v64-quick-filters button{padding:4px 5px;font-size:8.5px;}
+ .results .v64-quick-filters .v75-weekend-group{overflow-x:auto;scrollbar-width:thin;}
 }
