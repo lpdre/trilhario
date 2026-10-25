@@ -1,48 +1,5 @@
 
 'use strict';
-const SEED=[
-{id:'indoeu-campos',title:'Campos e Alto do Trovão',date:'2026-10-24',time:'09:15',town:'Vieira do Minho',region:'Norte',area:'Serra da Cabreira',organizer:'Indoeu',km:16,gain:450,price:15,difficulty:3,description:'Aldeia tradicional, bosques densos, caminhos rurais e panorâmicas do Alto do Trovão.',url:'https://indoeu.pt/camposeoaltodotrovao/',tag:'Bosques'},
-{id:'mais-ave',title:'Da Nascente do Ave ao cume da Cabreira',date:'2026-10-24',time:'09:00',town:'Vieira do Minho',region:'Norte',area:'Serra da Cabreira',organizer:'Mais Trilhos',km:21,gain:750,price:20,difficulty:4,description:'A nascente do rio Ave, subida ao Talefe e panorâmicas de alta montanha.',url:'https://maistrilhos.pt/caminhadas/a-nascente-o-ave',tag:'Montanha'},
-{id:'sico',title:'Moinho da Melriça e Vale Encantado',date:'2026-10-24',time:'09:30',town:'Pombal',region:'Centro',area:'Serra de Sicó',organizer:'Hike Land',km:16.5,gain:550,price:15,difficulty:3,description:'Calcário, carvalhais, olivais, aldeias e vales mediterrânicos.',url:'https://www.hikeland.pt/atividades-1-dia/',tag:'Geologia'},
-{id:'geres-vertical',title:'Gerês Vertical',date:'2026-10-24',time:'09:30',town:'Terras de Bouro',region:'Norte',area:'Gerês',organizer:'Hike Land',km:16.5,gain:1200,price:null,difficulty:5,description:'Percurso técnico de montanha com passagens de trepada em granito. Requer experiência.',url:'https://www.hikeland.pt/eventos/geres-vertical-terras-de-bouro/',tag:'Técnico'},
-{id:'dinossauros',title:'Pegadas de Dinossauros + caminhada',date:'2026-10-24',time:'10:00',town:'Ourém',region:'Centro',area:'Serra de Aire',organizer:'Hike Land',km:7.5,gain:240,price:20,difficulty:2,description:'Percurso interpretativo com observação de pegadas fósseis e acompanhamento especializado.',url:'https://www.hikeland.pt/atividades-1-dia/',tag:'Geologia'},
-{id:'freita-plano',title:'Travessia no Planalto da Freita',date:'2026-10-24',time:'10:00',town:'Arouca',region:'Centro',area:'Serra da Freita',organizer:'Hike Land',km:21,gain:650,price:15,difficulty:3,description:'Planalto, património geológico, Pedras Parideiras e Frecha da Mizarela. Zonas elevadas, afloramentos e pontos de interesse geológico.',url:'https://www.hikeland.pt/eventos/travessia-no-planalto-da-freita-arouca/',tag:'Geologia'},
-{id:'basto-levada',title:'Trilhos de Outono: Levada da Víbora',date:'2026-10-24',time:'09:15',town:'Cabeceiras de Basto',region:'Norte',area:'Serra da Cabreira',organizer:'Basto Trekking',km:11,gain:299,price:7,difficulty:2,description:'Levada da Víbora e Moinhos de Rei. Percurso florestal pelo vale da Víbora.',url:'https://bastotrekking.pt/caminhada/trilhos-de-outono-pela-serra-da-cabreira',tag:'Bosques'},
-{id:'incas',title:'Trilho dos Incas e subida à Besta',date:'2026-10-24',time:'10:00',town:'São Pedro do Sul',region:'Centro',area:'Serra da Arada',organizer:'Hike Land',km:13.5,gain:750,price:20,difficulty:4,description:'Vereda de xisto e subida exposta à Besta, dependente das condições. Inclui uma passagem exposta na Besta.',url:'https://www.hikeland.pt/eventos/da-magia-do-trilho-inca-a-verticalidade-da-besta-s-pedro-do-sul-2a-edicao/',tag:'Técnico'},
-{id:'arrabida',title:'Trilhos do Forte do Cozinhador',date:'2026-10-24',time:'10:00',town:'Sesimbra',region:'Lisboa e Vale do Tejo',area:'Serra da Arrábida',organizer:'Hike Land',km:14,gain:630,price:15,difficulty:4,description:'Caminhada de falésias e fortificações com partes técnicas.',url:'https://www.hikeland.pt/eventos/pelos-trilhos-do-forte-do-cozinhador-arrabida-4/',tag:'Costa'},
-{id:'parque-cerdeira',title:'Aldeias típicas: Brufe, Cutelo e Cortinhas',date:'2026-10-24',time:'09:00',town:'Terras de Bouro',region:'Norte',area:'Gerês',organizer:'Parque Cerdeira',km:null,gain:null,price:12.5,difficulty:2,description:'Caminhada rural por aldeias tradicionais e paisagem de granito.',url:'https://parquecerdeira.com/eventos/',tag:'Aldeias'},
-{id:'arouca-urtigosa',title:'PR2 Caminhos do Vale do Urtigosa',date:'2026-10-24',time:'09:00',town:'Arouca',region:'Centro',area:'Rossas',organizer:'Município de Arouca',km:11,gain:null,price:null,difficulty:2,description:'Percurso integrado no Festival da Castanha; partida da Igreja Matriz de Rossas.',url:'https://www.cm-arouca.pt/visitar/eventos/festival-da-castanha-2026/',tag:'Cultura'},
-{id:'fafe',title:'Aldeias Serranas de Fafe',date:'2026-10-25',time:'09:00',town:'Fafe',region:'Norte',area:'Serras de Fafe',organizer:'Mais Trilhos',km:20,gain:700,price:20,difficulty:4,description:'Lagoa, Aboim, Figueiró do Monte e Mós, por carvalhais, ribeiras e caminhos antigos.',url:'https://maistrilhos.pt/caminhadas/aldeias-serranas-de-fafe',tag:'Aldeias'},
-{id:'candeeira',title:'Vale da Candeeira e Cântaro Gordo',date:'2026-10-25',time:'09:00',town:'Manteigas',region:'Centro',area:'Serra da Estrela',organizer:'Mais Trilhos',km:11,gain:800,price:15,difficulty:5,description:'Percurso técnico em alta montanha e vale glaciar; exige experiência.',url:'https://maistrilhos.pt/caminhadas',tag:'Técnico'},
-{id:'nariz',title:'Pisão e Nariz do Mundo',date:'2026-10-25',time:'10:00',town:'Cabeceiras de Basto',region:'Norte',area:'Serra da Cabreira',organizer:'Hike Land',km:12.5,gain:610,price:15,difficulty:3,description:'Moinhos, ribeira de Cavez e miradouro natural do Nariz do Mundo.',url:'https://www.hikeland.pt/eventos/pisao-e-nariz-do-mundo-entre-vales-da-serra-da-cabreira-cabeceiras-de-basto/',tag:'Miradouros'},
-{id:'bruxas',title:'Grande Travessia da Montanha das Bruxas',date:'2026-10-25',time:'10:00',town:'Mendiga',region:'Centro',area:'Serra dos Candeeiros',organizer:'GreenTrekker',km:21,gain:500,price:20,difficulty:3,description:'Depressões cársicas, cavidades, moinhos e cume do Cruto das Cavalarias.',url:'https://www.greentrekker.pt/agenda/grande-rota-da-montanha-das-bruxas/',tag:'Geologia'},
-{id:'corno',title:'Corno do Bico Outonal',date:'2026-10-25',time:'10:00',town:'Paredes de Coura',region:'Norte',area:'Paisagem Protegida do Corno do Bico',organizer:'Montanhas Dentro',km:10,gain:357,price:15,difficulty:2,description:'Carvalhal centenário, musgos, blocos graníticos e cores de Outono.',url:'https://montanhasdentro.com/',tag:'Bosques'},
-{id:'freita-arada',title:'Entre a Freita e a Arada',date:'2026-10-25',time:'10:00',town:'Vale de Cambra',region:'Centro',area:'Freita / Arada',organizer:'Hike Land',km:10,gain:420,price:12,difficulty:2,description:'Trilhos serranos e panorâmicas entre a Freita e a Arada; paisagens serranas.',url:'https://www.hikeland.pt/eventos/entre-a-serra-da-freita-e-a-serra-da-arada-vale-de-cambra/',tag:'Montanha'},
-{id:'obidos',title:'Trilhos Rurais de Óbidos',date:'2026-10-25',time:'09:30',town:'Óbidos',region:'Centro',area:'Oeste',organizer:'Hike Land',km:12,gain:null,price:null,difficulty:2,description:'Caminhos agrícolas, zona rural e património histórico.',url:'https://www.hikeland.pt/atividades-1-dia/',tag:'Cultura'},
-{id:'zezeres',title:'Trilhos do Zêzere',date:'2026-10-25',time:'09:00',town:'Pedrógão Pequeno',region:'Centro',area:'Vale do Zêzere',organizer:'GreenTrekker',km:10,gain:null,price:15,difficulty:2,description:'Levada, túnel, cursos de água e Ponte Filipina.',url:'https://www.greentrekker.pt/',tag:'Rio'}
-];
-const META={
-  'indoeu-campos':{duration:7,capacity:null,start:'Aldeia de Campos, Vieira do Minho',lat:41.671627,lon:-8.009749,verified:true},
-  'mais-ave':{duration:9,capacity:20,start:'Casa Florestal dos Anjos (ponto anunciado)',lat:41.645,lon:-8.046,verified:false},
-  'fafe':{duration:9,capacity:20,start:'Santuário de Nossa Senhora das Neves, Lagoa',lat:41.51614,lon:-8.08964,verified:true},
-  'arouca-urtigosa':{duration:4,estimatedDuration:true,start:'Igreja Matriz de Rossas, Arouca',lat:40.905768611,lon:-8.303089644,verified:true},
-  'nariz':{duration:6,start:'Restaurante O Moscoso, aldeia de Moscoso',lat:41.5830574,lon:-7.924835,verified:true},
-  'geres-vertical':{duration:8,start:'Zona da Cascata do Arado, Gerês (referência)',lat:41.722,lon:-8.130,verified:false,capacity:null},
-  'basto-levada':{duration:3.75,estimatedDuration:true,start:'Zona dos Moinhos de Rei (referência)',lat:41.57152,lon:-7.984653,verified:false},
-  'sico':{duration:6,start:'Serra de Sicó — ponto exacto a confirmar',lat:39.940,lon:-8.594,verified:false},
-  'dinossauros':{duration:5.5,estimatedDuration:true,start:'Pegadas de Dinossáurios, Serra de Aire (referência)',lat:39.568,lon:-8.588,verified:false},
-  'freita-plano':{duration:7,estimatedDuration:true,start:'Serra da Freita — referência',lat:40.873,lon:-8.268,verified:false},
-  'incas':{duration:6,estimatedDuration:true,start:'Serra da Arada — referência',lat:40.843,lon:-8.079,verified:false},
-  'arrabida':{duration:6.5,estimatedDuration:true,start:'Serra da Arrábida — referência',lat:38.463,lon:-9.040,verified:false},
-  'parque-cerdeira':{duration:4,start:'Parque Cerdeira — referência',lat:41.744,lon:-8.188,verified:false},
-  'candeeira':{duration:7,estimatedDuration:true,start:'Manteigas — referência',lat:40.402,lon:-7.540,verified:false},
-  'bruxas':{duration:7,start:'Mendiga — referência',lat:39.486,lon:-8.858,verified:false},
-  'corno':{duration:5,estimatedDuration:true,capacity:20,start:'Corno do Bico — referência',lat:41.909,lon:-8.553,verified:false},
-  'freita-arada':{duration:4.5,estimatedDuration:true,start:'Serra da Arada — referência',lat:40.864,lon:-8.127,verified:false},
-  'obidos':{duration:4.5,estimatedDuration:true,start:'Óbidos — referência',lat:39.360,lon:-9.158,verified:false},
-  'zezeres':{duration:4.5,estimatedDuration:true,start:'Pedrógão Pequeno — referência',lat:39.899,lon:-8.132,verified:false}
-};
-// Os pontos não confirmados são aproximados e não devem ser usados para navegação.
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const fmtN=n=>n===null||n===undefined||n===''?'—':Number(n).toLocaleString('pt-PT',{maximumFractionDigits:1});
@@ -62,7 +19,7 @@ function sanitizeStored(key,value,fallback){
     typeof e.title==='string'&&e.title.trim().length>0&&typeof e.organizer==='string'&&
     e.organizer.trim().length>0&&storedDate(e.date)).map(e=>({...e,userAdded:true}));
  }
- if(key==='trilhario_compare_v19'||key==='trilhario_fav_v1'){
+ if(key==='trilhario_compare_v19'){
   return Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&id.length>0&&id.length<=240))]:[];
  }
  if(key==='trilhario_travel_prefs_v19'){
@@ -258,7 +215,6 @@ function localPartidaLegivel(valor){
 }
 // Fonte desactivada: o catálogo anterior confundiu 'EVENTO FECHADO' com títulos
 // e misturou actividades não pedestres. Nunca apresentar registos desta origem.
-function excludedOrganizer(name){return false; /* A Smile entra apenas pela fonte oficial; o agregador é filtrado pelo URL. */}
 // v39 — rejeitar anúncios cujo link aponta para o agregador, independentemente do nome do organizador.
 function isTrilhosCaminhadasSource(e){
  if(String(e?.source||'').trim().toLowerCase()==='trilhos & caminhadas')return true;
@@ -289,13 +245,12 @@ function allEvents(){
     normalizedEventsCache.today===todayKey&&
     normalizedEventsCache.feedState===remoteFeedState)return normalizedEventsCache.events;
  const isOfficialCatalogue=remoteFeedState==='ready'&&Array.isArray(remoteEvents);
- // Enquanto a fonte é carregada, nunca apresentar eventos de demonstração
- // como se fossem anúncios reais. Na falha, o modo demo tem aviso explícito.
- const source=isOfficialCatalogue?remoteEvents:(remoteFeedState==='loading'?[]:SEED);
- const catalogue=source.filter(e=>!excludedOrganizer(e.organizer)&&!isTrilhosCaminhadasSource(e));
- const normalized=catalogue.concat(custom.filter(e=>!excludedOrganizer(e.organizer))).map(x=>{
-  // META pertence apenas ao catálogo demonstrativo de emergência.
-  const e=isOfficialCatalogue?{...x}:{...x,...(META[x.id]||{})};
+ // Em falha, não criar nem apresentar anúncios que não estejam no catálogo oficial.
+ const source=isOfficialCatalogue?remoteEvents:[];
+ const catalogue=source.filter(e=>!isTrilhosCaminhadasSource(e));
+ // Os eventos pessoais já guardados continuam acessíveis em modo de leitura.
+ const normalized=catalogue.concat(custom).map(x=>{
+  const e={...x};
   const publishedGps=!(e.verified&&hasCoords(e))?parsePublishedGps(e.start):null;
   return {...e,...(publishedGps||{}),title:legibleEventTitle(e),verified:!!e.verified||!!publishedGps,
           start:displayDeparture(e)};
@@ -304,8 +259,7 @@ function allEvents(){
  normalizedEventsCache={remote:remoteEvents,custom,customLength:custom.length,today:todayKey,feedState:remoteFeedState,events:normalized};
  return normalized;
 }
-// Num alojamento web, o catálogo actualizado pode ser publicado como eventos.json.
-// Se não existir, o HTML continua autónomo e mostra o catálogo demonstrativo.
+// O catálogo oficial depende de eventos.json; falhas de carregamento nunca geram anúncios fictícios.
 function catalogToday(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Lisbon'});}
 // v58 — a agenda usa sempre a hora portuguesa, independentemente do fuso do navegador.
 const AGENDA_CLOCK_FORMATTER=new Intl.DateTimeFormat('en-GB',{
@@ -381,9 +335,9 @@ function renderCatalogStatus(){
  // Quando a fonte falha ou está muito desactualizada, mostrar apenas o aviso útil.
  const node=$('catalogStatus');if(!node)return;
  let status=remoteFeedState,message='';
- if(status==='unavailable')message='Não foi possível carregar o catálogo online. Os trilhos apresentados são exemplos e não uma agenda confirmada.';
- else if(status==='invalid')message='O catálogo online está inválido. Os trilhos apresentados são exemplos.';
- else if(status==='offline')message='Modo de demonstração: os trilhos apresentados podem não estar actualizados.';
+ if(status==='unavailable')message='Não foi possível carregar a agenda online. Tenta actualizar a página.';
+ else if(status==='invalid')message='A agenda online está temporariamente indisponível por dados inválidos.';
+ else if(status==='offline')message='A agenda necessita de acesso ao servidor; abre o Trilhário através do site.';
  else if(status==='ready'){
   const when=remoteUpdatedAt?new Date(remoteUpdatedAt):null;
   const age=when&&Number.isFinite(when.getTime())?(Date.now()-when.getTime())/3600000:Infinity;
@@ -413,7 +367,6 @@ async function loadEventFeed(){
   const json=await response.json();
   if(!json||!Array.isArray(json.events)||json.events.length>10000){remoteFeedState='invalid';renderCatalogStatus();render();return;}
   const events=json.events.filter(e=>e&&typeof e.id==='string'&&typeof e.title==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&typeof e.organizer==='string'
-    && !excludedOrganizer(e.organizer)
     && !isTrilhosCaminhadasSource(e)
     && !(e.organizer==='Montanhas Dentro' && e.date_verified!=='official_detail'))
     .map(e=>({...e,url:(typeof e.url==='string'&&/^https?:\/\//i.test(e.url))?e.url:''}));
@@ -427,7 +380,7 @@ async function loadEventFeed(){
   geo.selectionShown=false;populateOrganizers();render();
   // Fotografias existentes dos próximos fins de semana entram antecipadamente na cache.
   warmUpcomingWeekendPhotos();
- }catch(err){remoteFeedState='unavailable';console.info('Catálogo externo indisponível; dados locais indicados como demonstração.',err?.message);renderCatalogStatus();render();}
+ }catch(err){remoteFeedState='unavailable';console.info('Catálogo externo indisponível; sem eventos de demonstração.',err?.message);renderCatalogStatus();render();}
 }
 
 const fold=t=>String(t??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -903,9 +856,6 @@ function downloadIcs(id){const e=allEvents().find(x=>x.id===id);if(!e)return;con
  saveBlob(new Blob([data],{type:'text/calendar;charset=utf-8'}),e.id+'.ics');toast(e.time?'Evento exportado. Confirma o horário real.':'Evento exportado sem hora definida; confirma o horário antes de sair.');}
 
 function removeEvent(id){if(!confirm('Eliminar este evento?'))return;const next=custom.filter(e=>e.id!==id);if(!persistValue('trilhario_custom_v1',next))return;custom=next;populateOrganizers();render();toast('Evento eliminado')}
-function openModal(){$('modal').hidden=false;$('fTitle').focus();document.body.style.overflow='hidden'}function closeModal(){$('modal').hidden=true;document.body.style.overflow=''}
-$('addBtn')?.addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
-$('eventForm').addEventListener('submit',e=>{e.preventDefault();const val=id=>$(id).value.trim(),maybeNumber=id=>val(id)!==''?Number(val(id)):null;const lat=maybeNumber('fLat'),lon=maybeNumber('fLon');const entry={id:'meu-'+Date.now(),userAdded:true,title:val('fTitle'),date:val('fDate'),time:val('fTime'),town:val('fTown'),region:val('fRegion'),area:val('fTown'),organizer:val('fOrg'),km:maybeNumber('fKm'),gain:maybeNumber('fGain'),price:maybeNumber('fPrice'),duration:maybeNumber('fDuration'),capacity:maybeNumber('fMaxParticipants'),start:val('fStart'),lat,lon,verified:lat!=null&&lon!=null,difficulty:Number(val('fDifficulty')),description:val('fDescription'),url:val('fUrl'),tag:'Manual'};if(!entry.title||!entry.date||!entry.town||!entry.organizer)return;const next=[...custom,entry];if(!persistValue('trilhario_custom_v1',next))return;custom=next;$('eventForm').reset();closeModal();populateOrganizers();resetFilters();toast('Evento guardado neste navegador.');});
 document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{
  const chosen=Number(b.dataset.quickKm);
  const active=state.kmMin===chosen&&state.kmMax===KM_CAP;

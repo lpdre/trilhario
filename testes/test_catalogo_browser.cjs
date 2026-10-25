@@ -2,7 +2,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
 const s=fs.readFileSync(__dirname+'/../assets/js/trilhario.js','utf8');
 const start=s.indexOf('function migrateComparedAliases(');
-const end=s.indexOf('// Num alojamento web',start);
+const end=s.indexOf('function catalogToday()',start);
 assert(start>0&&end>start);
 const compiled=s.slice(start,end);
 // A partir da v47A, a migração dos IDs usa o auxiliar de persistência.
@@ -10,7 +10,7 @@ const compiled=s.slice(start,end);
 const writes=[];
 const ctx={
   remoteFeedState:'ready',remoteEvents:[{id:'recolhido',date:'2026-11-01',title:'Caminhada oficial',organizer:'X',start:'Arouca',url:'https://exemplo.pt/1'}],
-  normalizedEventsCache:null, custom:[], SEED:[{id:'demo',date:'2026-11-01',title:'Demo',organizer:'Y',start:'Aveiro'}],META:{demo:{km:4}},
+  normalizedEventsCache:null, custom:[],
   catalogToday:()=> '2026-10-23',excludedOrganizer:()=>false,isTrilhosCaminhadasSource:()=>false,
   hasCoords:()=>false,parsePublishedGps:()=>null,legibleEventTitle:e=>e.title,displayDeparture:e=>e.start,
   compared:new Set(['manual','desconhecido']),TRAVEL_COMPARE_KEY:'comparacoes',
@@ -37,11 +37,15 @@ items=ctx.allEvents();
 assert.equal(items.length,0,'durante a consulta não surgem anúncios fictícios');
 ctx.remoteFeedState='unavailable';
 items=ctx.allEvents();
-assert.equal(items.length,1,'em falha pode mostrar demo claramente identificada');
-assert.equal(items[0].id,'demo');
-assert.equal(items[0].km,4);
+assert.equal(items.length,0,'em falha não apresentar eventos fictícios');
 ctx.remoteFeedState='ready';ctx.remoteEvents=[{id:'real',date:'2026-11-01',title:'Evento',organizer:'X'}];
 ctx.custom=[{id:'meu',date:'2026-11-02',title:'Evento pessoal',organizer:'Eu'}];
 items=ctx.allEvents();
 assert.equal(items.length,2,'eventos inseridos pelo utilizador preservados');
-console.log('OK: JSON único, vazio, carregamento, demonstração, eventos pessoais');
+const html=fs.readFileSync(__dirname+'/../index.html','utf8');
+const css=fs.readFileSync(__dirname+'/../assets/css/trilhario.css','utf8');
+assert.equal(s.includes('const SEED='),false,'catálogo fictício não deve existir');
+assert.equal(s.includes('const META='),false,'metadados de demonstração não devem existir');
+assert.equal(html.includes('id="eventForm"'),false,'formulário descontinuado não deve estar no HTML');
+assert.equal(css.includes('.walk-favorite'),false,'estilos de favoritos descontinuados');
+console.log('OK: catálogo oficial, falhas sem anúncios fictícios, eventos antigos preservados e limpeza HTML/CSS');

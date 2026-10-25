@@ -3,7 +3,7 @@
 
 Este é um colector experimental, com fontes de HTML públicas. Os sites podem
 mudar de estrutura, bloquear pedidos automáticos ou ter condições de acesso.
-Executa duas vezes por semana através do GitHub Actions.
+Executa diariamente através do GitHub Actions.
 """
 
 # TRILHARIO FASE 2 — EXTRACCAO E CONTROLO DE FONTES
@@ -49,7 +49,7 @@ SOURCES = [
     {"organizer": "NDesafios — Natureza e Desafios", "url": "https://ndesafios.pt/",
      "mode": "ndesafios"},
     # Trekking4Life: site Wix oficial sem calendário de saídas parseável.
-    # Eventos válidos podem entrar pelo agregador; não usar data 2926.
+    # Sem extractor oficial fiável; não importar resultados de agregadores.
     # Agendas oficiais adicionais. Só são importados anúncios com data validada.
     {"organizer": "Montanhas do Norte", "url": "https://montanhasdonorte.pt/percursos-1-dia/",
      "path": r"^/(?:tour|percursos|percurso|produto|atividade|actividade)/[^/]+/?$"},
@@ -75,7 +75,7 @@ SOURCES = [
     {"organizer": "SAL — Sistemas de Ar Livre", "url": "https://www.sal.pt/", "mode": "sal"},
     {"organizer": "Gerês Viver Turismo", "url": "https://geres.pt/programa-anual-de-caminhadas-2026/", "mode": "programa"},
     {"organizer": "Programa Municipal de Caminhadas de Lousada", "url": "https://app.cm-lousada.pt/servicos/cultura-desporto-e-lazer/desporto/atividades/galeria-39", "mode": "lousada"},
-    # Agregador como segunda fonte; a entidade promotora mantém o nome real.
+    # Recolha directa das fontes oficiais de RB e Smile.
     {"organizer": "RB Hiking & Trekking", "url": "https://barbosa-trekking.pt/", "mode": "rb"},
     {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/", "mode": "smile"},
     # Agregador Trilhos & Caminhadas desactivado; utilizar apenas as fontes oficiais.
