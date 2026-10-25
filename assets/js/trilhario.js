@@ -425,6 +425,8 @@ async function loadEventFeed(){
   const future=events.filter(e=>eventHasNotStarted(e,clock)).map(e=>e.date).sort();
   if(future.length){state.year=Number(future[0].slice(0,4));state.month=Number(future[0].slice(5,7))-1;}
   geo.selectionShown=false;populateOrganizers();render();
+  // Fotografias existentes dos próximos fins de semana entram antecipadamente na cache.
+  warmUpcomingWeekendPhotos();
  }catch(err){remoteFeedState='unavailable';console.info('Catálogo externo indisponível; dados locais indicados como demonstração.',err?.message);renderCatalogStatus();render();}
 }
 
@@ -523,6 +525,42 @@ function eventPhotoUrl(e){
  if(typeof val!=='string'||!/^https:\/\/[^/]+/i.test(val))return '';
  try{const u=new URL(val);return u.protocol==='https:'&&!!u.hostname&&u.username===''&&u.password===''?u.href:''}
  catch{return ''}
+}
+// v85 — pré-carregamento limitado a dois fins de semana, sem tocar em outros eventos.
+// Três transferências simultâneas protegem a resposta no telemóvel; URLs únicas
+// deixam a cache HTTP do navegador tratar das imagens já descarregadas.
+const queuedWeekendPhotos=new Set();
+const pendingWeekendPhotos=[];
+const activeWeekendPhotoLoads=new Set();
+function pumpUpcomingWeekendPhotos(){
+ while(activeWeekendPhotoLoads.size<3&&pendingWeekendPhotos.length){
+  const url=pendingWeekendPhotos.shift();
+  const image=new Image();
+  activeWeekendPhotoLoads.add(image);
+  image.decoding='async';
+  image.referrerPolicy='strict-origin-when-cross-origin';
+  if('fetchPriority' in image)image.fetchPriority='low';
+  const done=()=>{image.onload=null;image.onerror=null;activeWeekendPhotoLoads.delete(image);pumpUpcomingWeekendPhotos();};
+  image.onload=done;
+  image.onerror=done;
+  image.src=url;
+ }
+}
+function warmUpcomingWeekendPhotos(){
+ if(remoteFeedState!=='ready'||!Array.isArray(remoteEvents))return;
+ if(navigator.connection?.saveData)return;
+ const windows=weekendWindows(),today=agendaClock().date;
+ const keys=today>windows.this.from?['next','following']:['this','next'];
+ const chosen=keys.map(key=>windows[key]);
+ for(const event of remoteEvents){
+  if(!chosen.some(r=>event.date>=r.from&&event.date<=r.to))continue;
+  const url=eventPhotoUrl(event);
+  if(url&&!queuedWeekendPhotos.has(url)){
+   queuedWeekendPhotos.add(url);
+   pendingWeekendPhotos.push(url);
+  }
+ }
+ pumpUpcomingWeekendPhotos();
 }
 function eventRow(x){
  const spot=displayDeparture(x),verified=!!x.verified;
