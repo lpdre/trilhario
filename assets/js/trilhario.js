@@ -329,7 +329,9 @@ function weekendWindows(clock=agendaClock()){
   const to=new Date(from);to.setUTCDate(to.getUTCDate()+1);
   return {from:iso(from),to:iso(to)};
  };
- return {this:range(0),next:range(7),following:range(14)};
+ const windows={this:range(0),next:range(7),following:range(14)};
+ for(let week=3;week<12;week++)windows['w'+week]=range(week*7);
+ return windows;
 }
 // v77 — separar dia e mês para manter a mesma largura em todas as datas.
 function weekendLabelLines({from,to}){
@@ -874,7 +876,22 @@ document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('clic
  state.view='list';
  render();
 }));
-document.querySelectorAll('[data-quick-weekend]').forEach(b=>b.addEventListener('click',()=>{const chosen=b.dataset.quickWeekend;state.weekend=state.weekend===chosen?'all':chosen;state.day='all';state.view='list';render();}));
+// v82 — acrescentar os próximos fins de semana sem ocupar mais altura.
+const weekendStrip=document.querySelector('.v79-weekend-buttons');
+if(weekendStrip){
+ for(let week=3;week<12;week++){
+  const button=document.createElement('button');
+  button.type='button';
+  button.dataset.quickWeekend='w'+week;
+  button.setAttribute('aria-pressed','false');
+  weekendStrip.appendChild(button);
+ }
+}
+document.querySelectorAll('[data-quick-weekend]').forEach(b=>b.addEventListener('click',()=>{
+ const chosen=b.dataset.quickWeekend;
+ state.weekend=state.weekend===chosen?'all':chosen;
+ state.day='all';state.view='list';render();
+}));
 $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;render()});
 ['km','gain'].forEach(prefix=>{
  $(prefix+'Min').addEventListener('input',e=>changeDual(prefix,'Min',e.target.value));
