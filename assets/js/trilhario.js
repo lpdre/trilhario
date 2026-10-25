@@ -329,7 +329,7 @@ function weekendWindows(clock=agendaClock()){
   const to=new Date(from);to.setUTCDate(to.getUTCDate()+1);
   return {from:iso(from),to:iso(to)};
  };
- return {this:range(0),next:range(7)};
+ return {this:range(0),next:range(7),following:range(14)};
 }
 function weekendLabel({from,to}){
  const a=new Date(from+'T12:00:00Z'),b=new Date(to+'T12:00:00Z');
