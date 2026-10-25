@@ -331,19 +331,26 @@ function weekendWindows(clock=agendaClock()){
  };
  return {this:range(0),next:range(7),following:range(14)};
 }
-function weekendLabel({from,to}){
+// v77 — separar dia e mês para manter a mesma largura em todas as datas.
+function weekendLabelLines({from,to}){
  const a=new Date(from+'T12:00:00Z'),b=new Date(to+'T12:00:00Z');
  const month=d=>{const m=d.toLocaleDateString('pt-PT',{month:'short',timeZone:'UTC'}).replaceAll('.','');return m[0].toUpperCase()+m.slice(1);};
  return a.getUTCMonth()===b.getUTCMonth()&&a.getUTCFullYear()===b.getUTCFullYear()
-  ?a.getUTCDate()+'–'+b.getUTCDate()+' '+month(b)
-  :a.getUTCDate()+' '+month(a)+'–'+b.getUTCDate()+' '+month(b);
+  ?[a.getUTCDate()+'–'+b.getUTCDate(),month(b)]
+  :[a.getUTCDate()+' '+month(a),b.getUTCDate()+' '+month(b)];
 }
 function updateWeekendQuickFilters(){
  const ranges=weekendWindows();
  document.querySelectorAll('[data-quick-weekend]').forEach(button=>{
   const type=button.dataset.quickWeekend,range=ranges[type],on=state.weekend===type;
   if(!range)return;
-  button.textContent=weekendLabel(range);
+  const lines=weekendLabelLines(range);
+  button.replaceChildren(...lines.map(line=>{
+   const span=document.createElement('span');
+   span.className='v77-date-line';
+   span.textContent=line;
+   return span;
+  }));
   button.classList.toggle('active',on);
   button.setAttribute('aria-pressed',String(on));
   button.setAttribute('aria-label','Caminhadas de '+range.from+' a '+range.to);
