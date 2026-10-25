@@ -1682,41 +1682,50 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  }
 }
 
-/* v76 — duas linhas compactas: distâncias e três próximos fins de semana. */
+/* v77 — alinhamento em duas linhas, larguras e alturas iguais para todos os botões. */
 .results .v51-quick-filters.v64-quick-filters{
  display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-bottom:8px;
 }
-.results .v64-quick-filters .v75-distance-group,
-.results .v64-quick-filters .v75-weekend-group{
- display:flex;align-items:center;gap:5px;flex-wrap:nowrap;white-space:nowrap;
+.results .v51-quick-filters.v64-quick-filters .v75-distance-group,
+.results .v51-quick-filters.v64-quick-filters .v75-weekend-group{
+ display:grid;grid-template-columns:minmax(94px,120px) repeat(4,minmax(0,72px));
+ align-items:center;column-gap:5px;
  width:100%;min-width:0;margin:0;padding:0;border:0;
 }
 .results .v64-quick-filters .v75-distance-caption,
 .results .v64-quick-filters .v75-weekend-caption{
- flex:0 0 126px;margin:0;color:#35523e;
- font-size:var(--ui-caption);font-weight:750;letter-spacing:.05px;
+ display:block;margin:0;color:#35523e;font-size:var(--ui-caption);
+ font-weight:750;letter-spacing:.05px;line-height:1.2;white-space:normal;
 }
-.results .v64-quick-filters .v75-weekend-group button{flex:0 0 auto;}
+.results .v51-quick-filters.v64-quick-filters .v75-distance-group button,
+.results .v51-quick-filters.v64-quick-filters .v75-weekend-group button{
+ box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ width:100%;height:36px;min-height:36px;min-width:0;
+ padding:3px 2px;margin:0;line-height:1.15;text-align:center;white-space:nowrap;
+}
+.results .v64-quick-filters .v77-date-line{display:block;white-space:nowrap;}
 @media(max-width:540px){
  .results .v51-quick-filters.v64-quick-filters{gap:5px;margin-bottom:7px;}
- .results .v64-quick-filters .v75-distance-group,
- .results .v64-quick-filters .v75-weekend-group{gap:4px;}
- .results .v64-quick-filters .v75-distance-caption,
- .results .v64-quick-filters .v75-weekend-caption{
-  flex-basis:113px;font-size:9.6px;letter-spacing:0;
+ .results .v51-quick-filters.v64-quick-filters .v75-distance-group,
+ .results .v51-quick-filters.v64-quick-filters .v75-weekend-group{
+  grid-template-columns:minmax(92px,110px) repeat(4,minmax(0,70px));column-gap:4px;
  }
- .results .v64-quick-filters button{padding:4px 7px;font-size:9.3px;}
-}
-@media(max-width:390px){
  .results .v64-quick-filters .v75-distance-caption,
- .results .v64-quick-filters .v75-weekend-caption{flex-basis:104px;font-size:9px;}
- .results .v64-quick-filters button{padding:4px 6px;font-size:9px;}
- .results .v64-quick-filters .v75-distance-group,
- .results .v64-quick-filters .v75-weekend-group{gap:3px;}
+ .results .v64-quick-filters .v75-weekend-caption{font-size:9.6px;letter-spacing:0;}
+ .results .v51-quick-filters.v64-quick-filters .v75-distance-group button,
+ .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button{
+  font-size:9.5px;height:34px;min-height:34px;
+ }
 }
-@media(max-width:340px){
+@media(max-width:365px){
+ .results .v51-quick-filters.v64-quick-filters .v75-distance-group,
+ .results .v51-quick-filters.v64-quick-filters .v75-weekend-group{
+  grid-template-columns:minmax(86px,99px) repeat(4,minmax(0,68px));column-gap:3px;
+ }
  .results .v64-quick-filters .v75-distance-caption,
- .results .v64-quick-filters .v75-weekend-caption{flex-basis:94px;font-size:8.6px;}
- .results .v64-quick-filters button{padding:4px 5px;font-size:8.5px;}
- .results .v64-quick-filters .v75-weekend-group{overflow-x:auto;scrollbar-width:thin;}
+ .results .v64-quick-filters .v75-weekend-caption{font-size:9px;}
+ .results .v51-quick-filters.v64-quick-filters .v75-distance-group button,
+ .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button{
+  font-size:9px;padding:3px 1px;
+ }
 }
