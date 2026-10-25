@@ -5,7 +5,7 @@
 <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="#143e32" name="theme-color"/><meta content="Trilhário — agenda de caminhadas organizadas em Portugal, com lista, calendário, mapa e estimativa de deslocações." name="description"/>
 <title>Trilhário — Agenda de caminhadas</title>
-<link rel="stylesheet" href="assets/css/trilhario.css?v=82"/>
+<link rel="stylesheet" href="assets/css/trilhario.css?v=83"/>
 </head>
 <body>
 <section class="hero" id="top"><div class="hero-inner shell"><div class="hero-copy">
@@ -91,19 +91,31 @@
 <section aria-live="polite" class="results">
 <div class="v51-quick-filters v64-quick-filters" role="group" aria-label="Filtros rápidos de distância e datas">
  <div class="v75-distance-group" role="group" aria-label="Distância mínima">
- <span class="v75-distance-caption">Distância mínima</span>
- <div class="v81-distance-buttons">
-  <button type="button" data-quick-km="10" aria-pressed="false">10+ km</button>
-  <button type="button" data-quick-km="15" aria-pressed="false">15+ km</button>
-  <button type="button" data-quick-km="20" aria-pressed="false">20+ km</button>
- </div>
+  <span class="v75-distance-caption v83-label">Distância</span>
+  <div class="v83-scroll-shell">
+   <div class="v81-distance-buttons v83-strip" id="quickKmStrip" role="group" aria-label="Desliza horizontalmente para ver mais opções">
+    <button type="button" data-quick-km="10" aria-pressed="false">10+ km</button>
+    <button type="button" data-quick-km="15" aria-pressed="false">15+ km</button>
+    <button type="button" data-quick-km="20" aria-pressed="false">20+ km</button>
+    <button type="button" data-quick-km="25" aria-pressed="false">25+ km</button>
+    <button type="button" data-quick-km="30" aria-pressed="false">30+ km</button>
+    <button type="button" data-quick-km="35" aria-pressed="false">35+ km</button>
+    <button type="button" data-quick-km="40" aria-pressed="false">40+ km</button>
+   </div>
+   <button type="button" class="v83-arrow v83-arrow-prev" data-quick-scroll="quickKmStrip" data-scroll-direction="-1" aria-label="Opções anteriores" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+   <button type="button" class="v83-arrow v83-arrow-next" data-quick-scroll="quickKmStrip" data-scroll-direction="1" aria-label="Mais opções" ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+  </div>
  </div>
  <div class="v75-weekend-group" role="group" aria-label="Próximos fins de semana">
-  <span class="v75-weekend-caption">Próximos<br>fins de semana</span>
-  <div class="v79-weekend-buttons" role="group" aria-label="Desliza horizontalmente para consultar até doze fins de semana">
-   <button type="button" data-quick-weekend="this" aria-pressed="false">—</button>
-   <button type="button" data-quick-weekend="next" aria-pressed="false">—</button>
-   <button type="button" data-quick-weekend="following" aria-pressed="false">—</button>
+  <span class="v75-weekend-caption v83-label">Datas</span>
+  <div class="v83-scroll-shell">
+   <div class="v79-weekend-buttons v83-strip" id="quickWeekendStrip" role="group" aria-label="Desliza horizontalmente para ver mais opções">
+    <button type="button" data-quick-weekend="this" aria-pressed="false">—</button>
+    <button type="button" data-quick-weekend="next" aria-pressed="false">—</button>
+    <button type="button" data-quick-weekend="following" aria-pressed="false">—</button>
+   </div>
+   <button type="button" class="v83-arrow v83-arrow-prev" data-quick-scroll="quickWeekendStrip" data-scroll-direction="-1" aria-label="Opções anteriores" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+   <button type="button" class="v83-arrow v83-arrow-next" data-quick-scroll="quickWeekendStrip" data-scroll-direction="1" aria-label="Mais opções" ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
   </div>
  </div>
 </div>
@@ -202,5 +214,5 @@
 <div class="field"><label for="fLat">Latitude GPS</label><input class="control" id="fLat" max="90" min="-90" placeholder="40.905768" step="any" type="number"/></div>
 <div class="field"><label for="fLon">Longitude GPS</label><input class="control" id="fLon" max="180" min="-180" placeholder="-8.303089" step="any" type="number"/></div>
 <div class="field wide"><label for="fDescription">Descrição</label><input class="control" id="fDescription" maxlength="250" placeholder="Paisagem, pontos de interesse, terreno..."/></div></div><div class="dialog-actions"><button id="cancelBtn" type="button">Cancelar</button><button class="save" type="submit">Guardar evento</button></div></form></div></div><div class="toast" hidden="" id="toast"></div>
-<script src="assets/js/trilhario.js?v=82"></script>
+<script src="assets/js/trilhario.js?v=83"></script>
 </body></html>
