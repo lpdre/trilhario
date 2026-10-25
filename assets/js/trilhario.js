@@ -892,6 +892,31 @@ document.querySelectorAll('[data-quick-weekend]').forEach(b=>b.addEventListener(
  state.weekend=state.weekend===chosen?'all':chosen;
  state.day='all';state.view='list';render();
 }));
+// v83 — o mesmo controlo horizontal para quilómetros e fins de semana.
+function initQuickFilterScroll(){
+ for(const id of ['quickKmStrip','quickWeekendStrip']){
+  const strip=$(id);if(!strip)continue;
+  const holder=strip.closest('.v83-scroll-shell');
+  const prev=holder.querySelector('.v83-arrow-prev'),next=holder.querySelector('.v83-arrow-next');
+  const refresh=()=>{
+   const max=Math.max(0,strip.scrollWidth-strip.clientWidth);
+   prev.hidden=strip.scrollLeft<=2;
+   next.hidden=strip.scrollLeft>=max-2;
+  };
+  strip.addEventListener('scroll',refresh,{passive:true});
+  if(typeof ResizeObserver==='function')new ResizeObserver(refresh).observe(strip);
+  else window.addEventListener('resize',refresh,{passive:true});
+  [prev,next].forEach(button=>button.addEventListener('click',()=>{
+   const first=strip.querySelector('button');
+   const gap=parseFloat(getComputedStyle(strip).gap)||0;
+   const step=(first?.getBoundingClientRect().width||strip.clientWidth/3)+gap;
+   strip.scrollBy({left:Number(button.dataset.scrollDirection)*step*3,behavior:'smooth'});
+  }));
+  refresh();
+ }
+}
+initQuickFilterScroll();
+
 $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;render()});
 ['km','gain'].forEach(prefix=>{
  $(prefix+'Min').addEventListener('input',e=>changeDual(prefix,'Min',e.target.value));
