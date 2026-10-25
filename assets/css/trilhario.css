@@ -1610,3 +1610,74 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .walk-row.v51-card.v56-card .v73-trip-cost>strong{font-size:11px}
  .walk-row.v51-card.v56-card .v73-trip-total{padding-left:5px}
 }
+
+
+/* v74 — recuperar a densidade das v56/v57 com organização por separadores. */
+.walk-row.v51-card.v56-card .walk-trip-line.v53-trip{
+ padding:4px 9px 5px;gap:3px 8px;align-items:center;
+}
+.walk-row.v51-card.v56-card .v53-trip .walk-trip-info{
+ flex:1 1 260px;min-width:0;
+}
+.walk-row.v51-card.v56-card .v74-trip-summary{
+ display:flex;flex-direction:column;gap:2px;min-width:0;
+ font-variant-numeric:tabular-nums;
+}
+.walk-row.v51-card.v56-card .v74-trip-line{
+ display:flex;align-items:center;flex-wrap:wrap;
+ column-gap:6px;row-gap:1px;min-width:0;
+ font-size:11px;line-height:1.22;color:#526653;
+}
+.walk-row.v51-card.v56-card .v74-trip-route strong{
+ font-size:11px;line-height:1.22;font-weight:750;color:#30503c;
+}
+.walk-row.v51-card.v56-card .v74-trip-brand{
+ display:inline-flex;align-items:center;gap:5px;color:#28573b;
+}
+.walk-row.v51-card.v56-card .v74-trip-brand strong{font-weight:800}
+.walk-row.v51-card.v56-card .v74-trip-brand .v66-trip-car{
+ width:19px;height:19px;flex:none;margin:0;
+ transform:translateY(-1px);color:#315f41;
+}
+.walk-row.v51-card.v56-card .v74-trip-divider{
+ font-size:10px;font-weight:400;color:#a1afa3;
+}
+.walk-row.v51-card.v56-card .v74-trip-prices{
+ column-gap:5px;row-gap:2px;
+ font-size:10.5px;
+}
+.walk-row.v51-card.v56-card .v74-trip-piece{
+ display:inline-flex;align-items:baseline;gap:3px;
+ min-width:0;white-space:nowrap;
+}
+.walk-row.v51-card.v56-card .v74-trip-piece strong{
+ font-size:inherit;font-weight:750;color:#30503c;
+}
+.walk-row.v51-card.v56-card .v74-trip-total{
+ color:#315f41;font-weight:700;
+}
+.walk-row.v51-card.v56-card .v74-trip-total strong{
+ color:#185236;font-weight:850;
+}
+.walk-row.v51-card.v56-card .v74-trip-total small{
+ font-size:9.5px;font-weight:500;color:#66796a;
+}
+@media(max-width:540px){
+ .walk-row.v51-card.v56-card .walk-trip-line.v53-trip{padding:4px 8px 5px}
+ .walk-row.v51-card.v56-card .v74-trip-line{column-gap:5px;font-size:10.5px}
+ .walk-row.v51-card.v56-card .v74-trip-brand .v66-trip-car{
+  width:18px;height:18px;
+ }
+ .walk-row.v51-card.v56-card .v74-trip-route strong{font-size:10.5px}
+ .walk-row.v51-card.v56-card .v74-trip-prices{
+  column-gap:4px;font-size:10px;
+ }
+ .walk-row.v51-card.v56-card .v74-trip-piece{gap:2px}
+ .walk-row.v51-card.v56-card .v74-trip-total small{font-size:9px}
+}
+@media(max-width:350px){
+ .walk-row.v51-card.v56-card .v74-trip-prices{column-gap:4px}
+ .walk-row.v51-card.v56-card .v74-trip-prices .v74-trip-divider{
+  display:none;
+ }
+}
