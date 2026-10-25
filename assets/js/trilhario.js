@@ -337,7 +337,7 @@ function weekendLabelLines({from,to}){
  const month=d=>{const m=d.toLocaleDateString('pt-PT',{month:'short',timeZone:'UTC'}).replaceAll('.','');return m[0].toUpperCase()+m.slice(1);};
  return a.getUTCMonth()===b.getUTCMonth()&&a.getUTCFullYear()===b.getUTCFullYear()
   ?[a.getUTCDate()+'–'+b.getUTCDate(),month(b)]
-  :[a.getUTCDate()+' '+month(a),b.getUTCDate()+' '+month(b)];
+  :[String(a.getUTCDate()).padStart(2,'0')+'–'+String(b.getUTCDate()).padStart(2,'0'),month(a)+'–'+month(b)];
 }
 function updateWeekendQuickFilters(){
  const ranges=weekendWindows();
@@ -866,7 +866,14 @@ function removeEvent(id){if(!confirm('Eliminar este evento?'))return;const next=
 function openModal(){$('modal').hidden=false;$('fTitle').focus();document.body.style.overflow='hidden'}function closeModal(){$('modal').hidden=true;document.body.style.overflow=''}
 $('addBtn')?.addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
 $('eventForm').addEventListener('submit',e=>{e.preventDefault();const val=id=>$(id).value.trim(),maybeNumber=id=>val(id)!==''?Number(val(id)):null;const lat=maybeNumber('fLat'),lon=maybeNumber('fLon');const entry={id:'meu-'+Date.now(),userAdded:true,title:val('fTitle'),date:val('fDate'),time:val('fTime'),town:val('fTown'),region:val('fRegion'),area:val('fTown'),organizer:val('fOrg'),km:maybeNumber('fKm'),gain:maybeNumber('fGain'),price:maybeNumber('fPrice'),duration:maybeNumber('fDuration'),capacity:maybeNumber('fMaxParticipants'),start:val('fStart'),lat,lon,verified:lat!=null&&lon!=null,difficulty:Number(val('fDifficulty')),description:val('fDescription'),url:val('fUrl'),tag:'Manual'};if(!entry.title||!entry.date||!entry.town||!entry.organizer)return;const next=[...custom,entry];if(!persistValue('trilhario_custom_v1',next))return;custom=next;$('eventForm').reset();closeModal();populateOrganizers();resetFilters();toast('Evento guardado neste navegador.');});
-document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{state.kmMin=Number(b.dataset.quickKm);state.kmMax=KM_CAP;state.view='list';render();}));
+document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{
+ const chosen=Number(b.dataset.quickKm);
+ const active=state.kmMin===chosen&&state.kmMax===KM_CAP;
+ state.kmMin=active?0:chosen;
+ state.kmMax=KM_CAP;
+ state.view='list';
+ render();
+}));
 document.querySelectorAll('[data-quick-weekend]').forEach(b=>b.addEventListener('click',()=>{const chosen=b.dataset.quickWeekend;state.weekend=state.weekend===chosen?'all':chosen;state.day='all';state.view='list';render();}));
 $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;render()});
 ['km','gain'].forEach(prefix=>{
