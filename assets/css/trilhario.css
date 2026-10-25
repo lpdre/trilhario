@@ -1730,30 +1730,20 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  }
 }
 
-/* v78 — os três fins de semana distribuem-se por toda a barra.
-   Primeira e última datas alinhadas às extremidades; botão central ao meio.
-   Todos conservam a mesma largura e altura dos botões de distância. */
-.results .v51-quick-filters.v64-quick-filters .v75-weekend-group{
- --v78-filter-gap:5px;
-}
-.results .v51-quick-filters.v64-quick-filters .v75-weekend-group button[data-quick-weekend="this"]{
- grid-column:2;
-}
-.results .v51-quick-filters.v64-quick-filters .v75-weekend-group button[data-quick-weekend="next"]{
- grid-column:3 / span 2;
- width:calc((100% - var(--v78-filter-gap)) / 2);
- justify-self:center;
-}
-.results .v51-quick-filters.v64-quick-filters .v75-weekend-group button[data-quick-weekend="following"]{
- grid-column:5;
+/* v79 — três datas contíguas, sem intervalos artificiais.
+   A grelha externa é igual à da distância; as datas repartem
+   a largura dos quatro botões superiores em três partes iguais. */
+.results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{
+ grid-column:2 / -1;
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:5px;
+ min-width:0;
+ width:100%;
 }
 @media(max-width:540px){
- .results .v51-quick-filters.v64-quick-filters .v75-weekend-group{
-  --v78-filter-gap:4px;
- }
+ .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{gap:4px;}
 }
 @media(max-width:365px){
- .results .v51-quick-filters.v64-quick-filters .v75-weekend-group{
-  --v78-filter-gap:3px;
- }
+ .results .v51-quick-filters.v64-quick-filters .v79-weekend-buttons{gap:3px;}
 }
