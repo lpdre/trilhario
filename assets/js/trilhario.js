@@ -122,7 +122,7 @@ function persistValue(key,value,quiet=false){
 }
 let custom=storage('trilhario_custom_v1',[]);
 const KM_CAP=50, GAIN_CAP=2500;
-let state={day:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,view:'list',month:9,year:2026};
+let state={day:'all',weekend:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP,view:'list',month:9,year:2026};
 let remoteEvents=null;
 let remoteUpdatedAt=null;
 let remoteSourcesHealth=null,remoteFeedState='loading';
@@ -318,6 +318,38 @@ function agendaClock(instant=new Date()){
  return {date:parts.year+'-'+parts.month+'-'+parts.day,
          minute:Number(parts.hour)*60+Number(parts.minute)};
 }
+// v75 — fins de semana relativos ao calendário de Portugal, não ao fuso do visitante.
+function weekendWindows(clock=agendaClock()){
+ const saturday=new Date(clock.date+'T12:00:00Z');
+ const weekday=(saturday.getUTCDay()+6)%7; // Segunda=0; domingo=6.
+ saturday.setUTCDate(saturday.getUTCDate()+5-weekday);
+ const iso=d=>d.toISOString().slice(0,10);
+ const range=extraDays=>{
+  const from=new Date(saturday);from.setUTCDate(from.getUTCDate()+extraDays);
+  const to=new Date(from);to.setUTCDate(to.getUTCDate()+1);
+  return {from:iso(from),to:iso(to)};
+ };
+ return {this:range(0),next:range(7)};
+}
+function weekendLabel({from,to}){
+ const a=new Date(from+'T12:00:00Z'),b=new Date(to+'T12:00:00Z');
+ const month=d=>{const m=d.toLocaleDateString('pt-PT',{month:'short',timeZone:'UTC'}).replaceAll('.','');return m[0].toUpperCase()+m.slice(1);};
+ return a.getUTCMonth()===b.getUTCMonth()&&a.getUTCFullYear()===b.getUTCFullYear()
+  ?a.getUTCDate()+'–'+b.getUTCDate()+' '+month(b)
+  :a.getUTCDate()+' '+month(a)+'–'+b.getUTCDate()+' '+month(b);
+}
+function updateWeekendQuickFilters(){
+ const ranges=weekendWindows();
+ document.querySelectorAll('[data-quick-weekend]').forEach(button=>{
+  const type=button.dataset.quickWeekend,range=ranges[type],on=state.weekend===type;
+  if(!range)return;
+  button.textContent=weekendLabel(range);
+  button.classList.toggle('active',on);
+  button.setAttribute('aria-pressed',String(on));
+  button.setAttribute('aria-label','Caminhadas de '+range.from+' a '+range.to);
+  button.title='Caminhadas de '+range.from+' a '+range.to;
+ });
+}
 function eventHasNotStarted(e,clock=agendaClock()){
  if(!e||typeof e.date!=='string')return false;
  if(e.date!==clock.date)return e.date>clock.date;
@@ -329,11 +361,11 @@ function eventHasNotStarted(e,clock=agendaClock()){
 function agendaUpcomingFingerprint(clock=agendaClock()){
  return allEvents().filter(e=>eventHasNotStarted(e,clock)).map(e=>e.id).join('\u001f');
 }
-let agendaCurrentFingerprint='';
+let agendaCurrentFingerprint='',agendaDisplayedDate='';
 function refreshAgendaForClock(){
  if(document.hidden)return;
- const current=agendaUpcomingFingerprint();
- if(current!==agendaCurrentFingerprint){populateOrganizers();render();}
+ const clock=agendaClock(),current=agendaUpcomingFingerprint(clock);
+ if(current!==agendaCurrentFingerprint||clock.date!==agendaDisplayedDate){populateOrganizers();render();}
 }
 function renderCatalogStatus(){
  // O estado normal do catálogo não ocupa espaço na página.
@@ -426,9 +458,10 @@ function populateOrganizers(){
  select.innerHTML='<option value="all">Todos os organizadores</option>'+orgs.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
  select.value=state.organizer;
 }
-function selected({ignoreDay=false}={}){const clock=agendaClock();return allEvents().filter(x=>
+function selected({ignoreDay=false}={}){const clock=agendaClock(),weekend=state.weekend==='all'?null:weekendWindows(clock)[state.weekend];return allEvents().filter(x=>
   eventHasNotStarted(x,clock)&&
-  (ignoreDay||state.day==='all'||x.date===state.day)&&
+   (ignoreDay||state.day==='all'||x.date===state.day)&&
+   (!weekend||(x.date>=weekend.from&&x.date<=weekend.to))&&
   (state.organizer==='all'||x.organizer===state.organizer)&&
   ((state.kmMin===0&&state.kmMax===KM_CAP)||(x.km!=null&&Number(x.km)>=state.kmMin&&Number(x.km)<=state.kmMax))&&
   ((state.gainMin===0&&state.gainMax===GAIN_CAP)||(x.gain!=null&&Number(x.gain)>=state.gainMin&&Number(x.gain)<=state.gainMax))
@@ -659,7 +692,7 @@ const LIST_INITIAL=30,LIST_INCREMENT=30;
 let listLimit=LIST_INITIAL,listSignature='',listWalks=[],listMoreObserver=null;
 function stopListObserver(){if(listMoreObserver){listMoreObserver.disconnect();listMoreObserver=null;}}
 function renderProgressiveList(events){
- const stableSignature=JSON.stringify([state.day,state.organizer,state.kmMin,state.kmMax,
+ const stableSignature=JSON.stringify([state.day,state.weekend,state.organizer,state.kmMin,state.kmMax,
    state.gainMin,state.gainMax,$('travelSort')?.value||'date',
    remoteFeedState,remoteUpdatedAt,custom.length,events.length,events[0]?.id,events.at(-1)?.id]);
  if(stableSignature!==listSignature){listSignature=stableSignature;listLimit=LIST_INITIAL;}
@@ -694,15 +727,16 @@ function loadMoreWalks(){
  // Respeitar os lotes de cálculo de deslocações para os cartões agora visíveis.
  scheduleTravelBatches(listWalks);
 }
-function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();const events=sortedWalks(selected());
+function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();agendaDisplayedDate=agendaClock().date;const events=sortedWalks(selected());
  // O calendário usa os outros filtros, mas não restringe os resultados ao dia destacado.
  const displayedEvents=state.view==='calendar'?sortedWalks(selected({ignoreDay:true})):events;
  renderCatalogStatus();
- const applied=[state.day!=='all',state.organizer!=='all',state.kmMin>0||state.kmMax<KM_CAP,state.gainMin>0||state.gainMax<GAIN_CAP].filter(Boolean).length;
+ const applied=[state.day!=='all',state.weekend!=='all',state.organizer!=='all',state.kmMin>0||state.kmMax<KM_CAP,state.gainMin>0||state.gainMax<GAIN_CAP].filter(Boolean).length;
  $('filtersCounterMini').textContent=applied?String(applied):'';$('filtersCounterMini').hidden=!applied;
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
- document.querySelectorAll('[data-quick-km]').forEach(b=>{const on=state.kmMin===Number(b.dataset.quickKm)&&state.kmMax===KM_CAP;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+  document.querySelectorAll('[data-quick-km]').forEach(b=>{const on=state.kmMin===Number(b.dataset.quickKm)&&state.kmMax===KM_CAP;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+  updateWeekendQuickFilters();
  renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
    scheduleTravelBatches(events);
  }else{stopListObserver();if(tripBatchObserver){tripBatchObserver.disconnect();tripBatchObserver=null;}if(state.view==='calendar')renderCalendar(displayedEvents);else renderMap(events)}}
@@ -782,12 +816,12 @@ $('calendarView').addEventListener('keydown',calendarKeyboardNavigation);
 function clearSelectedDay(){state.day='all';render()}
 function setDay(d){
  if(state.day===d){clearSelectedDay();return;}
- state.day=d;state.view='list';render();
+  state.day=d;state.weekend='all';state.view='list';render();
  // Após seleccionar pelo teclado, não deixar o foco num botão removido do DOM.
  document.querySelector('[data-view="list"]')?.focus({preventScroll:true});
  document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function resetFilters(){Object.assign(state,{day:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP});$('organizer').value='all';render()}
+function resetFilters(){Object.assign(state,{day:'all',weekend:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP});$('organizer').value='all';render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
 function calendarIcs(e){
@@ -826,6 +860,7 @@ function openModal(){$('modal').hidden=false;$('fTitle').focus();document.body.s
 $('addBtn')?.addEventListener('click',openModal);$('cancelBtn').addEventListener('click',closeModal);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').hidden)closeModal()});
 $('eventForm').addEventListener('submit',e=>{e.preventDefault();const val=id=>$(id).value.trim(),maybeNumber=id=>val(id)!==''?Number(val(id)):null;const lat=maybeNumber('fLat'),lon=maybeNumber('fLon');const entry={id:'meu-'+Date.now(),userAdded:true,title:val('fTitle'),date:val('fDate'),time:val('fTime'),town:val('fTown'),region:val('fRegion'),area:val('fTown'),organizer:val('fOrg'),km:maybeNumber('fKm'),gain:maybeNumber('fGain'),price:maybeNumber('fPrice'),duration:maybeNumber('fDuration'),capacity:maybeNumber('fMaxParticipants'),start:val('fStart'),lat,lon,verified:lat!=null&&lon!=null,difficulty:Number(val('fDifficulty')),description:val('fDescription'),url:val('fUrl'),tag:'Manual'};if(!entry.title||!entry.date||!entry.town||!entry.organizer)return;const next=[...custom,entry];if(!persistValue('trilhario_custom_v1',next))return;custom=next;$('eventForm').reset();closeModal();populateOrganizers();resetFilters();toast('Evento guardado neste navegador.');});
 document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{state.kmMin=Number(b.dataset.quickKm);state.kmMax=KM_CAP;state.view='list';render();}));
+document.querySelectorAll('[data-quick-weekend]').forEach(b=>b.addEventListener('click',()=>{const chosen=b.dataset.quickWeekend;state.weekend=state.weekend===chosen?'all':chosen;state.day='all';state.view='list';render();}));
 $('organizer').addEventListener('change',e=>{state.organizer=e.target.value;render()});
 ['km','gain'].forEach(prefix=>{
  $(prefix+'Min').addEventListener('input',e=>changeDual(prefix,'Min',e.target.value));
