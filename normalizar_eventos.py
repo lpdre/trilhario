@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 import unicodedata
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
 import time
@@ -406,7 +406,7 @@ def enrich_official(e, previous):
 # de terceiros para o GitHub). Alguns organizadores impedem hotlink: nesse caso
 # a foto é omitida pelo browser e o cartão permanece utilizável.
 PHOTO_FIRST_EVENTS = 50  # Primeiro grupo de caminhadas futuras por data
-PHOTO_VISITS_PER_RUN = 50  # Máximo de novas consultas por execução
+PHOTO_VISITS_PER_RUN = 80  # Priorizar os dois fins de semana seguintes; máximo global por execução
 PHOTO_RETRY_DAYS = 28
 PHOTO_MAX_HTML_BYTES = 800_000
 PHOTO_AGENT = {'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)',
@@ -773,7 +773,23 @@ def main():
     future_events = sorted(
         (e for e in events if isinstance(e, dict) and str(e.get('date', '')) >= today.isoformat()),
         key=lambda e: (str(e.get('date', '9999')), str(e.get('time', '')), str(e.get('title', ''))))
-    for e in future_events[:PHOTO_FIRST_EVENTS]:
+    # v85 — incluir TODOS os anúncios dos dois próximos fins de semana antes
+    # de preencher o orçamento com os primeiros 50 anúncios futuros.
+    # Aos domingos, o sábado anterior já não conta como fim de semana seguinte.
+    days_to_saturday=(5-today.weekday()) % 7
+    first_saturday=today+timedelta(days=days_to_saturday)
+    weekend_dates={d.isoformat()
+                   for week in range(2)
+                   for d in (first_saturday+timedelta(days=7*week),
+                             first_saturday+timedelta(days=7*week+1))}
+    upcoming_weekends=[e for e in future_events if e.get('date') in weekend_dates]
+    candidates=upcoming_weekends+future_events[:PHOTO_FIRST_EVENTS]
+    already_seen=set()
+    for e in candidates:
+        key=e.get('id') or id(e)
+        if key in already_seen:
+            continue
+        already_seen.add(key)
         if meaningful(e.get('image')):
             if not valid_event_image(e.get('image'),e.get('url','')):
                 e.pop('image',None)
@@ -800,7 +816,7 @@ def main():
              f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
              f'Limpeza de anúncios: {removed_aggregator} duplicados, não caminhadas e registos de agregador retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
-             f'Fotografias nos primeiros {PHOTO_FIRST_EVENTS} eventos futuros: {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
+             f'Fotografias: {len(upcoming_weekends)} eventos nos 2 próximos fins de semana prioritários + primeiros {PHOTO_FIRST_EVENTS} futuros; {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',
              f'{truncated} locais aparentemente truncados; {generic} títulos genéricos por resolver']
