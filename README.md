@@ -70,3 +70,9 @@ node testes/test_localizacoes_browser.cjs
 - `qualidade_anuncios.py` centraliza critérios de anúncios multidiários, títulos de cartão genéricos e datas explícitas contraditórias.
 - O colector, a recuperação do catálogo e a normalização impedem a reentrada destes anúncios.
 - Testes unitários acrescentados; restantes eventos, IDs, filtros, viagens e dificuldade preservados.
+
+## Auditoria v94 — Locais e GPS (fase 5.2)
+- Limpeza consistente em Python e JavaScript de finais de moradas interrompidos (por exemplo, `R`, `Av`, `n`, `Hora de`, `Coo`). Conservar o topónimo inteligível, sem inventar um endereço.
+- Nas ligações para o Google Maps, nunca juntar `Por confirmar` à morada; acrescentar apenas localidade efectiva e ainda não presente no ponto de encontro.
+- Testes de regressão para partidas e pesquisas do Google Maps; coordenadas GPS já publicadas não são substituídas automaticamente.
+- Relatório: `auditorias/fase_5_2_locais_gps_2026-10-26.md`.

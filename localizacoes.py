@@ -20,6 +20,9 @@ def limpar_local(valor, organizador=''):
     s = re.split(r'\s+pelas\s+\d{1,2}\s*[hH:]\s*[0-5]\d\b', s, maxsplit=1, flags=re.I)[0]
     s = re.sub(r'\s*\(\s*(?:Localiza[cç][aã]o|Ver\s+no\s+Google\s+Maps)\b.*$', '', s, flags=re.I)
     s = re.sub(r'\s*\bVer\s+no\s+Google\s+Maps\b.*$', '', s, flags=re.I)
+    # Finais cortados pela recolha não são moradas; conservar o topónimo útil.
+    s = re.sub(r'\s+(?:Hora\s+de|Coo)\s*$', '', s, flags=re.I)
+    s = re.sub(r'(?:\s*[,;–—-]\s*|\s+)(?:R\.?|Rua|Av\.?|Avenida|n\.?|n[º°]\.?)\s*$', '', s, flags=re.I)
     # Um parêntese cortado pela recolha não é um dado geográfico.
     if s.count('(') > s.count(')'):
         s = s[:s.rfind('(')]

@@ -196,6 +196,9 @@ function localPartidaLegivel(valor){
  // O agregador inclui ligações como texto dentro da localidade.
  texto=texto.replace(/\s*\(\s*Ver\s+no\s+Google\s+Maps\s*\)/gi,'')
             .replace(/\s*\bVer\s+no\s+Google\s+Maps\b.*$/gi,'');
+ // Finais cortados pela recolha: manter o ponto de referência, sem rua fictícia.
+ texto=texto.replace(/\s+(?:Hora\s+de|Coo)\s*$/i,'')
+            .replace(/(?:\s*[,;–—-]\s*|\s+)(?:R\.?|Rua|Av\.?|Avenida|n\.?|n[º°]\.?)\s*$/i,'');
  // Também retirar pares de coordenadas escritos sem rótulo.
  texto=texto.replace(/\s*[,;([]?\s*-?\d{1,2}[.,]\d{4,}\s*[,; /]+\s*-?\d{1,3}[.,]\d{4,}.*$/,'');
  texto=texto.replace(/\bVila[\s-]*real\b/gi,'Vila Real')
@@ -421,10 +424,12 @@ function organizerHomepage(x){
 function googleMapsDeparture(x,spot){
  const text=String(spot||'').trim();
  if(!text||/^(?:por confirmar|a confirmar|desconhecido)(?:\b|$)/i.test(text))return '';
+ // O campo town fica frequentemente «Por confirmar»; nunca enviá-lo ao Maps.
+ const town=localPartidaLegivel(x.town);
  // Usar coordenadas apenas quando o próprio ponto foi confirmado pela fonte.
  const query=x.verified&&hasCoords(x)?Number(x.lat)+','+Number(x.lon):
    [text.replace(/\s*\([^)]*(?:a confirmar|ponto exacto|local exacto)[^)]*\)/gi,'').trim(),
-    x.town&&fold(text).includes(fold(localPartidaLegivel(x.town)))?'':localPartidaLegivel(x.town),'Portugal'].filter(Boolean).join(', ');
+    !isPlacePlaceholder(town)&&!fold(text).includes(fold(town))?town:'','Portugal'].filter(Boolean).join(', ');
  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
 }
 const TRILHARIO_DELETE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>';

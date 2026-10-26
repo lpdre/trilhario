@@ -29,6 +29,18 @@ class TestePartidas(unittest.TestCase):
             with self.subTest(raw=raw):
                 self.assertIsNone(limpar_local(raw,'Montanhas do Norte'))
 
+    def test_finais_de_moradas_interrompidos(self):
+        casos = {
+            'Parque Desportivo Municipal de Mafra, R': 'Parque Desportivo Municipal de Mafra',
+            'Entrada principal da Mesquita de Lisboa - Rua da Mesquita, n': 'Entrada principal da Mesquita de Lisboa - Rua da Mesquita',
+            'Salinas do Samouco, Alcochete Hora de': 'Salinas do Samouco, Alcochete',
+            'Largo do Chafariz de Dentro, Lisboa Coo': 'Largo do Chafariz de Dentro, Lisboa',
+            'Junto à Igreja Matriz, Av': 'Junto à Igreja Matriz',
+        }
+        for raw, esperado in casos.items():
+            with self.subTest(raw=raw):
+                self.assertEqual(limpar_local(raw), esperado)
+
     def test_town_gps_invalido(self):
         e={'organizer':'RB Hiking & Trekking','start':'Tourém (Localização','town':'41°54’30','time':'09:00','url':'https://barbosa-trekking.pt/'}
         self.assertEqual(normalizar_local_evento(e),2)
