@@ -146,11 +146,15 @@ def fetch(url: str) -> BeautifulSoup | None:
 
 
 def canonical(base: str, href: str) -> str | None:
-    url = urldefrag(urljoin(base, href))[0].rstrip("/")
-    p = urlparse(url)
-    if p.scheme not in ("https", "http"):
+    """Normaliza links sem deixar um URL mal formado interromper a fonte."""
+    try:
+        url = urldefrag(urljoin(base, href))[0].rstrip("/")
+        p = urlparse(url)
+        if p.scheme not in ("https", "http") or not p.hostname:
+            return None
+        return p._replace(query="").geturl()
+    except (TypeError, ValueError):
         return None
-    return p._replace(query="").geturl()
 
 
 def smallest_context(anchor) -> str:
@@ -843,7 +847,7 @@ def collect_source(source: dict) -> list[dict]:
         if html is None:
             continue
         for anchor in html.find_all("a", href=True):
-            url = canonical(source["url"], anchor["href"])
+            url = canonical(listing_url, anchor["href"])
             if not url:
                 continue
             parsed = urlparse(url)
@@ -858,8 +862,9 @@ def collect_source(source: dict) -> list[dict]:
             # Excluir links repetidos na mesma listagem.
             if url not in links or len(block) < len(links[url][1]):
                 links[url] = (title, block)
-        if links:
-            break  # usar só a primeira listagem que forneça eventos
+        # A listagem principal pode conter apenas anúncios antigos ou links
+        # de navegação. Continuar a consultar as alternativas documentadas;
+        # os URLs repetidos continuam a ser eliminados pelo dicionário.
     logging.info("%s: %d possíveis anúncios", source["organizer"], len(links))
     result = []
     for url, (title, block) in list(links.items())[:75]:

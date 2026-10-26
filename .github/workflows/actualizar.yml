@@ -48,13 +48,15 @@ jobs:
               assert callable(getattr(recolher, name, None)), f'Colector sem a função {name}'
           print('Colector validado; sem migrações automáticas.')
           PREFLIGHT
-          python -m unittest discover -s testes -p 'test_localizacoes.py' -v
-          python -m unittest discover -s testes -p 'test_monitorizacao.py' -v
-          python -m unittest discover -s testes -p 'test_catalogo_unico.py' -v
-          python -m unittest discover -s testes -p 'test_rotas_precalculadas.py' -v
+          # Mesma suite offline aplicada nos pull requests; impede a recolha
+          # agendada de ignorar testes introduzidos em futuras auditorias.
+          python -m unittest discover -s testes -p 'test_*.py' -v
           node --check assets/js/trilhario.js
+          node --check assets/js/trilhario-routes.js
           node testes/test_catalogo_browser.cjs
           node testes/test_localizacoes_browser.cjs
+          node testes/test_rotas_browser.cjs
+          node testes/test_interface_browser.cjs
       - name: Verificar correcções de extracção sem consultar sites
         shell: bash
         run: |

@@ -47,3 +47,10 @@ node testes/test_localizacoes_browser.cjs
 - Deduplicação de eventos renomeada e simplificada, preservando IDs alternativos.
 - GPS parcial, mal formatado ou infinito é rejeitado com erro controlado, sem interromper a execução abruptamente.
 - Removida a correcção específica de 25-10-2026, mantendo a protecção genérica contra horas fictícias `00:00`.
+
+## Auditoria v91 — Fontes e validação
+- Listagens alternativas documentadas são consultadas mesmo quando a página principal contém links sem eventos válidos. Ligações relativas usam a página onde foram encontradas.
+- URLs mal formados são descartados sem interromper a consulta da fonte.
+- GPS é validado com os mesmos limites usados pelo mapa (continente, Madeira e Açores).
+- Registos manuais sem validade ou com datas inválidas devolvem erros explícitos.
+- A execução diária aplica a mesma bateria offline de testes Python e JavaScript da validação de código.
