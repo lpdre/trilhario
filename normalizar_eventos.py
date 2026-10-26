@@ -19,11 +19,11 @@ from urllib.parse import urlsplit, unquote, urljoin
 import time
 from localizacoes import limpar_local, normalizar_local_evento
 from identidade_eventos import sessoes_diferentes
+from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts
 
 ROOT = Path(__file__).resolve().parent
 CATALOG = ROOT / 'eventos.json'
 PLACEHOLDERS = {'', 'por confirmar', 'a confirmar', 'por definir', 'desconhecido'}
-GENERIC_TITLE = re.compile(r'^(?:f[aá]cil|moderad[oa]|desafiante|dif[ií]cil|exigente)\s+\d{1,2}/\d{1,2}/20\d{2}\b', re.I)
 JOINERS = {'da', 'de', 'do', 'das', 'dos', 'e', 'a', 'o', 'ao', 'em', 'na', 'no', 'nas', 'nos', 'por', 'pelo', 'pelos', 'entre'}
 
 
@@ -636,6 +636,15 @@ def main():
     from consolidar_catalogo import integrate, load_registry
     events[:], verified_corrections, exception_report = integrate(events, load_registry())
     events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
+    # Blindagem adicional: dados antigos ou excepções nunca devem reintroduzir
+    # uma expedição de vários dias ou uma data contraditória no catálogo.
+    excluded_multiday = [e for e in events if MULTIDAY.search(str(e.get('title') or ''))]
+    excluded_date_conflicts = [e for e in events if title_date_conflicts(e)]
+    if excluded_multiday or excluded_date_conflicts:
+        for entry in excluded_multiday + excluded_date_conflicts:
+            print('Anúncio não elegível (título/data):', entry.get('id'), entry.get('url'))
+        blocked = {id(e) for e in excluded_multiday + excluded_date_conflicts}
+        events[:] = [e for e in events if id(e) not in blocked]
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
     by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
@@ -836,6 +845,7 @@ def main():
              f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
              f'Limpeza de anúncios: {removed_invalid_or_duplicate} registos duplicados e anúncios de agregador retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
+             f'Títulos/datas: {len(excluded_multiday)} programas multidiários excluídos; {len(excluded_date_conflicts)} datas contraditórias bloqueadas',
              f'Fotografias: {len(upcoming_weekends)} eventos nos 2 próximos fins de semana prioritários + primeiros {PHOTO_FIRST_EVENTS} futuros; {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',

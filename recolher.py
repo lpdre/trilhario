@@ -23,6 +23,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts
 from identidade_eventos import sessoes_diferentes
 
 ROOT = Path(__file__).resolve().parent
@@ -443,10 +444,6 @@ NON_WALK_TITLES = re.compile(
     r"trail\s?running|corrida|jipes?|bugg?ys?|visita\s+guiada\s+ao\s+museu|"
     r"jantar|workshop|formac[aã]o|confer[eê]ncia|semin[aá]rio|mercados?\s+de\s+natal)\b", re.I
 )
-MULTIDAY = re.compile(
-    r"\b(?:fim\s+de\s+semana|viagem|expedi[cç][aã]o|"
-    r"\d+\s*(?:dias|noites)|de\s+\d{1,2}\s+a\s+\d{1,2}\s+de)\b", re.I
-)
 WALK_TERMS = re.compile(r"caminhad|pedestr|trekking|marcha|trilho|rota|levada|percurs|passeio", re.I)
 
 
@@ -721,7 +718,9 @@ MONTANHAS_PREFIX_DATE = re.compile(r"^\s*(?:seg|ter|qua|qui|sex|s[aá]b|dom)[a-z
 
 
 def header_date_conflicts(item: dict) -> bool:
-    """Detecta títulos com 'Sex, 30 out' que contradizem a data guardada."""
+    """Detecta data explícita contraditória, incluindo o prefixo Montanhas."""
+    if title_date_conflicts(item):
+        return True
     m = MONTANHAS_PREFIX_DATE.search(item.get('title') or '')
     if not m:
         return False
@@ -935,11 +934,17 @@ def collect_source(source: dict) -> list[dict]:
             enrich_jsonld(detail, item)
             parse_meta(detail, item)
             extra_source_meta(detail, item, source["organizer"])
-            # Usar o nome real do anúncio se o link apenas disser «Ver detalhes».
-            if folded(item["title"]) in {"ver detalhes", "mais informacoes", "ver mais", "visualizar evento", "ver evento", "saber mais"}:
-                h = detail.find("h1")
+            # Os cartões podem apresentar só «Muito Difícil 21/11/2026 21 km»
+            # em vez do nome. Nestes casos, ler o H1 da ficha oficial.
+            if (folded(item["title"]) in {"ver detalhes", "mais informacoes", "ver mais",
+                                          "visualizar evento", "ver evento", "saber mais"}
+                    or GENERIC_TITLE.match(item["title"])):
+                scope = detail.find("main") or detail.find("article") or detail
+                h = scope.find("h1") or detail.find("h1")
                 if h:
-                    item["title"] = clean(h.get_text(" ", strip=True))[:140]
+                    official_title = clean(h.get_text(" ", strip=True))[:140]
+                    if 12 <= len(official_title) <= 140 and not GENERIC_TITLE.match(official_title):
+                        item["title"] = official_title
             # Datas sem ano em páginas dos organizadores: confirmar no conteúdo.
             if not item["date"]:
                 main = detail.find("main") or detail.find("article") or detail
@@ -1002,6 +1007,9 @@ def main() -> int:
                     if header_date_conflicts(item):
                         logging.warning('Registo antigo com data contraditória eliminado: %s',item.get('url'))
                         continue
+                    if MULTIDAY.search(str(item.get('title') or '')):
+                        logging.info('A retirar programa de vários dias guardado: %s', item.get('url'))
+                        continue
                     if item.get("id") and item.get("date", "") >= TODAY.isoformat():
                         aggregated[item["id"]] = item
                         published_ids.add(item["id"])
@@ -1036,7 +1044,7 @@ def main() -> int:
                 # Um [] pode significar 0 eventos ou erro: nunca declarar êxito.
                 logging.warning('Fonte %s: sem resultados confirmados (ausência ou falha)',name)
             for item in found:
-                if is_disallowed_aggregator_event(item):
+                if is_disallowed_aggregator_event(item) or MULTIDAY.search(str(item.get('title') or '')):
                     continue
                 if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                     # Não aceitar datas desta empresa reenviadas por agregadores.
