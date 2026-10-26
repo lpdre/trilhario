@@ -255,6 +255,16 @@
       "fields": {
         "title": "Vamos ao Barro e à Azeitona"
       }
+    },
+    {
+      "organizer": "Hike Land",
+      "slug": "montemuro-o-vale-do-bestanca-cinfaes",
+      "date": "2026-11-21",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "title": "Montemuro: O Vale do Bestança | Cinfães"
+      }
     }
   ],
   "fallback_events": [

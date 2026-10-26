@@ -62,3 +62,11 @@ node testes/test_localizacoes_browser.cjs
 - Uma falha isolada de fonte continua a conservar anúncios futuros anteriormente confirmados, sem actualizar falsamente `last_confirmed_at`.
 - Botões rápidos de distância e fim de semana e barra Filtros/Ordenar/Vistas ficaram menos altos, mantendo as opções e setas.
 - Testes offline adicionais em `test_identidade_eventos.py` e `test_layout_compacto.cjs`.
+
+## Auditoria v93 — Títulos e datas (fase 5.1)
+- Análise do catálogo de 201 anúncios e relatório em `auditorias/fase_5_1_titulos_datas_2026-10-26.md`.
+- Título oficial da caminhada **Montemuro: O Vale do Bestança | Cinfães** recuperado a partir do H1 verificado; correcção com proveniência registada.
+- Retirados dois programas multidiários indevidos: expedição aos Pirinéus da Trekking Roots e passagem de ano da Mais Trilhos.
+- `qualidade_anuncios.py` centraliza critérios de anúncios multidiários, títulos de cartão genéricos e datas explícitas contraditórias.
+- O colector, a recuperação do catálogo e a normalização impedem a reentrada destes anúncios.
+- Testes unitários acrescentados; restantes eventos, IDs, filtros, viagens e dificuldade preservados.
