@@ -147,7 +147,9 @@ function renderOrganizersPage(){
  $('orgPageStats').textContent=entries.length+' organizadores acompanhados · '+[...count.keys()].length+' com caminhadas na agenda';
  const card=e=>{
   const n=count.get(fold(e.name))||0;
-  const description=n?n+' caminhada'+(n===1?'':'s')+' na agenda':'Organizador acompanhado';
+  const configured=remoteSourcesHealth&&Object.prototype.hasOwnProperty.call(remoteSourcesHealth,e.name);
+  const collectionLabel=remoteSourcesHealth?(configured?'Recolha automática configurada':'Apenas no directório'):'Recolha por confirmar';
+  const description=(n?n+' caminhada'+(n===1?'':'s')+' na agenda':'Organizador acompanhado')+' · '+collectionLabel;
   const valid=safeExternalUrl(e.url);
   return '<article class="org-card"><div class="org-card-copy"><h3>'+(valid?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+esc(e.name)+'</a>':esc(e.name))+'</h3><small>'+description+'</small></div>'+(valid?'<a class="org-card-open" href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer" title="Abrir site de '+esc(e.name)+'" aria-label="Abrir site de '+esc(e.name)+'">↗</a>':'')+'</article>';
  };
@@ -534,7 +536,10 @@ function eventRow(x){
  return `<article class="walk-row v51-card v56-card" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
-   <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
+   <div class="walk-title-row">
+    <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
+    <button type="button" class="walk-compare-toggle${compared.has(x.id)?' selected':''}" data-event-action="toggleCompare" data-event-id="${esc(x.id)}" data-event-title="${esc(x.title)}" aria-pressed="${compared.has(x.id)}" aria-label="${compared.has(x.id)?'Retirar da comparação: ':'Adicionar à comparação: '}${esc(x.title)}">${compared.has(x.id)?'✓ Seleccionado':'Comparar'}</button>
+   </div>
    <div class="walk-card-details">
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}</a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
@@ -558,7 +563,7 @@ function eventRow(x){
  </article>`;
 }
 function chips(){let xs=[];
- if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" onclick="clearSelectedDay()" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
+ if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" data-ui-action="clearDay" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
  if(state.organizer!=='all')xs.push('Organizador: '+state.organizer);
  if(state.kmMin>0||state.kmMax<KM_CAP)xs.push('Distância: '+state.kmMin+'–'+state.kmMax+' km');
  if(state.gainMin>0||state.gainMax<GAIN_CAP)xs.push('D+: '+state.gainMin+'–'+state.gainMax+' m');
@@ -643,7 +648,7 @@ function paintMap(){
   }else showGeoPopup(selectedEvent);
  }
 }
-function showGeoPopup(e){const pos=toScreen(e.lat,e.lon),w=$('map').clientWidth,h=$('map').clientHeight;if(pos.x<100||pos.x>w-100||pos.y<145||pos.y>h-20)return;const popup=document.createElement('div');popup.className='geo-popup';popup.id='geoPopup';popup.dataset.eventId=String(e.id);popup.style.left=pos.x+'px';popup.style.top=(pos.y-24)+'px';popup.innerHTML=`<button type="button" aria-label="Fechar" class="close" onclick="geo.picked=null;paintMap()">×</button><small>${esc(dateShort(e))} · Organizador: ${esc(e.organizer)}</small><h3>${esc(e.title)}</h3><p>Local de partida: ${esc(displayDeparture(e))} · ${e.verified?'local confirmado':'localidade aproximada (a confirmar)'}</p><div class="popup-stats">${fmtN(e.km)} km · ${e.gain!=null?'+'+fmtN(e.gain)+' m D+':'D+ —'} · ${e.duration!=null?dur(e)+' h':'Tempo —'} · ${fmtP(e.price)}</div><div class="popup-actions">${e.url?`<a target="_blank" rel="noopener noreferrer" href="${esc(e.url)}">Inscrição ↗</a>`:''}</div>`;$('map').appendChild(popup)}
+function showGeoPopup(e){const pos=toScreen(e.lat,e.lon),w=$('map').clientWidth,h=$('map').clientHeight;if(pos.x<100||pos.x>w-100||pos.y<145||pos.y>h-20)return;const popup=document.createElement('div');popup.className='geo-popup';popup.id='geoPopup';popup.dataset.eventId=String(e.id);popup.style.left=pos.x+'px';popup.style.top=(pos.y-24)+'px';popup.innerHTML=`<button type="button" aria-label="Fechar" class="close" data-ui-action="closeMapPopup">×</button><small>${esc(dateShort(e))} · Organizador: ${esc(e.organizer)}</small><h3>${esc(e.title)}</h3><p>Local de partida: ${esc(displayDeparture(e))} · ${e.verified?'local confirmado':'localidade aproximada (a confirmar)'}</p><div class="popup-stats">${fmtN(e.km)} km · ${e.gain!=null?'+'+fmtN(e.gain)+' m D+':'D+ —'} · ${e.duration!=null?dur(e)+' h':'Tempo —'} · ${fmtP(e.price)}</div><div class="popup-actions">${e.url?`<a target="_blank" rel="noopener noreferrer" href="${esc(e.url)}">Inscrição ↗</a>`:''}</div>`;$('map').appendChild(popup)}
 function mapFitTo(events){const ps=events.filter(hasCoords),root=$('map');if(!ps.length||!root.clientWidth)return;const midX=(Math.min(...ps.map(e=>worldX(e.lon,7)))+Math.max(...ps.map(e=>worldX(e.lon,7))))/2,midY=(Math.min(...ps.map(e=>worldY(e.lat,7)))+Math.max(...ps.map(e=>worldY(e.lat,7))))/2;let z=12;for(;z>5;z--){const xx=ps.map(e=>worldX(e.lon,z)),yy=ps.map(e=>worldY(e.lat,z));if(Math.max(...xx)-Math.min(...xx)<root.clientWidth-95 && Math.max(...yy)-Math.min(...yy)<root.clientHeight-100)break;}geo.zoom=z;const pt=toLatLon(midX*2**(z-7),midY*2**(z-7),z);geo.center=pt;paintMap()}
 function zoomTo(z,pivot){z=Math.max(5,Math.min(15,z));if(geo.zoom===z)return;const root=$('map'),p=pivot||{x:root.clientWidth/2,y:root.clientHeight/2},oldPos=coordsAt(p.x,p.y),oldZ=geo.zoom;geo.zoom=z;const nowPx=worldX(oldPos.lon,z),nowPy=worldY(oldPos.lat,z),cx=nowPx-(p.x-root.clientWidth/2),cy=nowPy-(p.y-root.clientHeight/2);geo.center=toLatLon(cx,cy,z);paintMap()}
 function initGeo(){if(geo.initialized)return;geo.initialized=true;const canvas=$('map');let dragging=null;
@@ -692,7 +697,7 @@ function renderProgressiveList(events){
  if(stableSignature!==listSignature){listSignature=stableSignature;listLimit=LIST_INITIAL;}
  listWalks=events;
  stopListObserver();
- if(!events.length){$('listView').innerHTML='<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>';return;}
+ if(!events.length){$('listView').innerHTML='<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button data-ui-action="resetFilters">Limpar filtros</button></div>';return;}
  listLimit=Math.min(listLimit,events.length);
  $('listView').innerHTML=events.slice(0,listLimit).map(eventRow).join('')+
   (listLimit<events.length?listMoreHtml(events.length):'');
@@ -700,7 +705,7 @@ function renderProgressiveList(events){
 }
 function listMoreHtml(total){return `<div id="listMoreSentinel" class="list-more" role="status">
  <small>A mostrar ${listLimit} de ${total} caminhadas</small>
- <button type="button" id="listMoreButton" onclick="loadMoreWalks()">Mostrar mais caminhadas</button></div>`;}
+ <button type="button" id="listMoreButton" data-ui-action="loadMore">Mostrar mais caminhadas</button></div>`;}
 function observeListMore(){
  const node=$('listMoreSentinel');
  if(!node||typeof IntersectionObserver!=='function')return;
@@ -744,8 +749,8 @@ function renderCalendar(events){
        total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;
  const monthName=first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
  let html=`<div class="month"><div class="monthbar"><h3 id="calendarMonthTitle">${monthName}</h3>`+
-   `<div class="arrows"><button type="button" data-month-nav="prev" onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button>`+
-   `<button type="button" data-month-nav="next" onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div>`+
+   `<div class="arrows"><button type="button" data-month-nav="prev" data-ui-action="previousMonth" aria-label="Mês anterior">‹</button>`+
+   `<button type="button" data-month-nav="next" data-ui-action="nextMonth" aria-label="Mês seguinte">›</button></div></div>`+
    `<div class="calendar-grid" role="group" aria-labelledby="calendarMonthTitle" aria-describedby="calendarHelp">`;
  ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);
  for(let i=0;i<len;i++){
@@ -756,13 +761,13 @@ function renderCalendar(events){
   const count=entries.length,description=`${calendarDateLabel(iso)}; ${count} caminhada${count===1?'':'s'}`;
   html+=`<div class="day-cell ${inMonth?'':'outside'} ${picked?'picked':''}">`;
   if(inMonth){
-   html+=`<button type="button" class="day-number" data-cal-date="${iso}" onclick="setDay('${iso}')" `+
+   html+=`<button type="button" class="day-number" data-cal-date="${iso}" data-ui-action="selectDay" data-day-value="${iso}" `+
      `aria-pressed="${picked}" title="${picked?'Retirar selecção':'Seleccionar dia'}: ${description}" `+
      `aria-label="${picked?'Dia seleccionado, ':'Seleccionar '}${description}">${day}</button>`;
    html+=entries.slice(0,2).map(x=>`<button type="button" title="${esc(x.title)}" `+
-     `class="mini-event" onclick="setDay('${iso}')" `+
+     `class="mini-event" data-ui-action="selectDay" data-day-value="${iso}" `+
      `aria-label="Ver caminhadas de ${esc(calendarDateLabel(iso))}: ${esc(x.title)}">${esc(x.title)}</button>`).join('');
-   if(count>2)html+=`<button type="button" class="mini-more" onclick="setDay('${iso}')" `+
+   if(count>2)html+=`<button type="button" class="mini-more" data-ui-action="selectDay" data-day-value="${iso}" `+
      `aria-label="Ver mais ${count-2} caminhadas de ${esc(calendarDateLabel(iso))}">+${count-2} mais</button>`;
   }
   html+='</div>';
@@ -1015,6 +1020,22 @@ function travelRow(e){
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
 // dataset devolve o ID literal, mesmo contendo aspas ou outros caracteres.
+// Delegação para comandos de interface, incluindo elementos criados dinamicamente.
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-ui-action]');
+ if(!button)return;
+ switch(button.dataset.uiAction){
+  case 'clearDay':clearSelectedDay();break;
+  case 'closeMapPopup':geo.picked=null;paintMap();break;
+  case 'resetFilters':resetFilters();break;
+  case 'loadMore':loadMoreWalks();break;
+  case 'previousMonth':shiftMonth(-1);break;
+  case 'nextMonth':shiftMonth(1);break;
+  case 'selectDay':if(/^\d{4}-\d{2}-\d{2}$/.test(button.dataset.dayValue||''))setDay(button.dataset.dayValue);break;
+  case 'calculateComparedRoutes':calculateVisibleRoutes(true);break;
+  case 'refreshComparison':renderComparison();break;
+ }
+});
 document.addEventListener('click',function(event){
  const button=event.target.closest('button[data-event-action][data-event-id]');
  if(!button)return;
@@ -1028,11 +1049,42 @@ document.addEventListener('click',function(event){
   case 'openOriginSettings':openTravelPanel();break;
  }
 });
-function toggleCompare(id){if(compared.has(id))compared.delete(id);else compared.add(id);const saved=persistTravel(true);render();if(!saved)toast('Comparação actualizada apenas nesta sessão; não foi possível guardar.');}
-function clearCompare(){compared.clear();const saved=persistTravel(true);render();if(!saved)toast('Comparação limpa apenas nesta sessão; não foi possível guardar.');}
-function renderCompareTray(){const bar=$('compareTray');if(!bar)return;bar.hidden=true;return; // v63: comparação temporariamente fora da interface
- $('compareQty').textContent=compared.size+' seleccionada'+(compared.size===1?'':'s');const items=allEvents().filter(e=>compared.has(e.id));$('compareNames').textContent=items.length>3?items.slice(0,3).map(e=>e.title).join(' · ')+' · …':items.map(e=>e.title).join(' · ')||'Selecciona caminhadas';
- $('compareOpen').classList.toggle('is-disabled',compared.size<2);$('compareOpen').setAttribute('aria-disabled',String(compared.size<2));}
+function availableCompared(){return allEvents().filter(e=>compared.has(e.id));}
+function syncCompareButtons(){
+ document.querySelectorAll('button[data-event-action="toggleCompare"]').forEach(button=>{
+  const active=compared.has(button.dataset.eventId);
+  button.classList.toggle('selected',active);
+  button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',(active?'Retirar da comparação: ':'Adicionar à comparação: ')+(button.dataset.eventTitle||'caminhada'));
+  button.textContent=active?'✓ Seleccionado':'Comparar';
+ });
+}
+function toggleCompare(id){
+ if(compared.has(id))compared.delete(id);else compared.add(id);
+ const saved=persistTravel(true);
+ syncCompareButtons();renderCompareTray();
+ if(COMPARE_PAGE_MODE)renderComparison();
+ if(!saved)toast('Comparação alterada apenas nesta sessão; não foi possível guardar.');
+}
+function clearCompare(){
+ compared.clear();const saved=persistTravel(true);
+ syncCompareButtons();renderCompareTray();if(COMPARE_PAGE_MODE)renderComparison();
+ if(!saved)toast('Comparação limpa apenas nesta sessão; não foi possível guardar.');
+}
+function renderCompareTray(){
+ const bar=$('compareTray');if(!bar)return;
+ const items=availableCompared();
+ bar.hidden=COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE||!items.length;
+ document.body.classList.toggle('has-active-comparison',!bar.hidden);
+ if(bar.hidden)return;
+ $('compareQty').textContent=items.length+' seleccionada'+(items.length===1?'':'s');
+ $('compareNames').textContent=items.length>2
+  ?items.slice(0,2).map(e=>e.title).join(' · ')+' …'
+  :items.map(e=>e.title).join(' · ');
+ const open=$('compareOpen'),allowed=items.length>=2;
+ open.classList.toggle('is-disabled',!allowed);
+ open.setAttribute('aria-disabled',String(!allowed));
+}
 function travelSortVal(e,sort){const t=tripCalc(e);return sort==='km'?t?.km:sort==='fuel'?t?.fuel:t?.total;}
 function sortedWalks(xs){const s=$('travelSort')?.value||'date';if(s==='date')return xs;return xs.sort((a,b)=>{const av=travelSortVal(a,s),bv=travelSortVal(b,s);return av==null?bv==null?0:1:bv==null?-1:av-bv});}
 // Actualizar apenas os valores da viagem na tabela comparativa, preservando
@@ -1070,7 +1122,7 @@ function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('compari
  case 'organizer':return esc(e.organizer);case 'date':return esc(dateShort(e))+' · '+esc(e.time||'—');case 'walk':return e.km==null?'—':fmtN(e.km)+' km';case 'gain':return e.gain==null?'—':fmtN(e.gain)+' m';case 'difficulty':return esc(names[e.difficulty]||'—');case 'price':return fmtP(e.price);
  case 'location':return esc(displayDeparture(e)||'Por confirmar');case 'driveKm':case 'driveTime':case 'fuel':case 'toll':case 'total':return comparisonTravelCell(e,key);case 'source':return safeExternalUrl(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ver evento ↗</a>`:'—';default:return '—';}};
  const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Total viagem (combustível + portagens)'],['source','Anúncio']];
- target.innerHTML=`<div class="comparison-action"><button type="button" onclick="calculateVisibleRoutes(true)" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" onclick="renderComparison()">Actualizar tabela</button></div><p class="comparison-swipe-hint">${items.length} caminhadas seleccionadas · Desliza horizontalmente a tabela para comparar todas.</p><div class="comparison-table-wrap" role="region" aria-label="Comparação de ${items.length} caminhadas; deslocação horizontal" tabindex="0"><table class="comparison-table" style="min-width:${Math.max(625,155+items.length*225)}px"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}" data-comparison-field="${k}"><th scope="row">${label}</th>${items.map(e=>`<td data-comparison-eid="${esc(e.id)}">${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ target.innerHTML=`<div class="comparison-action"><button type="button" data-ui-action="calculateComparedRoutes" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" data-ui-action="refreshComparison">Actualizar tabela</button></div><p class="comparison-swipe-hint">${items.length} caminhadas seleccionadas · Desliza horizontalmente a tabela para comparar todas.</p><div class="comparison-table-wrap" role="region" aria-label="Comparação de ${items.length} caminhadas; deslocação horizontal" tabindex="0"><table class="comparison-table" style="min-width:${Math.max(625,155+items.length*225)}px"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}" data-comparison-field="${k}"><th scope="row">${label}</th>${items.map(e=>`<td data-comparison-eid="${esc(e.id)}">${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
  target.querySelectorAll('[data-compare-remove]').forEach(button=>button.addEventListener('click',()=>{compared.delete(button.dataset.compareRemove);const saved=persistTravel(true);renderComparison();if(!saved)toast('Comparação alterada apenas nesta sessão; não foi possível guardar.');}));
 }
 let originEditing=false;
@@ -1728,7 +1780,7 @@ $('originForm').addEventListener('submit',applyOrigin);
 $('originEdit').addEventListener('click',editTripOrigin);
 $('originCancel').addEventListener('click',cancelTripOrigin);
 $('travelSort').addEventListener('change',()=>{updateSortLabel();render();});
-$('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(compared.size<2)e.preventDefault();});
+$('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(availableCompared().length<2)e.preventDefault();});
 window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_COMPARE_KEY){compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}if(e.key==='trilhario_custom_v1'){custom=storage('trilhario_custom_v1',[]);populateOrganizers();render()}});
 
 initIntroHelp();

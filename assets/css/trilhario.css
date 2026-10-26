@@ -1836,3 +1836,36 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow-next{right:0;left:auto;}
 .results .v51-quick-filters.v64-quick-filters .v75-distance-group button.v83-arrow-prev,
 .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow-prev{left:0;right:auto;}
+
+/* v87 — botão de comparação na linha do título, sem nova faixa no cartão. */
+.walk-row.v51-card.v56-card .walk-title-row{
+ grid-area:title;display:flex;align-items:flex-start;justify-content:space-between;
+ gap:7px;min-width:0;margin:0 0 7px;
+}
+.walk-row.v51-card.v56-card .walk-title-row h3{
+ grid-area:auto;flex:1;min-width:0;margin:0;
+}
+.walk-row.v51-card.v56-card .walk-compare-toggle{
+ flex:0 0 auto;border:1px solid #c9dacb;border-radius:5px;
+ background:#f5f8f2;color:#315a40;font-size:10px;font-weight:750;
+ padding:5px 7px;line-height:1.2;white-space:nowrap;cursor:pointer;
+}
+.walk-row.v51-card.v56-card .walk-compare-toggle.selected{
+ background:#dcece0;border-color:#89b29a;color:#1e6342;
+}
+.walk-row.v51-card.v56-card .walk-compare-toggle:hover,
+.walk-row.v51-card.v56-card .walk-compare-toggle:focus-visible{
+ border-color:#5d9574;background:#e6f2e8;
+}
+.compare-tray{border-top-width:2px}
+.compare-tray-content{padding:7px 14px;gap:9px}
+.compare-tray-content span{max-width:min(52vw,440px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.has-active-comparison{padding-bottom:52px}
+@media(max-width:540px){
+ .walk-row.v51-card.v56-card .walk-title-row{gap:5px}
+ .walk-row.v51-card.v56-card .walk-compare-toggle{padding:4px 5px;font-size:9px}
+ .compare-tray-content{padding:6px 10px;flex-direction:row;justify-content:space-between}
+ .compare-tray-content span{display:none}
+ .compare-tray-actions{gap:5px}
+ .compare-open{padding:7px 9px}
+}
