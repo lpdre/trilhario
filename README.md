@@ -76,3 +76,10 @@ node testes/test_localizacoes_browser.cjs
 - Nas ligações para o Google Maps, nunca juntar `Por confirmar` à morada; acrescentar apenas localidade efectiva e ainda não presente no ponto de encontro.
 - Testes de regressão para partidas e pesquisas do Google Maps; coordenadas GPS já publicadas não são substituídas automaticamente.
 - Relatório: `auditorias/fase_5_2_locais_gps_2026-10-26.md`.
+
+## Auditoria v95 — Programas multidiários disfarçados de caminhadas
+- Quatro pacotes de 2 a 4 dias detectados com títulos que não mencionavam a duração; 3 fichas oficiais acessíveis e calendário detalhado do quarto.
+- URL oficial individual documentado em `VERIFIED_MULTIDAY_URLS`. A validação actua tanto nos anúncios novos como nos anúncios históricos e antes da publicação final.
+- Não excluir actividades apenas pelo preço elevado: o critério é a evidência do programa multidiário.
+- Catálogo reduzido de 199 para 195 eventos, com IDs e campos restantes preservados.
+- Relatório: `auditorias/fase_5_3_programas_multidiarios_2026-10-26.md`.

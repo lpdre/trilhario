@@ -19,7 +19,7 @@ from urllib.parse import urlsplit, unquote, urljoin
 import time
 from localizacoes import limpar_local, normalizar_local_evento
 from identidade_eventos import sessoes_diferentes
-from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts
+from qualidade_anuncios import GENERIC_TITLE, title_date_conflicts, is_multiday_program
 
 ROOT = Path(__file__).resolve().parent
 CATALOG = ROOT / 'eventos.json'
@@ -638,7 +638,7 @@ def main():
     events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
     # Blindagem adicional: dados antigos ou excepções nunca devem reintroduzir
     # uma expedição de vários dias ou uma data contraditória no catálogo.
-    excluded_multiday = [e for e in events if MULTIDAY.search(str(e.get('title') or ''))]
+    excluded_multiday = [e for e in events if is_multiday_program(e)]
     excluded_date_conflicts = [e for e in events if title_date_conflicts(e)]
     if excluded_multiday or excluded_date_conflicts:
         for entry in excluded_multiday + excluded_date_conflicts:

@@ -23,7 +23,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
-from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts
+from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts, is_multiday_program
 from identidade_eventos import sessoes_diferentes
 
 ROOT = Path(__file__).resolve().parent
@@ -457,7 +457,7 @@ def valid_new_event(item: dict) -> bool:
     title = clean(item.get("title", ""))
     if not 7 <= len(title) <= 140 or NON_WALK_TITLES.search(title):
         return False
-    if MULTIDAY.search(title):
+    if is_multiday_program(item):
         return False
     if item.get("km") is not None and not (0 < float(item["km"]) <= 40):
         return False
@@ -1007,7 +1007,7 @@ def main() -> int:
                     if header_date_conflicts(item):
                         logging.warning('Registo antigo com data contraditória eliminado: %s',item.get('url'))
                         continue
-                    if MULTIDAY.search(str(item.get('title') or '')):
+                    if is_multiday_program(item):
                         logging.info('A retirar programa de vários dias guardado: %s', item.get('url'))
                         continue
                     if item.get("id") and item.get("date", "") >= TODAY.isoformat():
@@ -1044,7 +1044,7 @@ def main() -> int:
                 # Um [] pode significar 0 eventos ou erro: nunca declarar êxito.
                 logging.warning('Fonte %s: sem resultados confirmados (ausência ou falha)',name)
             for item in found:
-                if is_disallowed_aggregator_event(item) or MULTIDAY.search(str(item.get('title') or '')):
+                if is_disallowed_aggregator_event(item) or is_multiday_program(item):
                     continue
                 if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                     # Não aceitar datas desta empresa reenviadas por agregadores.

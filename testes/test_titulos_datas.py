@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 import recolher
 import normalizar_eventos as normalizar
-from qualidade_anuncios import GENERIC_TITLE, MULTIDAY, title_date_conflicts
+from qualidade_anuncios import GENERIC_TITLE, MULTIDAY, title_date_conflicts, is_multiday_program
 
 
 class TitulosDatas(unittest.TestCase):
@@ -32,6 +32,31 @@ class TitulosDatas(unittest.TestCase):
                     'title':title,'date':(recolher.TODAY+timedelta(days=8)).isoformat()}))
         self.assertFalse(MULTIDAY.search('GR Peneda-Gerês Etapas 18 e 19'))
         self.assertFalse(MULTIDAY.search('Caminhada no Bosque das Faias — Sábado Manhã'))
+
+    def test_programas_multidias_nao_identificados_pelo_titulo(self):
+        known = (
+            ('Trekking Roots', 'Rota das Faias e o Melhor do Outono de Manteigas',
+             'https://trekkingroots.pt/caminhada/rota-das-faias-e-o-melhor-do-outono-de-manteigas/'),
+            ('Trekking Roots', 'Bosques Mágicos do Courel',
+             'https://trekkingroots.pt/caminhada/bosques-magicos-do-courel/'),
+            ('Mais Trilhos', 'Parque Nacional de Monfragüe',
+             'https://maistrilhos.pt/caminhadas/parque-nacional-de-monfrague'),
+            ('Caminhando.pt', 'Caminhando em Aracena',
+             'https://caminhando.pt/eventos/caminhando-em-aracena-gruta-das-maravilhas-e-parque-mineiro-de-rio-tinto'),
+        )
+        for organizer, title, url in known:
+            event = {'organizer':organizer,'title':title,'url':url,
+                     'date':(recolher.TODAY+timedelta(days=8)).isoformat()}
+            with self.subTest(url=url):
+                self.assertFalse(MULTIDAY.search(title))
+                self.assertTrue(is_multiday_program(event))
+                self.assertFalse(recolher.valid_new_event(event))
+        regular={'title':'Rota das Faias e Covão D\'Ametade',
+                 'url':'https://trekkingroots.pt/caminhada/rota-das-faias-e-covao-d-ametade-antiga-2026-06-15/'}
+        self.assertFalse(is_multiday_program(regular))
+        # URLs idênticos com outras origens não são bloqueados.
+        self.assertFalse(is_multiday_program({'title':'Caminhada em Manteigas',
+                 'url':'https://outro.pt/caminhada/bosques-magicos-do-courel'}))
 
     def test_datas_do_titulo_coincidentes(self):
         for title in ('Trilho da Serra (21 de Novembro)',
@@ -95,7 +120,7 @@ class TitulosDatas(unittest.TestCase):
         self.assertEqual(len(events),len({e['id'] for e in events}))
         for e in events:
             with self.subTest(id=e['id']):
-                self.assertFalse(MULTIDAY.search(e.get('title') or ''))
+                self.assertFalse(is_multiday_program(e))
                 self.assertFalse(GENERIC_TITLE.match(e.get('title') or ''))
                 self.assertFalse(title_date_conflicts(e))
 

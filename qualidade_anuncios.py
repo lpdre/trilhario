@@ -7,6 +7,7 @@ explicitamente no título. Não é inferida uma data nova.
 from __future__ import annotations
 
 from datetime import date
+from urllib.parse import urlsplit
 import re
 
 # A agenda reúne caminhadas de um dia, não viagens, expedições ou fins de semana.
@@ -14,6 +15,30 @@ MULTIDAY = re.compile(
     r"\b(?:fim\s+de\s+semana|viagem|expedi[cç][aã]o|"
     r"\d+\s*(?:dias|noites)|de\s+\d{1,2}\s+a\s+\d{1,2}\s+de)\b", re.I,
 )
+
+# Programas comprovadamente multidiários cuja ficha usa o nome de um trilho,
+# sem indicar no título os dias de viagem. Correspondências restritas ao URL
+# individual do anúncio oficial; não usar critérios genéricos de preço.
+VERIFIED_MULTIDAY_URLS = frozenset({
+    ('trekkingroots.pt', '/caminhada/rota-das-faias-e-o-melhor-do-outono-de-manteigas'),
+    ('trekkingroots.pt', '/caminhada/bosques-magicos-do-courel'),
+    ('maistrilhos.pt', '/caminhadas/parque-nacional-de-monfrague'),
+    ('caminhando.pt', '/eventos/caminhando-em-aracena-gruta-das-maravilhas-e-parque-mineiro-de-rio-tinto'),
+})
+
+
+def is_multiday_program(event: dict) -> bool:
+    """Rejeita programas de vários dias por título ou URL oficialmente identificado."""
+    if MULTIDAY.search(str(event.get('title') or '')):
+        return True
+    try:
+        parsed = urlsplit(str(event.get('url') or ''))
+        host = (parsed.hostname or '').casefold().removeprefix('www.')
+        path = parsed.path.rstrip('/').casefold()
+    except ValueError:
+        return False
+    return (host, path) in VERIFIED_MULTIDAY_URLS
+
 
 # Certos cartões de organizadores dão o nível, a data e os quilómetros como
 # título, apesar de existir um H1 correcto na ficha individual.
