@@ -20,9 +20,6 @@ function sanitizeStored(key,value,fallback){
     typeof e.title==='string'&&e.title.trim().length>0&&typeof e.organizer==='string'&&
     e.organizer.trim().length>0&&storedDate(e.date)).map(e=>({...e,userAdded:true}));
  }
- if(key==='trilhario_compare_v19'){
-  return Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&id.length>0&&id.length<=240))]:[];
- }
  if(key==='trilhario_travel_prefs_v19'){
   if(!isStoredRecord(value))return {...fallback};
   const p={...fallback};
@@ -51,7 +48,7 @@ function sanitizeStored(key,value,fallback){
   let entries=Object.entries(value).filter(([k,row])=>k.length>0&&k.length<=350&&
    k!=='__proto__'&&isStoredRecord(row));
   if(entries.length>max){
-   // Só para caches: manter os registos mais recentes, sem impor limites à comparação.
+   // Só para caches: manter os registos mais recentes.
    entries.sort((a,b)=>(Number(b[1].updated||b[1].checkedAt||b[1].accessed)||0)-
      (Number(a[1].updated||a[1].checkedAt||a[1].accessed)||0));
    entries=entries.slice(0,max);
@@ -86,7 +83,7 @@ let remoteUpdatedAt=null;
 let remoteSourcesHealth=null,remoteFeedState='loading';
 
 // v20 — médias diárias da DGEG. Guarda a data do preço; não confunde dados antigos com preço de hoje.
-const TRAVEL_PREF_KEY='trilhario_travel_prefs_v19',TRAVEL_ROUTES_KEY='trilhario_routes_v19',TRAVEL_COMPARE_KEY='trilhario_compare_v19',TRAVEL_GEO_KEY='trilhario_geocode_v19';
+const TRAVEL_PREF_KEY='trilhario_travel_prefs_v19',TRAVEL_ROUTES_KEY='trilhario_routes_v19',TRAVEL_GEO_KEY='trilhario_geocode_v19';
 const FUEL_CACHE_KEY='trilhario_dgeg_medianas_v20';
 const TRAVEL_TOLL_GEOMETRY_KEY='trilhario_toll_geometry_v43';
 // Valores publicados na página da DGEG para 11-10-2026: recurso inicial, datado, não preço de hoje.
@@ -104,7 +101,6 @@ let travelTollGeometry=storage(TRAVEL_TOLL_GEOMETRY_KEY,{});
 if(!travelTollGeometry||typeof travelTollGeometry!=='object'||Array.isArray(travelTollGeometry))travelTollGeometry={};
 // Uma consulta em voo terminou ao fechar a página; nunca bloquear a próxima sessão.
 for(const route of Object.values(travelRoutes))if(route&&typeof route==='object')delete route.tollRequestId;
-let compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));
 let travelBusy=false,geoLastRequest=0,roadLastRequest=0;
 // v23: partida GPS validada, geocodificação progressiva e lotes de 10.
 const TRAVEL_BATCH_SIZE=10;
@@ -113,9 +109,6 @@ let tripFilterSignature='',tripBatchObserver=null,tripWorking=false;
 let tollJobs=[],tollWorking=false;
 const ROUNDTRIP_VERSION=37; // v37: ida e volta com percursos independentes; cache antiga não é fiável.
 const GEOCODER_VERSION=36,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
-
-const COMPARE_PAGE_MODE=new URLSearchParams(location.search).has('comparar');
-if(COMPARE_PAGE_MODE){document.body.classList.add('comparison-mode');document.title='Comparar caminhadas — Trilhário';}
 
 
 // Fontes monitorizadas; a presença aqui não significa vagas ou eventos confirmados.
@@ -224,20 +217,6 @@ function isTrilhosCaminhadasSource(e){
  try{const host=new URL(String(e?.url||'')).hostname.replace(/^www\./,'').toLowerCase();return host==='trilhosecaminhadas.pt';}
  catch{return false;}
 }
-// Ao integrar uma excepção numa ficha recolhida, manter a comparação associada
-// ao ID oficial. IDs sem correspondência ficam intactos para futuras recolhas.
-function migrateComparedAliases(events){
- if(!compared||typeof compared.has!=='function'||!compared.size)return;
- let changed=false;
- for(const e of events){
-  if(!Array.isArray(e.alias_ids)||!e.id)continue;
-  for(const old of e.alias_ids){
-   if(typeof old!=='string'||old===e.id||!compared.has(old))continue;
-   compared.delete(old);compared.add(e.id);changed=true;
-  }
- }
- if(changed)persistValue(TRAVEL_COMPARE_KEY,[...compared],true);
-}
 // v38 — os eventos normalizados não dependem dos cálculos de viagem.
 // Evita reconstruir o mesmo catálogo centenas de vezes enquanto as rotas são calculadas.
 let normalizedEventsCache=null;
@@ -258,7 +237,6 @@ function allEvents(){
   return {...e,...(publishedGps||{}),title:legibleEventTitle(e),verified:!!e.verified||!!publishedGps,
           start:displayDeparture(e)};
  });
- if(isOfficialCatalogue)migrateComparedAliases(normalized);
  normalizedEventsCache={remote:remoteEvents,custom,customLength:custom.length,today:todayKey,feedState:remoteFeedState,events:normalized};
  return normalized;
 }
@@ -536,10 +514,7 @@ function eventRow(x){
  return `<article class="walk-row v51-card v56-card" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
-   <div class="walk-title-row">
-    <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
-    <button type="button" class="walk-compare-toggle${compared.has(x.id)?' selected':''}" data-event-action="toggleCompare" data-event-id="${esc(x.id)}" data-event-title="${esc(x.title)}" aria-pressed="${compared.has(x.id)}" aria-label="${compared.has(x.id)?'Retirar da comparação: ':'Adicionar à comparação: '}${esc(x.title)}">${compared.has(x.id)?'✓ Seleccionado':'Comparar'}</button>
-   </div>
+   <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
    <div class="walk-card-details">
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}</a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
@@ -686,7 +661,7 @@ function changeDual(prefix,which,value){
  render();
 }
 // v46 — paginação apenas na apresentação. Os filtros, calendário, mapa,
-// comparação e exportações continuam a considerar o catálogo completo.
+// mapa, calendário e filtros continuam a considerar o catálogo completo.
 const LIST_INITIAL=30,LIST_INCREMENT=30;
 let listLimit=LIST_INITIAL,listSignature='',listWalks=[],listMoreObserver=null;
 function stopListObserver(){if(listMoreObserver){listMoreObserver.disconnect();listMoreObserver=null;}}
@@ -736,7 +711,7 @@ function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();agendaDis
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
   document.querySelectorAll('[data-quick-km]').forEach(b=>{const on=state.kmMin===Number(b.dataset.quickKm)&&state.kmMax===KM_CAP;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
   updateWeekendQuickFilters();
- renderOrganizersPage();renderCompareTray();renderComparison();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
+ renderOrganizersPage();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
    scheduleTravelBatches(events);
  }else{stopListObserver();if(tripBatchObserver){tripBatchObserver.disconnect();tripBatchObserver=null;}if(state.view==='calendar')renderCalendar(displayedEvents);else renderMap(events)}}
 // v47B — calendário mensal completo. A data destacada filtra a Lista, não o mês.
@@ -886,9 +861,8 @@ $('filterToggleBtn').addEventListener('click',()=>{const panel=$('filterPanel');
 function persistTravel(notify=false){
  // Guardar as preferências duradouras antes da cache, que pode exceder a quota.
  const prefs=persistValue(TRAVEL_PREF_KEY,travelPrefs,!notify);
- const choices=persistValue(TRAVEL_COMPARE_KEY,[...compared],!notify);
  persistValue(TRAVEL_ROUTES_KEY,travelRoutes,true);
- return prefs&&choices;
+ return prefs;
 }
 function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCase()+'|'+e.id;}
 // v43: rotas e tarifas têm validades independentes. Não apresentar uma estimativa expirada como actual.
@@ -1032,8 +1006,6 @@ document.addEventListener('click',function(event){
   case 'previousMonth':shiftMonth(-1);break;
   case 'nextMonth':shiftMonth(1);break;
   case 'selectDay':if(/^\d{4}-\d{2}-\d{2}$/.test(button.dataset.dayValue||''))setDay(button.dataset.dayValue);break;
-  case 'calculateComparedRoutes':calculateVisibleRoutes(true);break;
-  case 'refreshComparison':renderComparison();break;
  }
 });
 document.addEventListener('click',function(event){
@@ -1041,7 +1013,6 @@ document.addEventListener('click',function(event){
  if(!button)return;
  const id=button.dataset.eventId;
  switch(button.dataset.eventAction){
-  case 'toggleCompare':toggleCompare(id);break;
   case 'removeEvent':removeEvent(id);break;
   case 'mapSelect':mapSelect(id);break;
   case 'calculateOneRoute':calculateOneRoute(id);break;
@@ -1049,85 +1020,10 @@ document.addEventListener('click',function(event){
   case 'openOriginSettings':openTravelPanel();break;
  }
 });
-function availableCompared(){return allEvents().filter(e=>compared.has(e.id));}
-function syncCompareButtons(){
- document.querySelectorAll('button[data-event-action="toggleCompare"]').forEach(button=>{
-  const active=compared.has(button.dataset.eventId);
-  button.classList.toggle('selected',active);
-  button.setAttribute('aria-pressed',String(active));
-  button.setAttribute('aria-label',(active?'Retirar da comparação: ':'Adicionar à comparação: ')+(button.dataset.eventTitle||'caminhada'));
-  button.textContent=active?'✓ Seleccionado':'Comparar';
- });
-}
-function toggleCompare(id){
- if(compared.has(id))compared.delete(id);else compared.add(id);
- const saved=persistTravel(true);
- syncCompareButtons();renderCompareTray();
- if(COMPARE_PAGE_MODE)renderComparison();
- if(!saved)toast('Comparação alterada apenas nesta sessão; não foi possível guardar.');
-}
-function clearCompare(){
- compared.clear();const saved=persistTravel(true);
- syncCompareButtons();renderCompareTray();if(COMPARE_PAGE_MODE)renderComparison();
- if(!saved)toast('Comparação limpa apenas nesta sessão; não foi possível guardar.');
-}
-function renderCompareTray(){
- const bar=$('compareTray');if(!bar)return;
- const items=availableCompared();
- bar.hidden=COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE||!items.length;
- document.body.classList.toggle('has-active-comparison',!bar.hidden);
- if(bar.hidden)return;
- $('compareQty').textContent=items.length+' seleccionada'+(items.length===1?'':'s');
- $('compareNames').textContent=items.length>2
-  ?items.slice(0,2).map(e=>e.title).join(' · ')+' …'
-  :items.map(e=>e.title).join(' · ');
- const open=$('compareOpen'),allowed=items.length>=2;
- open.classList.toggle('is-disabled',!allowed);
- open.setAttribute('aria-disabled',String(!allowed));
-}
 function travelSortVal(e,sort){const t=tripCalc(e);return sort==='km'?t?.km:sort==='fuel'?t?.fuel:t?.total;}
 function sortedWalks(xs){const s=$('travelSort')?.value||'date';if(s==='date')return xs;return xs.sort((a,b)=>{const av=travelSortVal(a,s),bv=travelSortVal(b,s);return av==null?bv==null?0:1:bv==null?-1:av-bv});}
-// Actualizar apenas os valores da viagem na tabela comparativa, preservando
-// a posição horizontal e as colunas seleccionadas (10 ou mais caminhadas).
-function comparisonTravelCell(e,key){
- const t=tripCalc(e);
- switch(key){
-  case 'driveKm':return t?fmtN(t.km)+' km'+(travelData(e)?.precision&&travelData(e).precision!=='gps'?' (partida aprox.)':''):'—';
-  case 'driveTime':return t?timeStr(t.minutes):'—';
-  case 'fuel':return t?travelMoney(t.fuel):'—';
-  case 'toll':return t&&t.toll!=null?travelMoney(t.toll):'—';
-  case 'total':return t&&t.total!=null?travelMoney(t.total):'—';
-  default:return '—';
- }
-}
-function refreshComparisonTravelCells(id){
- const target=$('comparisonContent'),table=target?.querySelector('.comparison-table');
- if(!table){renderComparison();return;}
- const wanted=new Map(allEvents().filter(e=>!id||String(e.id)===String(id)).map(e=>[String(e.id),e]));
- for(const row of table.querySelectorAll('tr[data-comparison-field]')){
-  const key=row.dataset.comparisonField;
-  if(!['driveKm','driveTime','fuel','toll','total'].includes(key))continue;
-  for(const cell of row.querySelectorAll('td[data-comparison-eid]')){
-   const e=wanted.get(cell.dataset.comparisonEid);
-   if(e)cell.textContent=comparisonTravelCell(e,key);
-  }
- }
- const button=target.querySelector('.comparison-action button');
- if(button)button.disabled=Boolean(travelBusy);
-}
-function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('comparisonContent');if(!target)return;const items=allEvents().filter(e=>compared.has(e.id));
- if(!items.length){target.innerHTML='<div class="org-empty">Ainda não seleccionaste caminhadas. <a href="index.html">Voltar à agenda</a></div>';return;}
- const head=(e)=>`<th scope="col"><strong>${esc(e.title)}</strong><br><small>${esc(e.organizer)} · ${esc(dateShort(e))}</small><button type="button" class="compare-remove" data-compare-remove="${esc(e.id)}" aria-label="Retirar ${esc(e.title)} da comparação">Retirar ×</button></th>`;
- const cell=(e,key)=>{switch(key){
- case 'organizer':return esc(e.organizer);case 'date':return esc(dateShort(e))+' · '+esc(e.time||'—');case 'walk':return e.km==null?'—':fmtN(e.km)+' km';case 'gain':return e.gain==null?'—':fmtN(e.gain)+' m';case 'difficulty':return esc(names[e.difficulty]||'—');case 'price':return fmtP(e.price);
- case 'location':return esc(displayDeparture(e)||'Por confirmar');case 'driveKm':case 'driveTime':case 'fuel':case 'toll':case 'total':return comparisonTravelCell(e,key);case 'source':return safeExternalUrl(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ver evento ↗</a>`:'—';default:return '—';}};
- const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Total viagem (combustível + portagens)'],['source','Anúncio']];
- target.innerHTML=`<div class="comparison-action"><button type="button" data-ui-action="calculateComparedRoutes" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" data-ui-action="refreshComparison">Actualizar tabela</button></div><p class="comparison-swipe-hint">${items.length} caminhadas seleccionadas · Desliza horizontalmente a tabela para comparar todas.</p><div class="comparison-table-wrap" role="region" aria-label="Comparação de ${items.length} caminhadas; deslocação horizontal" tabindex="0"><table class="comparison-table" style="min-width:${Math.max(625,155+items.length*225)}px"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}" data-comparison-field="${k}"><th scope="row">${label}</th>${items.map(e=>`<td data-comparison-eid="${esc(e.id)}">${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
- target.querySelectorAll('[data-compare-remove]').forEach(button=>button.addEventListener('click',()=>{compared.delete(button.dataset.compareRemove);const saved=persistTravel(true);renderComparison();if(!saved)toast('Comparação alterada apenas nesta sessão; não foi possível guardar.');}));
-}
 let originEditing=false;
 function editTripOrigin(){
- if(COMPARE_PAGE_MODE){window.open('index.html','_blank','noopener');return;}
  originEditing=true;updateTravelHeader();$('tripOrigin').focus();$('tripOrigin').select();
 }
 function openTravelPanel(){editTripOrigin();}
@@ -1551,7 +1447,7 @@ async function autoTollsForGeometry(geometry){
 }
 // Primeiras 10 caminhadas ao definir a origem; mais 10 quando se aproximam do ecrã.
 function scheduleTravelBatches(events){
- if(COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE||state.view!=='list'||!travelPrefs.origin)return;
+ if(ORGANIZERS_PAGE_MODE||state.view!=='list'||!travelPrefs.origin)return;
  const signature=travelPrefs.origin.trim().toLowerCase()+'|'+events.map(e=>e.id).join(',');
  if(signature!==tripFilterSignature){
   tripFilterSignature=signature;
@@ -1625,7 +1521,6 @@ function queueTrips(events,manual=false){
 // v38 — actualização incremental: a geocodificação e portagens nunca precisam de
 // reconstruir a lista completa quando a ordenação continua por data.
 function refreshTravelCard(id){
- if(COMPARE_PAGE_MODE){refreshComparisonTravelCells(id);renderTravelProgress();return;}
  if(ORGANIZERS_PAGE_MODE){renderTravelProgress();return;}
  if(state.view!=='list'){renderTravelProgress();return;}
  // Nos modos ordenados por distância/custo, o resultado altera a ordem dos cartões.
@@ -1664,12 +1559,6 @@ function calculateOneRoute(id){
  tripOriginProblem='';tripProblems.delete(routeCacheKey(e));geoMisses.clear();
  // Pedido manual não pode ficar atrás dos restantes cálculos.
  queueTrips([e],true);refreshTravelCard(id);
-}
-function calculateVisibleRoutes(onlyCompared=false){
- if(!travelPrefs.origin){openTravelPanel();return;}
- tripOriginProblem='';
- const events=onlyCompared?allEvents().filter(e=>compared.has(e.id)):selected().slice(0,TRAVEL_BATCH_SIZE);
- queueTrips(events,true);render();
 }
 function runTollQueue(){
  if(tollWorking)return;
@@ -1754,7 +1643,7 @@ async function processTripQueue(){
    }
    console.info('Deslocação indisponível:',e.title,reason);
   }finally{tripActiveKey='';refreshTravelCard(e.id);}
- }}finally{tripWorking=false;travelBusy=false;if(COMPARE_PAGE_MODE)refreshComparisonTravelCells(null);renderTravelProgress();}}
+ }}finally{tripWorking=false;travelBusy=false;renderTravelProgress();}}
 function updateSortLabel(){
  const select=$('travelSort'),container=select.closest('.toolbar-sort');
  const label='Ordenar: '+select.options[select.selectedIndex].textContent;
@@ -1780,8 +1669,7 @@ $('originForm').addEventListener('submit',applyOrigin);
 $('originEdit').addEventListener('click',editTripOrigin);
 $('originCancel').addEventListener('click',cancelTripOrigin);
 $('travelSort').addEventListener('change',()=>{updateSortLabel();render();});
-$('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(availableCompared().length<2)e.preventDefault();});
-window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_COMPARE_KEY){compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}if(e.key==='trilhario_custom_v1'){custom=storage('trilhario_custom_v1',[]);populateOrganizers();render()}});
+window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}if(e.key==='trilhario_custom_v1'){custom=storage('trilhario_custom_v1',[]);populateOrganizers();render()}});
 
 initIntroHelp();
 renderSourcesDirectory();
