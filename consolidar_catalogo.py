@@ -78,9 +78,16 @@ def load_registry(path=EXCEPTIONS_PATH):
             raise ValueError('Evento manual sem identidade, data ou origem válida')
         if (urlsplit(e['url']).hostname or '').removeprefix('www.') == 'trilhosecaminhadas.pt':
             raise ValueError('Não admitir anúncios do agregador desactivado')
-        if row['expires_on'] != e['date']:
+        expiry = row.get('expires_on')
+        if not isinstance(expiry, str) or not isinstance(e.get('date'), str):
+            raise ValueError('Evento manual sem data de validade válida')
+        try:
+            date.fromisoformat(expiry)
+            date.fromisoformat(e['date'])
+        except ValueError as exc:
+            raise ValueError('Data inválida na excepção manual') from exc
+        if expiry != e['date']:
             raise ValueError('A validade deve terminar no dia do evento')
-        date.fromisoformat(e['date'])
     return data
 
 

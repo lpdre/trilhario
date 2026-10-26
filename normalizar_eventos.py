@@ -576,7 +576,13 @@ def valid_gps_pair(event):
         lon=float(event['lon'])
     except (KeyError, TypeError, ValueError, OverflowError):
         return False
-    return math.isfinite(lat) and math.isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180
+    if not (math.isfinite(lat) and math.isfinite(lon)):
+        return False
+    # Mesmos limites geográficos usados pelo mapa do Trilhário.
+    # Coordenadas 0,0 ou de países distantes não são pontos de partida válidos.
+    return ((36 <= lat <= 43 and -10 <= lon <= -6)
+            or (31.8 <= lat <= 33.6 and -18 <= lon <= -15.5)
+            or (36.5 <= lat <= 40.1 and -32 <= lon <= -24))
 
 
 def main():

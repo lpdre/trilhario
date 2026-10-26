@@ -10,9 +10,14 @@ class AuditoriaNormalizacao(unittest.TestCase):
     def test_gps_valido_e_invalidos(self):
         self.assertTrue(normalizar.valid_gps_pair({'lat':40.64,'lon':-8.65}))
         self.assertTrue(normalizar.valid_gps_pair({'lat':'40.64','lon':'-8.65'}))
+        for location in ({'lat':32.7,'lon':-16.9},  # Madeira
+                         {'lat':38.7,'lon':-27.2}):  # Açores
+            self.assertTrue(normalizar.valid_gps_pair(location))
         for value in ({'lat':None,'lon':-8},{'lat':'N 40','lon':-8},
                       {'lat':float('nan'),'lon':-8},{'lat':40,'lon':float('inf')},
-                      {'lat':100,'lon':-8},{'lat':40,'lon':-200},{'lat':40}):
+                      {'lat':100,'lon':-8},{'lat':40,'lon':-200},{'lat':40},
+                      {'lat':0,'lon':0},{'lat':48.85,'lon':2.35},
+                      {'lat':39.2,'lon':-3.7}):
             with self.subTest(value=value):
                 self.assertFalse(normalizar.valid_gps_pair(value))
 

@@ -50,6 +50,25 @@ class CatalogoUnico(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_registry(p)
 
+    def test_validade_em_falta_gera_erro_claro(self):
+        bad = registry()
+        bad['fallback_events'][0].pop('expires_on')
+        with TemporaryDirectory() as folder:
+            p = Path(folder) / 'registo.json'
+            p.write_text(json.dumps(bad), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'validade'):
+                load_registry(p)
+
+    def test_validade_com_data_impossivel_rejeitada(self):
+        bad = registry()
+        bad['fallback_events'][0]['expires_on'] = '2026-02-30'
+        bad['fallback_events'][0]['event']['date'] = '2026-02-30'
+        with TemporaryDirectory() as folder:
+            p = Path(folder) / 'registo.json'
+            p.write_text(json.dumps(bad), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'Data inválida'):
+                load_registry(p)
+
     def test_inserir_manual_quando_nao_recolhido(self):
         out, _, counters = integrate([], registry(), today=date(2026, 10, 23))
         self.assertEqual(len(out), 1)
