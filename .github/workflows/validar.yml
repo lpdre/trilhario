@@ -29,5 +29,7 @@ jobs:
           python -m py_compile recolher.py normalizar_eventos.py fontes_oficiais.py monitorizacao_fontes.py consolidar_catalogo.py localizacoes.py precalcular_rotas.py
           python -m unittest discover -s testes -p 'test_*.py' -v
           node --check assets/js/trilhario.js
+          node --check assets/js/trilhario-routes.js
           node testes/test_catalogo_browser.cjs
           node testes/test_localizacoes_browser.cjs
+          node testes/test_rotas_browser.cjs

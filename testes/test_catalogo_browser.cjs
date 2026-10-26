@@ -11,7 +11,7 @@ const writes=[];
 const ctx={
   remoteFeedState:'ready',remoteEvents:[{id:'recolhido',date:'2026-11-01',title:'Caminhada oficial',organizer:'X',start:'Arouca',url:'https://exemplo.pt/1'}],
   normalizedEventsCache:null, custom:[],
-  catalogToday:()=> '2026-10-23',excludedOrganizer:()=>false,isTrilhosCaminhadasSource:()=>false,
+  catalogToday:()=> '2026-10-23',isTrilhosCaminhadasSource:()=>false,
   hasCoords:()=>false,parsePublishedGps:()=>null,legibleEventTitle:e=>e.title,displayDeparture:e=>e.start,
   compared:new Set(['manual','desconhecido']),TRAVEL_COMPARE_KEY:'comparacoes',
   persistValue:(key,value,quiet)=>{writes.push({key,value,quiet});return true;},localStorage:{setItem(){}}

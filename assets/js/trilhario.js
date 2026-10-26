@@ -1,5 +1,6 @@
 
 'use strict';
+const {timeValid,encodeRouteGeometry,decodeRouteGeometry,compactRouteGeometry,routeShapeFingerprint}=window.TrilharioRoutes;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const fmtN=n=>n===null||n===undefined||n===''?'—':Number(n).toLocaleString('pt-PT',{maximumFractionDigits:1});
@@ -108,7 +109,7 @@ let travelBusy=false,geoLastRequest=0,roadLastRequest=0;
 // v23: partida GPS validada, geocodificação progressiva e lotes de 10.
 const TRAVEL_BATCH_SIZE=10;
 let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
-let tripFilterSignature='',tripBatchObserver=null,tripScheduling=false,tripWorking=false;
+let tripFilterSignature='',tripBatchObserver=null,tripWorking=false;
 let tollJobs=[],tollWorking=false;
 const ROUNDTRIP_VERSION=37; // v37: ida e volta com percursos independentes; cache antiga não é fiável.
 const GEOCODER_VERSION=36,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
@@ -414,7 +415,6 @@ function parsePublishedGps(raw){
  const p={lat,lon};return hasCoords(p)?{...p,verified:true,gpsFromAnnouncement:true}:null;
 }
 const dur=x=>Number.isFinite(Number(x.duration))&&x.duration!=null&&x.duration!==''?fmtN(x.duration):'—';
-const cap=x=>x.capacity!=null&&x.capacity!==''?Number(x.capacity).toLocaleString('pt-PT'):'—';
 function populateOrganizers(){
  const select=$('organizer');
  const orgs=[...new Set(allEvents().map(e=>String(e.organizer||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt'));
@@ -447,12 +447,7 @@ function googleMapsDeparture(x,spot){
     x.town&&fold(text).includes(fold(localPartidaLegivel(x.town)))?'':localPartidaLegivel(x.town),'Portugal'].filter(Boolean).join(', ');
  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
 }
-const TRILHARIO_ACTION_ICONS={
- map:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
- calendar:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg>',
- heart:'<svg viewBox="0 0 24 24" aria-hidden="true" class="icon-heart" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.3 5.3 0 0 0-7.5 0L12 6.9l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 22l8.8-8.9a5.3 5.3 0 0 0 0-7.5Z"/></svg>',
- trash:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>'
-};
+const TRILHARIO_DELETE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>';
 // Guia discreto: visível na primeira visita; o utilizador pode voltar a abri-lo.
 const INTRO_HELP_KEY='trilhario_intro_v33_closed';
 let introHelpVisible=!storage(INTRO_HELP_KEY,false);
@@ -557,7 +552,7 @@ function eventRow(x){
   ${travelRow(x)}
   ${x.userAdded?`<div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
    <div class="walk-action-quick">
-    <button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_ACTION_ICONS.trash}</button>
+    <button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_DELETE_ICON}</button>
    </div>
   </div>`:''}
  </article>`;
@@ -664,7 +659,6 @@ function renderMap(events){initGeo();const ps=events.filter(hasCoords),verified=
  $('mapSide').innerHTML=events.length?events.map(x=>`<button class="map-side-item ${geo.picked===x.id?'selected':''}" data-id="${esc(x.id)}" data-event-action="mapSelect" data-event-id="${esc(x.id)}" ${!hasCoords(x)?'disabled':''}><strong>${esc(x.title)}</strong><small>Organizador: ${esc(x.organizer)} · Local de partida: ${esc(displayDeparture(x))}${x.verified?'':' (a confirmar)'}</small><span>${esc(dateShort(x))} · ${x.km!=null?fmtN(x.km)+' km':'km —'} · <span class="mapgain">${x.gain!=null?'+'+fmtN(x.gain)+' m D+':'D+ —'}</span> · ${fmtP(x.price)}</span><small>${x.duration!=null?(x.estimatedDuration?'≈ ':'')+dur(x)+' h':'Duração —'} · ${x.verified?'● início confirmado':'○ ponto aproximado'}</small></button>`).join(''):'<p class="map-side-item">Sem resultados. Altera os filtros.</p>';
  requestAnimationFrame(()=>{if(!geo.selectionShown){geo.selectionShown=true;mapFitTo(events);}else paintMap()})}
 function mapSelect(id){const e=selected().find(x=>x.id===id);if(!e)return;if(!hasCoords(e)){toast('Este evento não tem coordenadas.');return}geo.picked=id;geo.zoom=Math.max(geo.zoom,10);geo.center={lat:Number(e.lat),lon:Number(e.lon)};$('mapSide').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.id===id));paintMap()}
-function focusEvent(id){const e=selected().find(x=>x.id===id);if(!e)return;state.view='map';render();requestAnimationFrame(()=>{mapSelect(id);$('mapView').scrollIntoView({behavior:'smooth',block:'start'})})}
 function updateDualUI(prefix,low,high,cap,unit){
  const from=100*low/cap,to=100*high/cap;
  const track=$(prefix+'Track');track.style.setProperty('--from',from+'%');track.style.setProperty('--to',to+'%');
@@ -824,37 +818,6 @@ function setDay(d){
 function resetFilters(){Object.assign(state,{day:'all',weekend:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP});$('organizer').value='all';render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
-function calendarIcs(e){
- const safe=s=>String(s??'').replaceAll('\\','\\\\').replaceAll('\r','').replaceAll('\n','\\n').replaceAll(',','\\,').replaceAll(';','\\;');
- const iso=String(e.date||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(iso))return null;
- const day=iso.replaceAll('-','');
- const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
- const hhmm=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.time||''));
- const uid=String(e.id||'event').replace(/[^a-zA-Z0-9_-]/g,'_');
- const notes=[e.organizer,e.url||'',hhmm?'':'Hora de início por confirmar: evento criado como dia inteiro, sem horário inventado.'].filter(Boolean).join(' | ');
- const lines=['BEGIN:VCALENDAR','VERSION:2.0','CALSCALE:GREGORIAN','PRODID:-//Trilhario//Agenda//PT','BEGIN:VEVENT',`UID:${uid}@trilhario.local`,`DTSTAMP:${stamp}`,`SUMMARY:${safe(e.title)}`,`LOCATION:${safe(displayDeparture(e))}`,`DESCRIPTION:${safe(notes)}`];
- if(!hhmm){
-  const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);
-  lines.push(`DTSTART;VALUE=DATE:${day}`,`DTEND;VALUE=DATE:${d.toISOString().slice(0,10).replaceAll('-','')}`,'TRANSP:TRANSPARENT');
- }else{
-  // Inclui VTIMEZONE para preservar a hora anunciada em Portugal noutros fusos horários.
-  lines.splice(4,0,'BEGIN:VTIMEZONE','TZID:Europe/Lisbon','BEGIN:DAYLIGHT','TZOFFSETFROM:+0000','TZOFFSETTO:+0100','TZNAME:WEST','DTSTART:20260329T010000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','BEGIN:STANDARD','TZOFFSETFROM:+0100','TZOFFSETTO:+0000','TZNAME:WET','DTSTART:20261025T020000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE');
-  lines.push(`DTSTART;TZID=Europe/Lisbon:${day}T${hhmm[1]}${hhmm[2]}00`);
-  let endDay=iso,endMinutes=null;
-  const advertised=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.endTime||''));
-  const startMinutes=Number(hhmm[1])*60+Number(hhmm[2]);
-  if(advertised){endMinutes=Number(advertised[1])*60+Number(advertised[2]);if(endMinutes<=startMinutes){const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);endDay=d.toISOString().slice(0,10);}}
-  else if(Number.isFinite(Number(e.duration))&&Number(e.duration)>0&&Number(e.duration)<=24){
-   endMinutes=startMinutes+Math.round(Number(e.duration)*60);
-   const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+Math.floor(endMinutes/1440));endDay=d.toISOString().slice(0,10);endMinutes%=1440;
-  }
-  if(endMinutes!=null)lines.push(`DTEND;TZID=Europe/Lisbon:${endDay.replaceAll('-','')}T${String(Math.floor(endMinutes/60)).padStart(2,'0')}${String(endMinutes%60).padStart(2,'0')}00`);
- }
- lines.push('END:VEVENT','END:VCALENDAR');return lines.join('\r\n')+'\r\n';
-}
-function downloadIcs(id){const e=allEvents().find(x=>x.id===id);if(!e)return;const data=calendarIcs(e);if(!data)return;
- saveBlob(new Blob([data],{type:'text/calendar;charset=utf-8'}),e.id+'.ics');toast(e.time?'Evento exportado. Confirma o horário real.':'Evento exportado sem hora definida; confirma o horário antes de sair.');}
-
 function removeEvent(id){if(!confirm('Eliminar este evento?'))return;const next=custom.filter(e=>e.id!==id);if(!persistValue('trilhario_custom_v1',next))return;custom=next;populateOrganizers();render();toast('Evento eliminado')}
 document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{
  const chosen=Number(b.dataset.quickKm);
@@ -927,7 +890,6 @@ function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCa
 const ROUTE_MAX_AGE_MS=14*86400000,TOLL_MAX_AGE_MS=7*86400000,PRECALC_MAX_AGE_MS=90*86400000;
 let precomputedRoutes=null;
 const ROUTE_GEOMETRY_LIMIT=24,ROUTE_GEOMETRY_MAX_AGE=ROUTE_MAX_AGE_MS;
-const timeValid=(stamp,maxAge,now=Date.now())=>Number.isFinite(Number(stamp))&&Number(stamp)>0&&Number(stamp)<=now+300000&&now-Number(stamp)<=maxAge;
 function routeFresh(e,r,now=Date.now()){
  return Boolean(r&&!r.manual&&r.roundTripVersion===ROUNDTRIP_VERSION&&r.geocoderVersion===GEOCODER_VERSION&&
  r.destinationFingerprint===endpointFingerprint(e)&&Number.isFinite(r.kmOne)&&Number.isFinite(r.kmBack)&&
@@ -943,31 +905,6 @@ function tollsDue(r,now=Date.now()){
 }
 // Polyline5, compatível com as coordenadas [longitude, latitude] do OSRM.
 // A geometria tem um limite de entradas e nunca é usada como fonte de GPS do evento.
-function encodeRouteGeometry(points){
- if(!Array.isArray(points)||points.length<2)return '';
- let lastLat=0,lastLon=0,out='';
- function part(diff){let n=diff<0?~(diff<<1):(diff<<1);while(n>=32){out+=String.fromCharCode((32|(n&31))+63);n>>>=5;}out+=String.fromCharCode(n+63);}
- for(const point of points){if(!Array.isArray(point)||point.length<2||!Number.isFinite(point[0])||!Number.isFinite(point[1]))return '';
-  const lat=Math.round(point[1]*1e5),lon=Math.round(point[0]*1e5);part(lat-lastLat);part(lon-lastLon);lastLat=lat;lastLon=lon;
- }
- return out;
-}
-function decodeRouteGeometry(value){
- if(typeof value!=='string'||!value||value.length>80000)return [];
- let pos=0,lat=0,lon=0;const result=[];
- function part(){let amount=0,shift=0;while(pos<value.length){const code=value.charCodeAt(pos++)-63;
-  if(code<0||code>63||shift>30)throw new Error('Polyline inválida');
-  amount|=(code&31)<<shift;if(!(code&32))return (amount&1)?~(amount>>1):(amount>>1);shift+=5;
- }throw new Error('Polyline incompleta');}
- try{while(pos<value.length&&result.length<2001){lat+=part();lon+=part();result.push([lon/1e5,lat/1e5]);}}
- catch{return []}
- return result.length>=2&&result.length<=1800?result:[];
-}
-function compactRouteGeometry(points){
- if(!Array.isArray(points)||points.length<2)return [];
- if(points.length<=1800)return points;
- return Array.from({length:1800},(_,i)=>points[Math.round(i*(points.length-1)/1799)]);
-}
 function saveRouteGeometry(key,record,outPoints,backPoints){
  const out=encodeRouteGeometry(compactRouteGeometry(outPoints));
  const back=encodeRouteGeometry(compactRouteGeometry(backPoints));
@@ -1037,16 +974,9 @@ function tripCalc(e){
  const minutes=Number.isFinite(r.minutesOne)&&Number.isFinite(r.minutesBack)?r.minutesOne+r.minutesBack:null;
  // Apenas apresentar portagens totais quando os dois sentidos foram confirmados.
  const toll=tollFresh(r)?Math.round((r.tollOut+r.tollBack)*100)/100:null;
- const fee=e.price==null?null:Number(e.price);
- return {km,minutes,fuel,toll,fee,total:toll==null?null:fuel+toll};
+ return {km,minutes,fuel,toll,total:toll==null?null:fuel+toll};
 }
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
-// Duração com unidades por extenso para o resumo da viagem.
-function tripDurationWords(minutes){
- if(!Number.isFinite(minutes))return '—';
- const m=Math.max(0,Math.round(minutes)),hours=Math.floor(m/60),mins=m%60;
- return hours?hours+' '+(hours===1?'hora':'horas')+(mins?' e '+mins+' '+(mins===1?'minuto':'minutos'):''):mins+' '+(mins===1?'minuto':'minutos');
-}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key);
@@ -1091,8 +1021,6 @@ document.addEventListener('click',function(event){
  const id=button.dataset.eventId;
  switch(button.dataset.eventAction){
   case 'toggleCompare':toggleCompare(id);break;
-  case 'focusEvent':focusEvent(id);break;
-  case 'downloadIcs':downloadIcs(id);break;
   case 'removeEvent':removeEvent(id);break;
   case 'mapSelect':mapSelect(id);break;
   case 'calculateOneRoute':calculateOneRoute(id);break;
@@ -1226,7 +1154,6 @@ function resetFuelPrice(){
  if(!(Number.isFinite(fuel)&&fuel>0)){toast('Preço médio indisponível.');return;}
  cancelCarEditor('fuel');saveCarPreference({fuelOverride:null,fuel});
 }
-function fuelKindLabel(kind){return kind==='gasolina'?'gasolina 95':'gasóleo';}
 function prettyFuelDate(date){const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(m[3]+'/'+m[2]+'/'+m[1]):String(date||'—');}
 function updateTravelHeader(){
  const hasOrigin=!!String(travelPrefs.origin||'').trim(),showForm=!hasOrigin||originEditing;
@@ -1521,7 +1448,6 @@ function departureCandidates(e){
  return candidates.filter(x=>!x.coords).slice(0,4).concat(candidates.filter(x=>x.coords).slice(0,1)); // Poucas tentativas, preservando GPS se houver.
 }
 function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade|Ver\s+no\s+Google\s+Maps/i.test(String(e.start||''))?'geo-refinado-v30':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
-function endpointName(e){return departureCandidates(e)[0]?.query||null;}
 async function locateEndpoint(e){
  const candidates=departureCandidates(e),failed=[];
  for(const item of candidates){
@@ -1727,12 +1653,6 @@ function runTollQueue(){
  }}finally{tollWorking=false;}})();
 }
 // Assinatura reduzida da geometria para não reutilizar portagens se o OSRM mudar o traçado.
-function routeShapeFingerprint(points){
- if(!Array.isArray(points)||!points.length)return '';
- const n=points.length;
- return n+':'+[0,Math.floor(n/4),Math.floor(n/2),Math.floor(3*n/4),n-1]
-  .map(i=>Array.isArray(points[i])?points[i].map(x=>Number(x).toFixed(4)).join(','):'').join(';');
-}
 async function processTripQueue(){
  if(tripWorking)return;
  tripWorking=true;travelBusy=true;

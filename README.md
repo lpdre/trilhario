@@ -22,3 +22,7 @@ node --check assets/js/trilhario.js
 node testes/test_catalogo_browser.cjs
 node testes/test_localizacoes_browser.cjs
 ```
+
+## Arquitectura v87
+- `assets/js/trilhario-routes.js` separa operações puras de geometria, amostragem e validade de rotas; não altera as consultas aos serviços externos.
+- Código obsoleto (exportação ICS sem botão, helpers e ícones sem utilização) retirado. Mantêm-se as caminhadas pessoais antigas, a exportação KML e a dificuldade.
