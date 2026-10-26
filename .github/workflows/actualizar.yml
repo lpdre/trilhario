@@ -23,6 +23,9 @@ concurrency:
 
 jobs:
   recolha:
+    # Um push num ramo de auditoria só deve validar código, não consultar
+    # organizadores nem alterar o catálogo desse ramo.
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
