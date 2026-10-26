@@ -1,5 +1,6 @@
 
 'use strict';
+const {timeValid,encodeRouteGeometry,decodeRouteGeometry,compactRouteGeometry,routeShapeFingerprint}=window.TrilharioRoutes;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const fmtN=n=>n===null||n===undefined||n===''?'—':Number(n).toLocaleString('pt-PT',{maximumFractionDigits:1});
@@ -108,7 +109,7 @@ let travelBusy=false,geoLastRequest=0,roadLastRequest=0;
 // v23: partida GPS validada, geocodificação progressiva e lotes de 10.
 const TRAVEL_BATCH_SIZE=10;
 let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
-let tripFilterSignature='',tripBatchObserver=null,tripScheduling=false,tripWorking=false;
+let tripFilterSignature='',tripBatchObserver=null,tripWorking=false;
 let tollJobs=[],tollWorking=false;
 const ROUNDTRIP_VERSION=37; // v37: ida e volta com percursos independentes; cache antiga não é fiável.
 const GEOCODER_VERSION=36,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
@@ -146,7 +147,9 @@ function renderOrganizersPage(){
  $('orgPageStats').textContent=entries.length+' organizadores acompanhados · '+[...count.keys()].length+' com caminhadas na agenda';
  const card=e=>{
   const n=count.get(fold(e.name))||0;
-  const description=n?n+' caminhada'+(n===1?'':'s')+' na agenda':'Organizador acompanhado';
+  const configured=remoteSourcesHealth&&Object.prototype.hasOwnProperty.call(remoteSourcesHealth,e.name);
+  const collectionLabel=remoteSourcesHealth?(configured?'Recolha automática configurada':'Apenas no directório'):'Recolha por confirmar';
+  const description=(n?n+' caminhada'+(n===1?'':'s')+' na agenda':'Organizador acompanhado')+' · '+collectionLabel;
   const valid=safeExternalUrl(e.url);
   return '<article class="org-card"><div class="org-card-copy"><h3>'+(valid?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+esc(e.name)+'</a>':esc(e.name))+'</h3><small>'+description+'</small></div>'+(valid?'<a class="org-card-open" href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer" title="Abrir site de '+esc(e.name)+'" aria-label="Abrir site de '+esc(e.name)+'">↗</a>':'')+'</article>';
  };
@@ -414,7 +417,6 @@ function parsePublishedGps(raw){
  const p={lat,lon};return hasCoords(p)?{...p,verified:true,gpsFromAnnouncement:true}:null;
 }
 const dur=x=>Number.isFinite(Number(x.duration))&&x.duration!=null&&x.duration!==''?fmtN(x.duration):'—';
-const cap=x=>x.capacity!=null&&x.capacity!==''?Number(x.capacity).toLocaleString('pt-PT'):'—';
 function populateOrganizers(){
  const select=$('organizer');
  const orgs=[...new Set(allEvents().map(e=>String(e.organizer||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt'));
@@ -447,12 +449,7 @@ function googleMapsDeparture(x,spot){
     x.town&&fold(text).includes(fold(localPartidaLegivel(x.town)))?'':localPartidaLegivel(x.town),'Portugal'].filter(Boolean).join(', ');
  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
 }
-const TRILHARIO_ACTION_ICONS={
- map:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
- calendar:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg>',
- heart:'<svg viewBox="0 0 24 24" aria-hidden="true" class="icon-heart" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.3 5.3 0 0 0-7.5 0L12 6.9l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 22l8.8-8.9a5.3 5.3 0 0 0 0-7.5Z"/></svg>',
- trash:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>'
-};
+const TRILHARIO_DELETE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 15H6L5 6m3 0V4h8v2m-6 4v7m4-7v7"/></svg>';
 // Guia discreto: visível na primeira visita; o utilizador pode voltar a abri-lo.
 const INTRO_HELP_KEY='trilhario_intro_v33_closed';
 let introHelpVisible=!storage(INTRO_HELP_KEY,false);
@@ -539,7 +536,10 @@ function eventRow(x){
  return `<article class="walk-row v51-card v56-card" data-eid="${esc(x.id)}">
   <div class="walk-date"><strong>${dt.getDate()}</strong><span>${month}</span><small>${weekday}</small></div>
   <div class="walk-main">
-   <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
+   <div class="walk-title-row">
+    <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
+    <button type="button" class="walk-compare-toggle${compared.has(x.id)?' selected':''}" data-event-action="toggleCompare" data-event-id="${esc(x.id)}" data-event-title="${esc(x.title)}" aria-pressed="${compared.has(x.id)}" aria-label="${compared.has(x.id)?'Retirar da comparação: ':'Adicionar à comparação: '}${esc(x.title)}">${compared.has(x.id)?'✓ Seleccionado':'Comparar'}</button>
+   </div>
    <div class="walk-card-details">
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}</a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
@@ -557,13 +557,13 @@ function eventRow(x){
   ${travelRow(x)}
   ${x.userAdded?`<div class="walk-actions" role="group" aria-label="Acções de ${esc(x.title)}">
    <div class="walk-action-quick">
-    <button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_ACTION_ICONS.trash}</button>
+    <button type="button" class="walk-icon-btn walk-delete" data-event-action="removeEvent" data-event-id="${esc(x.id)}" aria-label="Eliminar caminhada personalizada: ${esc(x.title)}" title="Eliminar caminhada">${TRILHARIO_DELETE_ICON}</button>
    </div>
   </div>`:''}
  </article>`;
 }
 function chips(){let xs=[];
- if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" onclick="clearSelectedDay()" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
+ if(state.day!=='all'){const d=new Date(state.day+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});xs.push('<button type="button" class="pill pill-clear-day" data-ui-action="clearDay" title="Remover filtro do dia" aria-label="Remover filtro do dia '+d+'">Dia: '+d+' <span aria-hidden="true">×</span></button>');}
  if(state.organizer!=='all')xs.push('Organizador: '+state.organizer);
  if(state.kmMin>0||state.kmMax<KM_CAP)xs.push('Distância: '+state.kmMin+'–'+state.kmMax+' km');
  if(state.gainMin>0||state.gainMax<GAIN_CAP)xs.push('D+: '+state.gainMin+'–'+state.gainMax+' m');
@@ -648,7 +648,7 @@ function paintMap(){
   }else showGeoPopup(selectedEvent);
  }
 }
-function showGeoPopup(e){const pos=toScreen(e.lat,e.lon),w=$('map').clientWidth,h=$('map').clientHeight;if(pos.x<100||pos.x>w-100||pos.y<145||pos.y>h-20)return;const popup=document.createElement('div');popup.className='geo-popup';popup.id='geoPopup';popup.dataset.eventId=String(e.id);popup.style.left=pos.x+'px';popup.style.top=(pos.y-24)+'px';popup.innerHTML=`<button type="button" aria-label="Fechar" class="close" onclick="geo.picked=null;paintMap()">×</button><small>${esc(dateShort(e))} · Organizador: ${esc(e.organizer)}</small><h3>${esc(e.title)}</h3><p>Local de partida: ${esc(displayDeparture(e))} · ${e.verified?'local confirmado':'localidade aproximada (a confirmar)'}</p><div class="popup-stats">${fmtN(e.km)} km · ${e.gain!=null?'+'+fmtN(e.gain)+' m D+':'D+ —'} · ${e.duration!=null?dur(e)+' h':'Tempo —'} · ${fmtP(e.price)}</div><div class="popup-actions">${e.url?`<a target="_blank" rel="noopener noreferrer" href="${esc(e.url)}">Inscrição ↗</a>`:''}</div>`;$('map').appendChild(popup)}
+function showGeoPopup(e){const pos=toScreen(e.lat,e.lon),w=$('map').clientWidth,h=$('map').clientHeight;if(pos.x<100||pos.x>w-100||pos.y<145||pos.y>h-20)return;const popup=document.createElement('div');popup.className='geo-popup';popup.id='geoPopup';popup.dataset.eventId=String(e.id);popup.style.left=pos.x+'px';popup.style.top=(pos.y-24)+'px';popup.innerHTML=`<button type="button" aria-label="Fechar" class="close" data-ui-action="closeMapPopup">×</button><small>${esc(dateShort(e))} · Organizador: ${esc(e.organizer)}</small><h3>${esc(e.title)}</h3><p>Local de partida: ${esc(displayDeparture(e))} · ${e.verified?'local confirmado':'localidade aproximada (a confirmar)'}</p><div class="popup-stats">${fmtN(e.km)} km · ${e.gain!=null?'+'+fmtN(e.gain)+' m D+':'D+ —'} · ${e.duration!=null?dur(e)+' h':'Tempo —'} · ${fmtP(e.price)}</div><div class="popup-actions">${e.url?`<a target="_blank" rel="noopener noreferrer" href="${esc(e.url)}">Inscrição ↗</a>`:''}</div>`;$('map').appendChild(popup)}
 function mapFitTo(events){const ps=events.filter(hasCoords),root=$('map');if(!ps.length||!root.clientWidth)return;const midX=(Math.min(...ps.map(e=>worldX(e.lon,7)))+Math.max(...ps.map(e=>worldX(e.lon,7))))/2,midY=(Math.min(...ps.map(e=>worldY(e.lat,7)))+Math.max(...ps.map(e=>worldY(e.lat,7))))/2;let z=12;for(;z>5;z--){const xx=ps.map(e=>worldX(e.lon,z)),yy=ps.map(e=>worldY(e.lat,z));if(Math.max(...xx)-Math.min(...xx)<root.clientWidth-95 && Math.max(...yy)-Math.min(...yy)<root.clientHeight-100)break;}geo.zoom=z;const pt=toLatLon(midX*2**(z-7),midY*2**(z-7),z);geo.center=pt;paintMap()}
 function zoomTo(z,pivot){z=Math.max(5,Math.min(15,z));if(geo.zoom===z)return;const root=$('map'),p=pivot||{x:root.clientWidth/2,y:root.clientHeight/2},oldPos=coordsAt(p.x,p.y),oldZ=geo.zoom;geo.zoom=z;const nowPx=worldX(oldPos.lon,z),nowPy=worldY(oldPos.lat,z),cx=nowPx-(p.x-root.clientWidth/2),cy=nowPy-(p.y-root.clientHeight/2);geo.center=toLatLon(cx,cy,z);paintMap()}
 function initGeo(){if(geo.initialized)return;geo.initialized=true;const canvas=$('map');let dragging=null;
@@ -664,7 +664,6 @@ function renderMap(events){initGeo();const ps=events.filter(hasCoords),verified=
  $('mapSide').innerHTML=events.length?events.map(x=>`<button class="map-side-item ${geo.picked===x.id?'selected':''}" data-id="${esc(x.id)}" data-event-action="mapSelect" data-event-id="${esc(x.id)}" ${!hasCoords(x)?'disabled':''}><strong>${esc(x.title)}</strong><small>Organizador: ${esc(x.organizer)} · Local de partida: ${esc(displayDeparture(x))}${x.verified?'':' (a confirmar)'}</small><span>${esc(dateShort(x))} · ${x.km!=null?fmtN(x.km)+' km':'km —'} · <span class="mapgain">${x.gain!=null?'+'+fmtN(x.gain)+' m D+':'D+ —'}</span> · ${fmtP(x.price)}</span><small>${x.duration!=null?(x.estimatedDuration?'≈ ':'')+dur(x)+' h':'Duração —'} · ${x.verified?'● início confirmado':'○ ponto aproximado'}</small></button>`).join(''):'<p class="map-side-item">Sem resultados. Altera os filtros.</p>';
  requestAnimationFrame(()=>{if(!geo.selectionShown){geo.selectionShown=true;mapFitTo(events);}else paintMap()})}
 function mapSelect(id){const e=selected().find(x=>x.id===id);if(!e)return;if(!hasCoords(e)){toast('Este evento não tem coordenadas.');return}geo.picked=id;geo.zoom=Math.max(geo.zoom,10);geo.center={lat:Number(e.lat),lon:Number(e.lon)};$('mapSide').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.id===id));paintMap()}
-function focusEvent(id){const e=selected().find(x=>x.id===id);if(!e)return;state.view='map';render();requestAnimationFrame(()=>{mapSelect(id);$('mapView').scrollIntoView({behavior:'smooth',block:'start'})})}
 function updateDualUI(prefix,low,high,cap,unit){
  const from=100*low/cap,to=100*high/cap;
  const track=$(prefix+'Track');track.style.setProperty('--from',from+'%');track.style.setProperty('--to',to+'%');
@@ -698,7 +697,7 @@ function renderProgressiveList(events){
  if(stableSignature!==listSignature){listSignature=stableSignature;listLimit=LIST_INITIAL;}
  listWalks=events;
  stopListObserver();
- if(!events.length){$('listView').innerHTML='<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button onclick="resetFilters()">Limpar filtros</button></div>';return;}
+ if(!events.length){$('listView').innerHTML='<div class="empty"><h3>Sem caminhadas para estes filtros</h3><p>Altera os filtros de distância, desnível ou organizador.</p><button data-ui-action="resetFilters">Limpar filtros</button></div>';return;}
  listLimit=Math.min(listLimit,events.length);
  $('listView').innerHTML=events.slice(0,listLimit).map(eventRow).join('')+
   (listLimit<events.length?listMoreHtml(events.length):'');
@@ -706,7 +705,7 @@ function renderProgressiveList(events){
 }
 function listMoreHtml(total){return `<div id="listMoreSentinel" class="list-more" role="status">
  <small>A mostrar ${listLimit} de ${total} caminhadas</small>
- <button type="button" id="listMoreButton" onclick="loadMoreWalks()">Mostrar mais caminhadas</button></div>`;}
+ <button type="button" id="listMoreButton" data-ui-action="loadMore">Mostrar mais caminhadas</button></div>`;}
 function observeListMore(){
  const node=$('listMoreSentinel');
  if(!node||typeof IntersectionObserver!=='function')return;
@@ -750,8 +749,8 @@ function renderCalendar(events){
        total=new Date(y,m+1,0).getDate(),len=Math.ceil((start+total)/7)*7;
  const monthName=first.toLocaleDateString('pt-PT',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
  let html=`<div class="month"><div class="monthbar"><h3 id="calendarMonthTitle">${monthName}</h3>`+
-   `<div class="arrows"><button type="button" data-month-nav="prev" onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button>`+
-   `<button type="button" data-month-nav="next" onclick="shiftMonth(1)" aria-label="Mês seguinte">›</button></div></div>`+
+   `<div class="arrows"><button type="button" data-month-nav="prev" data-ui-action="previousMonth" aria-label="Mês anterior">‹</button>`+
+   `<button type="button" data-month-nav="next" data-ui-action="nextMonth" aria-label="Mês seguinte">›</button></div></div>`+
    `<div class="calendar-grid" role="group" aria-labelledby="calendarMonthTitle" aria-describedby="calendarHelp">`;
  ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d=>html+=`<div class="day-head">${d}</div>`);
  for(let i=0;i<len;i++){
@@ -762,13 +761,13 @@ function renderCalendar(events){
   const count=entries.length,description=`${calendarDateLabel(iso)}; ${count} caminhada${count===1?'':'s'}`;
   html+=`<div class="day-cell ${inMonth?'':'outside'} ${picked?'picked':''}">`;
   if(inMonth){
-   html+=`<button type="button" class="day-number" data-cal-date="${iso}" onclick="setDay('${iso}')" `+
+   html+=`<button type="button" class="day-number" data-cal-date="${iso}" data-ui-action="selectDay" data-day-value="${iso}" `+
      `aria-pressed="${picked}" title="${picked?'Retirar selecção':'Seleccionar dia'}: ${description}" `+
      `aria-label="${picked?'Dia seleccionado, ':'Seleccionar '}${description}">${day}</button>`;
    html+=entries.slice(0,2).map(x=>`<button type="button" title="${esc(x.title)}" `+
-     `class="mini-event" onclick="setDay('${iso}')" `+
+     `class="mini-event" data-ui-action="selectDay" data-day-value="${iso}" `+
      `aria-label="Ver caminhadas de ${esc(calendarDateLabel(iso))}: ${esc(x.title)}">${esc(x.title)}</button>`).join('');
-   if(count>2)html+=`<button type="button" class="mini-more" onclick="setDay('${iso}')" `+
+   if(count>2)html+=`<button type="button" class="mini-more" data-ui-action="selectDay" data-day-value="${iso}" `+
      `aria-label="Ver mais ${count-2} caminhadas de ${esc(calendarDateLabel(iso))}">+${count-2} mais</button>`;
   }
   html+='</div>';
@@ -824,37 +823,6 @@ function setDay(d){
 function resetFilters(){Object.assign(state,{day:'all',weekend:'all',organizer:'all',kmMin:0,kmMax:KM_CAP,gainMin:0,gainMax:GAIN_CAP});$('organizer').value='all';render()}
 function toast(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').hidden=true,3000)}
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
-function calendarIcs(e){
- const safe=s=>String(s??'').replaceAll('\\','\\\\').replaceAll('\r','').replaceAll('\n','\\n').replaceAll(',','\\,').replaceAll(';','\\;');
- const iso=String(e.date||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(iso))return null;
- const day=iso.replaceAll('-','');
- const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
- const hhmm=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.time||''));
- const uid=String(e.id||'event').replace(/[^a-zA-Z0-9_-]/g,'_');
- const notes=[e.organizer,e.url||'',hhmm?'':'Hora de início por confirmar: evento criado como dia inteiro, sem horário inventado.'].filter(Boolean).join(' | ');
- const lines=['BEGIN:VCALENDAR','VERSION:2.0','CALSCALE:GREGORIAN','PRODID:-//Trilhario//Agenda//PT','BEGIN:VEVENT',`UID:${uid}@trilhario.local`,`DTSTAMP:${stamp}`,`SUMMARY:${safe(e.title)}`,`LOCATION:${safe(displayDeparture(e))}`,`DESCRIPTION:${safe(notes)}`];
- if(!hhmm){
-  const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);
-  lines.push(`DTSTART;VALUE=DATE:${day}`,`DTEND;VALUE=DATE:${d.toISOString().slice(0,10).replaceAll('-','')}`,'TRANSP:TRANSPARENT');
- }else{
-  // Inclui VTIMEZONE para preservar a hora anunciada em Portugal noutros fusos horários.
-  lines.splice(4,0,'BEGIN:VTIMEZONE','TZID:Europe/Lisbon','BEGIN:DAYLIGHT','TZOFFSETFROM:+0000','TZOFFSETTO:+0100','TZNAME:WEST','DTSTART:20260329T010000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','BEGIN:STANDARD','TZOFFSETFROM:+0100','TZOFFSETTO:+0000','TZNAME:WET','DTSTART:20261025T020000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE');
-  lines.push(`DTSTART;TZID=Europe/Lisbon:${day}T${hhmm[1]}${hhmm[2]}00`);
-  let endDay=iso,endMinutes=null;
-  const advertised=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.endTime||''));
-  const startMinutes=Number(hhmm[1])*60+Number(hhmm[2]);
-  if(advertised){endMinutes=Number(advertised[1])*60+Number(advertised[2]);if(endMinutes<=startMinutes){const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);endDay=d.toISOString().slice(0,10);}}
-  else if(Number.isFinite(Number(e.duration))&&Number(e.duration)>0&&Number(e.duration)<=24){
-   endMinutes=startMinutes+Math.round(Number(e.duration)*60);
-   const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+Math.floor(endMinutes/1440));endDay=d.toISOString().slice(0,10);endMinutes%=1440;
-  }
-  if(endMinutes!=null)lines.push(`DTEND;TZID=Europe/Lisbon:${endDay.replaceAll('-','')}T${String(Math.floor(endMinutes/60)).padStart(2,'0')}${String(endMinutes%60).padStart(2,'0')}00`);
- }
- lines.push('END:VEVENT','END:VCALENDAR');return lines.join('\r\n')+'\r\n';
-}
-function downloadIcs(id){const e=allEvents().find(x=>x.id===id);if(!e)return;const data=calendarIcs(e);if(!data)return;
- saveBlob(new Blob([data],{type:'text/calendar;charset=utf-8'}),e.id+'.ics');toast(e.time?'Evento exportado. Confirma o horário real.':'Evento exportado sem hora definida; confirma o horário antes de sair.');}
-
 function removeEvent(id){if(!confirm('Eliminar este evento?'))return;const next=custom.filter(e=>e.id!==id);if(!persistValue('trilhario_custom_v1',next))return;custom=next;populateOrganizers();render();toast('Evento eliminado')}
 document.querySelectorAll('[data-quick-km]').forEach(b=>b.addEventListener('click',()=>{
  const chosen=Number(b.dataset.quickKm);
@@ -927,7 +895,6 @@ function routeCacheKey(e){return String(travelPrefs.origin||'').trim().toLowerCa
 const ROUTE_MAX_AGE_MS=14*86400000,TOLL_MAX_AGE_MS=7*86400000,PRECALC_MAX_AGE_MS=90*86400000;
 let precomputedRoutes=null;
 const ROUTE_GEOMETRY_LIMIT=24,ROUTE_GEOMETRY_MAX_AGE=ROUTE_MAX_AGE_MS;
-const timeValid=(stamp,maxAge,now=Date.now())=>Number.isFinite(Number(stamp))&&Number(stamp)>0&&Number(stamp)<=now+300000&&now-Number(stamp)<=maxAge;
 function routeFresh(e,r,now=Date.now()){
  return Boolean(r&&!r.manual&&r.roundTripVersion===ROUNDTRIP_VERSION&&r.geocoderVersion===GEOCODER_VERSION&&
  r.destinationFingerprint===endpointFingerprint(e)&&Number.isFinite(r.kmOne)&&Number.isFinite(r.kmBack)&&
@@ -943,31 +910,6 @@ function tollsDue(r,now=Date.now()){
 }
 // Polyline5, compatível com as coordenadas [longitude, latitude] do OSRM.
 // A geometria tem um limite de entradas e nunca é usada como fonte de GPS do evento.
-function encodeRouteGeometry(points){
- if(!Array.isArray(points)||points.length<2)return '';
- let lastLat=0,lastLon=0,out='';
- function part(diff){let n=diff<0?~(diff<<1):(diff<<1);while(n>=32){out+=String.fromCharCode((32|(n&31))+63);n>>>=5;}out+=String.fromCharCode(n+63);}
- for(const point of points){if(!Array.isArray(point)||point.length<2||!Number.isFinite(point[0])||!Number.isFinite(point[1]))return '';
-  const lat=Math.round(point[1]*1e5),lon=Math.round(point[0]*1e5);part(lat-lastLat);part(lon-lastLon);lastLat=lat;lastLon=lon;
- }
- return out;
-}
-function decodeRouteGeometry(value){
- if(typeof value!=='string'||!value||value.length>80000)return [];
- let pos=0,lat=0,lon=0;const result=[];
- function part(){let amount=0,shift=0;while(pos<value.length){const code=value.charCodeAt(pos++)-63;
-  if(code<0||code>63||shift>30)throw new Error('Polyline inválida');
-  amount|=(code&31)<<shift;if(!(code&32))return (amount&1)?~(amount>>1):(amount>>1);shift+=5;
- }throw new Error('Polyline incompleta');}
- try{while(pos<value.length&&result.length<2001){lat+=part();lon+=part();result.push([lon/1e5,lat/1e5]);}}
- catch{return []}
- return result.length>=2&&result.length<=1800?result:[];
-}
-function compactRouteGeometry(points){
- if(!Array.isArray(points)||points.length<2)return [];
- if(points.length<=1800)return points;
- return Array.from({length:1800},(_,i)=>points[Math.round(i*(points.length-1)/1799)]);
-}
 function saveRouteGeometry(key,record,outPoints,backPoints){
  const out=encodeRouteGeometry(compactRouteGeometry(outPoints));
  const back=encodeRouteGeometry(compactRouteGeometry(backPoints));
@@ -1037,16 +979,9 @@ function tripCalc(e){
  const minutes=Number.isFinite(r.minutesOne)&&Number.isFinite(r.minutesBack)?r.minutesOne+r.minutesBack:null;
  // Apenas apresentar portagens totais quando os dois sentidos foram confirmados.
  const toll=tollFresh(r)?Math.round((r.tollOut+r.tollBack)*100)/100:null;
- const fee=e.price==null?null:Number(e.price);
- return {km,minutes,fuel,toll,fee,total:toll==null?null:fuel+toll};
+ return {km,minutes,fuel,toll,total:toll==null?null:fuel+toll};
 }
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
-// Duração com unidades por extenso para o resumo da viagem.
-function tripDurationWords(minutes){
- if(!Number.isFinite(minutes))return '—';
- const m=Math.max(0,Math.round(minutes)),hours=Math.floor(m/60),mins=m%60;
- return hours?hours+' '+(hours===1?'hora':'horas')+(mins?' e '+mins+' '+(mins===1?'minuto':'minutos'):''):mins+' '+(mins===1?'minuto':'minutos');
-}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key);
@@ -1085,14 +1020,28 @@ function travelRow(e){
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
 // dataset devolve o ID literal, mesmo contendo aspas ou outros caracteres.
+// Delegação para comandos de interface, incluindo elementos criados dinamicamente.
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-ui-action]');
+ if(!button)return;
+ switch(button.dataset.uiAction){
+  case 'clearDay':clearSelectedDay();break;
+  case 'closeMapPopup':geo.picked=null;paintMap();break;
+  case 'resetFilters':resetFilters();break;
+  case 'loadMore':loadMoreWalks();break;
+  case 'previousMonth':shiftMonth(-1);break;
+  case 'nextMonth':shiftMonth(1);break;
+  case 'selectDay':if(/^\d{4}-\d{2}-\d{2}$/.test(button.dataset.dayValue||''))setDay(button.dataset.dayValue);break;
+  case 'calculateComparedRoutes':calculateVisibleRoutes(true);break;
+  case 'refreshComparison':renderComparison();break;
+ }
+});
 document.addEventListener('click',function(event){
  const button=event.target.closest('button[data-event-action][data-event-id]');
  if(!button)return;
  const id=button.dataset.eventId;
  switch(button.dataset.eventAction){
   case 'toggleCompare':toggleCompare(id);break;
-  case 'focusEvent':focusEvent(id);break;
-  case 'downloadIcs':downloadIcs(id);break;
   case 'removeEvent':removeEvent(id);break;
   case 'mapSelect':mapSelect(id);break;
   case 'calculateOneRoute':calculateOneRoute(id);break;
@@ -1100,11 +1049,42 @@ document.addEventListener('click',function(event){
   case 'openOriginSettings':openTravelPanel();break;
  }
 });
-function toggleCompare(id){if(compared.has(id))compared.delete(id);else compared.add(id);const saved=persistTravel(true);render();if(!saved)toast('Comparação actualizada apenas nesta sessão; não foi possível guardar.');}
-function clearCompare(){compared.clear();const saved=persistTravel(true);render();if(!saved)toast('Comparação limpa apenas nesta sessão; não foi possível guardar.');}
-function renderCompareTray(){const bar=$('compareTray');if(!bar)return;bar.hidden=true;return; // v63: comparação temporariamente fora da interface
- $('compareQty').textContent=compared.size+' seleccionada'+(compared.size===1?'':'s');const items=allEvents().filter(e=>compared.has(e.id));$('compareNames').textContent=items.length>3?items.slice(0,3).map(e=>e.title).join(' · ')+' · …':items.map(e=>e.title).join(' · ')||'Selecciona caminhadas';
- $('compareOpen').classList.toggle('is-disabled',compared.size<2);$('compareOpen').setAttribute('aria-disabled',String(compared.size<2));}
+function availableCompared(){return allEvents().filter(e=>compared.has(e.id));}
+function syncCompareButtons(){
+ document.querySelectorAll('button[data-event-action="toggleCompare"]').forEach(button=>{
+  const active=compared.has(button.dataset.eventId);
+  button.classList.toggle('selected',active);
+  button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',(active?'Retirar da comparação: ':'Adicionar à comparação: ')+(button.dataset.eventTitle||'caminhada'));
+  button.textContent=active?'✓ Seleccionado':'Comparar';
+ });
+}
+function toggleCompare(id){
+ if(compared.has(id))compared.delete(id);else compared.add(id);
+ const saved=persistTravel(true);
+ syncCompareButtons();renderCompareTray();
+ if(COMPARE_PAGE_MODE)renderComparison();
+ if(!saved)toast('Comparação alterada apenas nesta sessão; não foi possível guardar.');
+}
+function clearCompare(){
+ compared.clear();const saved=persistTravel(true);
+ syncCompareButtons();renderCompareTray();if(COMPARE_PAGE_MODE)renderComparison();
+ if(!saved)toast('Comparação limpa apenas nesta sessão; não foi possível guardar.');
+}
+function renderCompareTray(){
+ const bar=$('compareTray');if(!bar)return;
+ const items=availableCompared();
+ bar.hidden=COMPARE_PAGE_MODE||ORGANIZERS_PAGE_MODE||!items.length;
+ document.body.classList.toggle('has-active-comparison',!bar.hidden);
+ if(bar.hidden)return;
+ $('compareQty').textContent=items.length+' seleccionada'+(items.length===1?'':'s');
+ $('compareNames').textContent=items.length>2
+  ?items.slice(0,2).map(e=>e.title).join(' · ')+' …'
+  :items.map(e=>e.title).join(' · ');
+ const open=$('compareOpen'),allowed=items.length>=2;
+ open.classList.toggle('is-disabled',!allowed);
+ open.setAttribute('aria-disabled',String(!allowed));
+}
 function travelSortVal(e,sort){const t=tripCalc(e);return sort==='km'?t?.km:sort==='fuel'?t?.fuel:t?.total;}
 function sortedWalks(xs){const s=$('travelSort')?.value||'date';if(s==='date')return xs;return xs.sort((a,b)=>{const av=travelSortVal(a,s),bv=travelSortVal(b,s);return av==null?bv==null?0:1:bv==null?-1:av-bv});}
 // Actualizar apenas os valores da viagem na tabela comparativa, preservando
@@ -1142,7 +1122,7 @@ function renderComparison(){if(!COMPARE_PAGE_MODE)return;const target=$('compari
  case 'organizer':return esc(e.organizer);case 'date':return esc(dateShort(e))+' · '+esc(e.time||'—');case 'walk':return e.km==null?'—':fmtN(e.km)+' km';case 'gain':return e.gain==null?'—':fmtN(e.gain)+' m';case 'difficulty':return esc(names[e.difficulty]||'—');case 'price':return fmtP(e.price);
  case 'location':return esc(displayDeparture(e)||'Por confirmar');case 'driveKm':case 'driveTime':case 'fuel':case 'toll':case 'total':return comparisonTravelCell(e,key);case 'source':return safeExternalUrl(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ver evento ↗</a>`:'—';default:return '—';}};
  const fields=[['date','Data'],['organizer','Organizador'],['walk','Distância a pé'],['gain','Desnível D+'],['difficulty','Dificuldade'],['price','Inscrição'],['location','Partida do trilho'],['driveKm','Carro · ida e volta'],['driveTime','Tempo · ida e volta'],['fuel','Combustível'],['toll','Portagens'],['total','Total viagem (combustível + portagens)'],['source','Anúncio']];
- target.innerHTML=`<div class="comparison-action"><button type="button" onclick="calculateVisibleRoutes(true)" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" onclick="renderComparison()">Actualizar tabela</button></div><p class="comparison-swipe-hint">${items.length} caminhadas seleccionadas · Desliza horizontalmente a tabela para comparar todas.</p><div class="comparison-table-wrap" role="region" aria-label="Comparação de ${items.length} caminhadas; deslocação horizontal" tabindex="0"><table class="comparison-table" style="min-width:${Math.max(625,155+items.length*225)}px"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}" data-comparison-field="${k}"><th scope="row">${label}</th>${items.map(e=>`<td data-comparison-eid="${esc(e.id)}">${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ target.innerHTML=`<div class="comparison-action"><button type="button" data-ui-action="calculateComparedRoutes" ${travelBusy?'disabled':''}>Calcular deslocações seleccionadas</button><button type="button" data-ui-action="refreshComparison">Actualizar tabela</button></div><p class="comparison-swipe-hint">${items.length} caminhadas seleccionadas · Desliza horizontalmente a tabela para comparar todas.</p><div class="comparison-table-wrap" role="region" aria-label="Comparação de ${items.length} caminhadas; deslocação horizontal" tabindex="0"><table class="comparison-table" style="min-width:${Math.max(625,155+items.length*225)}px"><thead><tr><th scope="col">Critério</th>${items.map(head).join('')}</tr></thead><tbody>${fields.map(([k,label])=>`<tr class="${k==='total'?'total-row':''}" data-comparison-field="${k}"><th scope="row">${label}</th>${items.map(e=>`<td data-comparison-eid="${esc(e.id)}">${cell(e,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
  target.querySelectorAll('[data-compare-remove]').forEach(button=>button.addEventListener('click',()=>{compared.delete(button.dataset.compareRemove);const saved=persistTravel(true);renderComparison();if(!saved)toast('Comparação alterada apenas nesta sessão; não foi possível guardar.');}));
 }
 let originEditing=false;
@@ -1226,7 +1206,6 @@ function resetFuelPrice(){
  if(!(Number.isFinite(fuel)&&fuel>0)){toast('Preço médio indisponível.');return;}
  cancelCarEditor('fuel');saveCarPreference({fuelOverride:null,fuel});
 }
-function fuelKindLabel(kind){return kind==='gasolina'?'gasolina 95':'gasóleo';}
 function prettyFuelDate(date){const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(m[3]+'/'+m[2]+'/'+m[1]):String(date||'—');}
 function updateTravelHeader(){
  const hasOrigin=!!String(travelPrefs.origin||'').trim(),showForm=!hasOrigin||originEditing;
@@ -1521,7 +1500,6 @@ function departureCandidates(e){
  return candidates.filter(x=>!x.coords).slice(0,4).concat(candidates.filter(x=>x.coords).slice(0,1)); // Poucas tentativas, preservando GPS se houver.
 }
 function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade|Ver\s+no\s+Google\s+Maps/i.test(String(e.start||''))?'geo-refinado-v30':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
-function endpointName(e){return departureCandidates(e)[0]?.query||null;}
 async function locateEndpoint(e){
  const candidates=departureCandidates(e),failed=[];
  for(const item of candidates){
@@ -1727,12 +1705,6 @@ function runTollQueue(){
  }}finally{tollWorking=false;}})();
 }
 // Assinatura reduzida da geometria para não reutilizar portagens se o OSRM mudar o traçado.
-function routeShapeFingerprint(points){
- if(!Array.isArray(points)||!points.length)return '';
- const n=points.length;
- return n+':'+[0,Math.floor(n/4),Math.floor(n/2),Math.floor(3*n/4),n-1]
-  .map(i=>Array.isArray(points[i])?points[i].map(x=>Number(x).toFixed(4)).join(','):'').join(';');
-}
 async function processTripQueue(){
  if(tripWorking)return;
  tripWorking=true;travelBusy=true;
@@ -1808,7 +1780,7 @@ $('originForm').addEventListener('submit',applyOrigin);
 $('originEdit').addEventListener('click',editTripOrigin);
 $('originCancel').addEventListener('click',cancelTripOrigin);
 $('travelSort').addEventListener('change',()=>{updateSortLabel();render();});
-$('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(compared.size<2)e.preventDefault();});
+$('compareClear').addEventListener('click',clearCompare);$('compareOpen').addEventListener('click',e=>{if(availableCompared().length<2)e.preventDefault();});
 window.addEventListener('storage',e=>{if(e.key===TRAVEL_ROUTES_KEY){travelRoutes=storage(TRAVEL_ROUTES_KEY,{});render()}if(e.key===TRAVEL_COMPARE_KEY){compared=new Set(storage(TRAVEL_COMPARE_KEY,[]));render()}if(e.key===TRAVEL_PREF_KEY){travelPrefs=storage(TRAVEL_PREF_KEY,travelPrefs);updateTravelHeader();render()}if(e.key==='trilhario_custom_v1'){custom=storage('trilhario_custom_v1',[]);populateOrganizers();render()}});
 
 initIntroHelp();
