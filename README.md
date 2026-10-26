@@ -34,3 +34,9 @@ node testes/test_localizacoes_browser.cjs
 - Retirada por completo a funcionalidade de comparação, incluindo página, botões, estilos, armazenamento, chamadas e testes dedicados.
 - Preservados os filtros, a indicação de dificuldade, as estimativas de viagem, o mapa e o calendário.
 - O histórico local de eventos pessoais e as preferências de deslocação não são alterados.
+
+## Auditoria Python v89
+- Removido o extractor do agregador desactivado e as referências ao respectivo despacho/monitorização.
+- Retirada a função de exclusão de organizadores que devolvia sempre `False`.
+- Programas PDF sem eventos individuais confirmados não provocam pedidos HTTP desnecessários.
+- Mantida a protecção que rejeita registos antigos do agregador e a validação de fontes oficiais.

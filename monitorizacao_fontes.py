@@ -161,8 +161,6 @@ def run() -> int:
                             continue
                         if recolher.is_disallowed_aggregator_event(item):
                             continue
-                        if recolher.excluded_organizer(item.get('organizer')):
-                            continue
                         if (item.get('organizer') == recolher.MONTANHAS_ORG
                                 and item.get('date_verified') != 'official_detail'):
                             continue
@@ -182,7 +180,7 @@ def run() -> int:
 
     recolher.SESSION.get = observed_get
     recolher.fetch = observed_fetch
-    handlers = ('collect_source', 'collect_aggregator', 'collect_ndesafios',
+    handlers = ('collect_source', 'collect_ndesafios',
                 'collect_drenergies', 'collect_sal', 'collect_simple_program')
     for name in handlers:
         fn = getattr(recolher, name, None)

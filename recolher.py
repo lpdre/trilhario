@@ -78,7 +78,6 @@ SOURCES = [
     # Recolha directa das fontes oficiais de RB e Smile.
     {"organizer": "RB Hiking & Trekking", "url": "https://barbosa-trekking.pt/", "mode": "rb"},
     {"organizer": "Caminhadas Smile", "url": "https://www.caminhadassmile.pt/", "mode": "smile"},
-    # Agregador Trilhos & Caminhadas desactivado; utilizar apenas as fontes oficiais.
 ]
 
 MONTHS = {
@@ -477,65 +476,6 @@ def new_event(organizer: str, url: str, title: str, dt: date, **fields) -> dict:
     }
 
 
-def collect_aggregator(source: dict) -> list[dict]:
-    """Lê calendário e páginas individuais do Trilhos & Caminhadas.
-
-    O agregador fornece nome do promotor real, dia e ligação de detalhe.
-    Mantém-se a atribuição correcta; o deduplicador privilegia a fonte oficial.
-    """
-    result = []
-    # O calendário expõe o mês pedido na query string. Percorrer ~3 meses.
-    months = set()
-    for step in range(4):
-        m = TODAY.month + step
-        year = TODAY.year + (m - 1) // 12
-        month = (m - 1) % 12 + 1
-        months.add((year, month))
-    links = set()
-    for year, month in sorted(months):
-        listing = f"{source['url']}?ano={year}&mes={month}"
-        html = fetch(listing)
-        if html is None:
-            continue
-        for a in html.find_all('a', href=True):
-            url = canonical(listing, a['href'])
-            if url and re.fullmatch(r'/percursos/evento_info\.php', urlparse(url).path) and re.search(r'[?&]id=\d+', a['href']):
-                # canonical remove query strings; preserve the official event ID.
-                full = urljoin(listing, a['href']).split('#', 1)[0]
-                links.add(full)
-    for url in sorted(links)[:95]:
-        html = fetch(url)
-        if html is None:
-            continue
-        scope = html.find('main') or html
-        content = clean(scope.get_text(' ', strip=True))
-        title_tag = scope.find('h2') or scope.find('h1')
-        if not title_tag:
-            continue
-        title = clean(title_tag.get_text(' ', strip=True))
-        dtm = re.search(r'Data\s*:\s*(20\d{2}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})', content, re.I)
-        dt = date_from(dtm[1]) if dtm else None
-        orgm = re.search(r'Entidade\s+Promotora\s*:\s*(.{3,90}?)(?=\s+(?:Local\s*:|Data\s*:))', content, re.I)
-        if not dt or not orgm:
-            continue
-        organizer = clean(orgm[1])
-        # Evitar nomes poluídos por texto da página, mas admitir associações locais.
-        if len(organizer) > 75 or len(organizer) < 3:
-            continue
-        loc = re.search(r'Local\s*:\s*(.{2,80}?)(?=\s+Data\s*:)', content, re.I)
-        city = clean(loc[1]) if loc else 'Por confirmar'
-        price = number(r'Valor\s+Inscri[cç][aã]o\s*:\s*(\d{1,3}(?:[.,]\d{1,2})?)', content, 500)
-        km = number(r'Dist[aâ]ncia\s*:\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*km', content, 40)
-        # Preserva URL verificável do evento: não adivinhar ligações a partir do texto.
-        event = new_event(organizer,url,title,dt,town=city,start=city,
-                          time=(dtm[2] if dtm else ''),price=price,km=km,source='Trilhos & Caminhadas')
-        if valid_new_event(event):
-            result.append(event)
-        time.sleep(0.12)
-    logging.info('Agregador: %d eventos de %d promotores',len(result),len({e['organizer'] for e in result}))
-    return result
-
-
 def collect_drenergies(source: dict) -> list[dict]:
     """Agenda por meses: criar evento só quando título e data estão contíguos."""
     html = fetch(source['url'])
@@ -594,13 +534,13 @@ def collect_sal(source: dict) -> list[dict]:
 
 def collect_simple_program(source: dict) -> list[dict]:
     """Agenda informativa: exigir datas individuais para não inventar saídas."""
+    # O programa é um PDF sem datas e ligações individuais utilizáveis.
+    # Evitar pedidos ao site quando sabemos que não podemos importar anúncios.
+    if source['mode']=='programa':
+        logging.info('%s: programa PDF apenas para consulta; sem anúncios confirmados.',source['organizer'])
+        return []
     html=fetch(source['url'])
     if html is None:return []
-    # O calendário Gerês é PDF e as entradas de Lousada podem ter múltiplas
-    # entidades; sem ligação individual + data inequívoca não importar.
-    if source['mode']=='programa':
-        logging.info('%s: calendário PDF; fonte registada para consulta, sem importar datas genéricas.',source['organizer'])
-        return []
     result=[]
     for a in html.find_all('a',href=True):
         parent=a.parent
@@ -627,7 +567,7 @@ def deduplicate(events: list[dict]) -> list[dict]:
     """Mesmo URL não implica o mesmo evento; título e data são obrigatórios."""
     from difflib import SequenceMatcher
     grouped={}
-    for item in sorted(events,key=lambda e:(bool(e.get('source')=='Trilhos & Caminhadas'),-sum(e.get(k) is not None for k in ('km','gain','price','time','duration')))):
+    for item in sorted(events,key=lambda e:-sum(e.get(k) is not None for k in ('km','gain','price','time','duration'))):
         day,org,title=similarity_key(item)
         if not day or not org or not title:continue
         group=grouped.setdefault((day,org),[])
@@ -1009,15 +949,6 @@ def collect_source(source: dict) -> list[dict]:
     return result
 
 
-# Desactivar uma fonte por qualidade de dados; protege também entradas
-# antigas e registos devolvidos por agregadores externos.
-def excluded_organizer(name: str) -> bool:
-    # A exclusão antiga da Smile era por má qualidade dos dados do agregador;
-    # a v40 admite apenas anúncios recolhidos directamente no site oficial.
-    return False
-
-
-
 # TRILHARIO V39 — AGREGADOR TRILHOS CAMINHADAS DESACTIVADO
 # TRILHARIO V40 — RB E SMILE COM FONTES OFICIAIS
 def is_disallowed_aggregator_event(item):
@@ -1033,7 +964,7 @@ def main() -> int:
             saved = json.loads(OUT.read_text(encoding="utf-8"))
             if saved.get("mode") != "demo":
                 for item in saved.get("events", []):
-                    if is_disallowed_aggregator_event(item) or excluded_organizer(item.get('organizer')):
+                    if is_disallowed_aggregator_event(item):
                         logging.info('A excluir registo antigo da fonte desactivada: %s',item.get('url'))
                         continue
                     # Preservar apenas anúncios que já tinham sido confirmados
@@ -1061,7 +992,6 @@ def main() -> int:
                     new_event=new_event,valid_new_event=valid_new_event,
                     parse_meta=parse_meta,enrich_jsonld=enrich_jsonld,today=TODAY)
             elif mode=='ndesafios': found=collect_ndesafios(source)
-            elif mode=='agregador': found=collect_aggregator(source)
             elif mode=='drenergies': found=collect_drenergies(source)
             elif mode=='sal': found=collect_sal(source)
             elif mode in ('programa','lousada'): found=collect_simple_program(source)
@@ -1077,7 +1007,7 @@ def main() -> int:
                 # Um [] pode significar 0 eventos ou erro: nunca declarar êxito.
                 logging.warning('Fonte %s: sem resultados confirmados (ausência ou falha)',name)
             for item in found:
-                if is_disallowed_aggregator_event(item) or excluded_organizer(item.get('organizer')):
+                if is_disallowed_aggregator_event(item):
                     continue
                 if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                     # Não aceitar datas desta empresa reenviadas por agregadores.
