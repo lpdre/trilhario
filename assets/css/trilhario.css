@@ -484,7 +484,7 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 @media(max-width:540px){.org-page-header{margin:0 -14px}}
 @media(max-width:480px){.org-page-header{margin:0 -12px}.org-card{padding:12px 13px}.org-intro h1{font-size:29px}.org-card h3{font-size:13px}}
 
-/* v19: viagens e comparação */
+/* v19: estimativas de viagem */
 .travel-box{border:1px solid #d4decf;background:#f1f4e9;margin:0 0 12px;border-radius:9px;overflow:hidden}
 
 .travel-heading span:not(.travel-symbol){display:block;color:#6b7e6a;font-size:10.5px;line-height:1.4;margin-top:2px}
@@ -494,11 +494,7 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 
 .walk-trip-line{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e2e7db;background:#f6f7f0;padding:6px 11px 6px 70px;min-width:0}
 .walk-trip-info{font-size:10.5px;color:#536b55;line-height:1.4;min-width:0}.walk-trip-info strong{color:#244c37;font-size:10.5px}.walk-trip-ctrl{display:flex;align-items:center;gap:7px;flex-shrink:0}.walk-trip-ctrl button{cursor:pointer;font-size:10.5px;border:1px solid #cddac9;border-radius:5px;background:#fffdf7;color:#365a41;padding:5px 8px}.walk-trip-ctrl button:hover{background:#e9f0e6}
-.compare-tray[hidden]{display:none!important}.compare-tray{position:fixed;bottom:0;left:0;right:0;background:#143d2d;color:white;z-index:85;border-top:3px solid #c99c65;box-shadow:0 -3px 20px #0c22145c}.compare-tray-content{max-width:1180px;margin:auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:15px}.compare-tray-content strong{font-size:12px;display:block}.compare-tray-content span{font-size:10.5px;color:#cadccb;display:block;margin-top:3px}.compare-tray-actions{display:flex;align-items:center;gap:9px}.compare-tray-actions button{border:0;background:transparent;color:#d2e1d5;font-size:11px;cursor:pointer}.compare-open{display:block;color:#163c2b;text-decoration:none;background:#f3d19b;padding:8px 13px;border-radius:4px;font-size:11px;font-weight:800;white-space:nowrap}.compare-open.is-disabled{opacity:.5;pointer-events:none}
-body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparison-mode>main,body.comparison-mode>footer,body.comparison-mode>.org-page,body.comparison-mode>.compare-tray{display:none!important}.comparison-page{display:none;padding-bottom:65px}body.comparison-mode .comparison-page{display:block}.comparison-head{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0a392b;padding:20px 26px;margin:0 -32px}.comparison-brand{color:#fff2db;display:inline-flex;align-items:center;font-weight:750;gap:11px;font-size:25px;text-decoration:none}.comparison-brand::before{content:'';width:26px;height:26px;border:2px solid #dcac72;border-radius:50%;background:linear-gradient(145deg,transparent 50%,#dcac72 51% 55%,transparent 56%)}.comparison-back{color:#f4d6ac;text-decoration:none;font-size:11px}.comparison-intro{margin:29px 0 18px}.comparison-intro h1{font:400 clamp(29px,3.6vw,39px) Georgia,serif;color:#1d442e;margin:5px 0 10px}.comparison-intro p{font-size:12px;color:#677768;line-height:1.6;max-width:720px}.comparison-intro .eyebrow{font-size:10px;color:#90734f;letter-spacing:1.3px}
-.comparison-table-wrap{overflow-x:auto;background:#fffdf8;border:1px solid #cfd9c9;border-radius:8px}.comparison-table{border-collapse:collapse;width:100%;min-width:625px;table-layout:fixed}.comparison-table th,.comparison-table td{border-bottom:1px solid #e4e9e0;text-align:left;padding:13px 14px;vertical-align:top;font-size:12px;color:#2e4d39;overflow-wrap:anywhere}.comparison-table thead th{background:#edf1e7;font-size:13px;color:#214631}.comparison-table tr:last-child td{border-bottom:0}.comparison-table tbody th{background:#f5f7f0;width:155px;font-weight:750;font-size:11px}.comparison-table td small{font-size:10px;color:#738274;display:block;margin-top:3px}.comparison-table a{color:#27583e;text-underline-offset:2px}.comparison-table .total-row th,.comparison-table .total-row td{background:#e9efe3;font-weight:800;color:#235039}.comparison-action{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.comparison-action button{padding:9px 12px;background:#fffdf6;border:1px solid #c8d8c5;border-radius:5px;color:#315c3e;cursor:pointer;font-size:11px}.comparison-note{color:#748372;font-size:11px;line-height:1.65;margin:17px 0}
-@media(max-width:790px){.comparison-head{margin:0 -18px;padding:16px 18px}}
-@media(max-width:540px){.comparison-head{margin:0 -14px}.travel-panel{padding:10px}.walk-trip-line{grid-column:2;grid-row:4;padding:8px 10px 9px;flex-wrap:wrap;gap:8px}.walk-trip-ctrl{width:100%;justify-content:flex-end}.walk-trip-info{font-size:10px}.compare-tray-content{padding:9px 11px;flex-direction:row-reverse;justify-content:flex-end}.compare-tray-actions{flex-shrink:0}.compare-tray-content span{max-width:125px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.comparison-head{margin:0 -14px}}
+@media(max-width:540px){.travel-panel{padding:10px}.walk-trip-line{grid-column:2;grid-row:4;padding:8px 10px 9px;flex-wrap:wrap;gap:8px}.walk-trip-ctrl{width:100%;justify-content:flex-end}.walk-trip-info{font-size:10px}}
 
 
 /* v20 — preço médio DGEG e personalização opcional */
@@ -517,7 +513,7 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 @media(max-width:540px){}
 
 
-/* v22 — comparar junto dos detalhes e estado de viagem legível. */
+/* v22 — detalhes e estado de viagem legível. */
 @media(min-width:781px){.walk-row{grid-template-columns:58px minmax(220px,1fr) minmax(230px,300px) 210px}}
 @media(min-width:781px) and (max-width:1060px){.walk-row{grid-template-columns:54px minmax(190px,1fr) minmax(185px,240px) 197px}}
 
@@ -573,25 +569,7 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
  .toolbar-sort{width:35px;flex-basis:35px}
 }
 
-/* v34 — Comparação sem limite fixo; critérios sempre visíveis durante scroll horizontal. */
-.comparison-table-wrap{overscroll-behavior-x:contain;scrollbar-gutter:stable;max-width:100%}
-.comparison-table{table-layout:fixed}
-.comparison-table thead th:first-child,.comparison-table tbody th{
- position:sticky;left:0;z-index:2;width:155px;min-width:155px;max-width:155px;
- box-shadow:2px 0 0 #d9e2d5}
-.comparison-table thead th:first-child{z-index:3;background:#edf1e7}
-.comparison-table tbody th{background:#f5f7f0}
-.comparison-table .total-row th{background:#e9efe3}
-.comparison-swipe-hint{font-size:12px;color:#526d56;margin:8px 0}
-.comparison-table .compare-remove{display:block;margin-top:8px;padding:4px 8px;
- border:1px solid #bed1be;border-radius:4px;background:#f9fbf5;color:#375841;
- font-size:11px;cursor:pointer}
-.comparison-table .compare-remove:hover{background:#e5eee1}
-@media(max-width:540px){.comparison-table thead th:first-child,.comparison-table tbody th{
- width:130px;min-width:130px;max-width:130px;padding:11px 8px}
- .comparison-table th,.comparison-table td{padding:10px 11px}}
-
-/* v28 — miniatura editorial opcional na lista. Nunca carrega fotos no mapa/calendário/comparação. */
+/* v28 — miniatura editorial opcional na lista. Nunca carrega fotos no mapa nem no calendário. */
 .walk-photo{float:right;width:96px;height:72px;max-width:30%;object-fit:cover;
  object-position:center;border-radius:5px;margin:1px 0 7px 12px;
  background:#e6e8df;border:1px solid #e0e5db;display:block}
@@ -1836,36 +1814,3 @@ body.comparison-mode{background:#f5f2e9}body.comparison-mode>.hero,body.comparis
 .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow-next{right:0;left:auto;}
 .results .v51-quick-filters.v64-quick-filters .v75-distance-group button.v83-arrow-prev,
 .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow-prev{left:0;right:auto;}
-
-/* v87 — botão de comparação na linha do título, sem nova faixa no cartão. */
-.walk-row.v51-card.v56-card .walk-title-row{
- grid-area:title;display:flex;align-items:flex-start;justify-content:space-between;
- gap:7px;min-width:0;margin:0 0 7px;
-}
-.walk-row.v51-card.v56-card .walk-title-row h3{
- grid-area:auto;flex:1;min-width:0;margin:0;
-}
-.walk-row.v51-card.v56-card .walk-compare-toggle{
- flex:0 0 auto;border:1px solid #c9dacb;border-radius:5px;
- background:#f5f8f2;color:#315a40;font-size:10px;font-weight:750;
- padding:5px 7px;line-height:1.2;white-space:nowrap;cursor:pointer;
-}
-.walk-row.v51-card.v56-card .walk-compare-toggle.selected{
- background:#dcece0;border-color:#89b29a;color:#1e6342;
-}
-.walk-row.v51-card.v56-card .walk-compare-toggle:hover,
-.walk-row.v51-card.v56-card .walk-compare-toggle:focus-visible{
- border-color:#5d9574;background:#e6f2e8;
-}
-.compare-tray{border-top-width:2px}
-.compare-tray-content{padding:7px 14px;gap:9px}
-.compare-tray-content span{max-width:min(52vw,440px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-body.has-active-comparison{padding-bottom:52px}
-@media(max-width:540px){
- .walk-row.v51-card.v56-card .walk-title-row{gap:5px}
- .walk-row.v51-card.v56-card .walk-compare-toggle{padding:4px 5px;font-size:9px}
- .compare-tray-content{padding:6px 10px;flex-direction:row;justify-content:space-between}
- .compare-tray-content span{display:none}
- .compare-tray-actions{gap:5px}
- .compare-open{padding:7px 9px}
-}
