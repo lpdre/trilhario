@@ -54,3 +54,11 @@ node testes/test_localizacoes_browser.cjs
 - GPS é validado com os mesmos limites usados pelo mapa (continente, Madeira e Açores).
 - Registos manuais sem validade ou com datas inválidas devolvem erros explícitos.
 - A execução diária aplica a mesma bateria offline de testes Python e JavaScript da validação de código.
+
+## Auditoria v92 — Sessões, IDs e interface compacta
+- `identidade_eventos.py` protege contra a fusão de sessões do mesmo dia/título com horários, pontos de partida ou fichas oficiais individuais diferentes.
+- A deduplicação do colector e do normalizador preserva preferencialmente o ID já publicado, mantendo aliases e GPS posteriormente confirmado.
+- Registos incompletos não desaparecem silenciosamente: prosseguem até à validação do catálogo.
+- Uma falha isolada de fonte continua a conservar anúncios futuros anteriormente confirmados, sem actualizar falsamente `last_confirmed_at`.
+- Botões rápidos de distância e fim de semana e barra Filtros/Ordenar/Vistas ficaram menos altos, mantendo as opções e setas.
+- Testes offline adicionais em `test_identidade_eventos.py` e `test_layout_compacto.cjs`.

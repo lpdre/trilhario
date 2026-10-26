@@ -18,6 +18,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
 import time
 from localizacoes import limpar_local, normalizar_local_evento
+from identidade_eventos import sessoes_diferentes
 
 ROOT = Path(__file__).resolve().parent
 CATALOG = ROOT / 'eventos.json'
@@ -529,35 +530,54 @@ def tidy_event_fields(event):
     return event
 
 
-def merge_exact_duplicates(events):
-    """Fundir eventos idênticos por data, organizador e título.
+def merge_exact_duplicates(events, preferred_ids=None):
+    """Fundir anúncios sem indícios de duas sessões distintas.
 
-    Não deduplicar apenas pelo URL; manter IDs alternativos para rastreabilidade.
+    Preserva o ID anteriormente publicado e todos os IDs alternativos.
+    Horários, partidas ou URLs individuais diferentes são suficientes para
+    conservar dois anúncios, mesmo com o mesmo título no mesmo dia.
     """
+    preferred_ids = set(preferred_ids or ())
     by_key={}
+    ungrouped=[]
     for entry in events:
         if not isinstance(entry,dict):continue
         key=(str(entry.get('date') or ''),
              re.sub(r'[^a-z0-9]','',folded(entry.get('organizer'))),
              re.sub(r'[^a-z0-9]','',folded(entry.get('title'))))
-        old=by_key.get(key)
-        if old is None:
-            by_key[key]=entry
+        if not all(key):
+            ungrouped.append(entry)
             continue
-        winner=entry if (not old.get('verified') and entry.get('verified')) else old
+        group=by_key.setdefault(key,[])
+        old=next((previous for previous in group
+                  if not sessoes_diferentes(entry,previous)),None)
+        if old is None:
+            group.append(entry)
+            continue
+        # Um GPS publicado posteriormente não é motivo para trocar o ID.
+        if old.get('id') in preferred_ids and entry.get('id') not in preferred_ids:
+            winner=old
+        elif entry.get('id') in preferred_ids and old.get('id') not in preferred_ids:
+            winner=entry
+        else:
+            winner=entry if (not old.get('verified') and entry.get('verified')) else old
         loser=old if winner is entry else entry
         aliases=set(winner.get('alias_ids') or []) | set(loser.get('alias_ids') or [])
         if loser.get('id') and loser.get('id')!=winner.get('id'):
             aliases.add(loser['id'])
         aliases.discard(winner.get('id'))
         if aliases:winner['alias_ids']=sorted(aliases)
-        # Completar apenas atributos publicados inequívocos. Não copiar GPS
-        # entre pontos de encontro diferentes (protecção da Fase 1).
         for field in ('km','gain','price','duration','time','image'):
             if not meaningful(winner.get(field)) and meaningful(loser.get(field)):
                 winner[field]=loser[field]
-        by_key[key]=winner
-    return list(by_key.values())
+        # A fonte acabou de publicar GPS validado: acrescentá-lo ao ID antigo,
+        # sem converter coordenadas de um evento distinto em fonte confirmada.
+        if not winner.get('verified') and loser.get('verified') is True and valid_gps_pair(loser):
+            for field in ('lat','lon','verified','gpsFromAnnouncement'):
+                if field in loser:winner[field]=loser[field]
+        if winner is entry:
+            group[group.index(old)]=entry
+    return [entry for group in by_key.values() for entry in group]+ungrouped
 
 
 def is_trilhos_caminhadas_record(event):
@@ -604,19 +624,20 @@ def main():
             if item.get('organizer') == 'GreenTrekker' and item.get('price') == 0:
                 item['price'] = None
     initial_count=len(events)
+    previous = git_previous()
+    preferred_ids = {e.get('id') for e in previous if isinstance(e,dict) and e.get('id')}
     # Uma caminhada da RB ou de outro organizador só fica se tiver fonte
     # própria; as ligações antigas ao agregador não são reutilizadas.
     events[:]=merge_exact_duplicates([e for e in events if isinstance(e,dict)
-        and not is_trilhos_caminhadas_record(e)])
+        and not is_trilhos_caminhadas_record(e)], preferred_ids=preferred_ids)
     removed_invalid_or_duplicate=initial_count-len(events)
     # Só aqui entram as excepções antigas que continuam confirmadas. Nunca
     # acrescentar dados por JavaScript depois de publicar o JSON.
     from consolidar_catalogo import integrate, load_registry
     events[:], verified_corrections, exception_report = integrate(events, load_registry())
-    events[:]=merge_exact_duplicates(events)
+    events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
-    previous = git_previous()
     by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
     errors = []
     changed = 0

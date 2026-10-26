@@ -23,6 +23,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from identidade_eventos import sessoes_diferentes
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "eventos.json"
@@ -567,18 +568,34 @@ def similarity_key(item: dict) -> tuple[str,str,str]:
     return (item.get('date',''),org,title)
 
 
-def deduplicate(events: list[dict]) -> list[dict]:
-    """Mesmo URL não implica o mesmo evento; título e data são obrigatórios."""
+def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
+    """Fundir apenas anúncios compatíveis da mesma data e organizador.
+
+    IDs já publicados têm prioridade sobre IDs novos gerados por uma alteração
+    de título ou metadados. Hora, ponto de partida ou duas fichas oficiais
+    individuais contraditórias impedem a fusão.
+    """
     from difflib import SequenceMatcher
-    grouped={}
-    for item in sorted(events,key=lambda e:-sum(e.get(k) is not None for k in ('km','gain','price','time','duration'))):
+    preferred_ids = set(preferred_ids or ())
+    grouped = {}
+    ungrouped = []
+    def rank(item):
+        return (item.get('id') in preferred_ids,
+                bool(item.get('verified')),
+                sum(item.get(k) is not None for k in ('km','gain','price','time','duration')))
+    for item in sorted(events, key=rank, reverse=True):
         day,org,title=similarity_key(item)
-        if not day or not org or not title:continue
+        if not day or not org or not title:
+            # Deixar o validador sinalizar registos incompletos, em vez de
+            # os apagar silenciosamente durante a deduplicação.
+            ungrouped.append(item)
+            continue
         group=grouped.setdefault((day,org),[])
         def duplicates(previous):
+            if sessoes_diferentes(item,previous):
+                return False
             old_title=similarity_key(previous)[2]
             if old_title==title:return True
-            # Títulos diferentes não são duplicados apenas por partilharem página.
             a,b=set(old_title.split()),set(title.split())
             if not a or not b:return False
             overlap=len(a&b)/max(len(a),len(b))
@@ -586,13 +603,18 @@ def deduplicate(events: list[dict]) -> list[dict]:
         prev=next((x for x in group if duplicates(x)),None)
         if prev is None:group.append(item);continue
         aliases=set(prev.get('alias_ids') or [])|set(item.get('alias_ids') or [])
-        if item.get('id')!=prev.get('id'):aliases.add(item.get('id'))
+        if item.get('id') and item.get('id')!=prev.get('id'):aliases.add(item['id'])
         aliases.discard(prev.get('id'))
         if aliases:prev['alias_ids']=sorted(x for x in aliases if x)
         for field in ('km','gain','price','duration','time','town','start','image'):
             if prev.get(field) in (None,'','Por confirmar') and item.get(field) not in (None,'','Por confirmar'):
                 prev[field]=item[field]
-    return [item for group in grouped.values() for item in group]
+        # Um ID antigo não impede o aproveitamento de GPS confirmado agora.
+        if not prev.get('verified') and item.get('verified') is True and (
+                item.get('lat') is not None and item.get('lon') is not None):
+            for field in ('lat','lon','verified','gpsFromAnnouncement'):
+                if field in item:prev[field]=item[field]
+    return [item for group in grouped.values() for item in group]+ungrouped
 
 
 def collect_ndesafios(source: dict) -> list[dict]:
@@ -964,6 +986,7 @@ def is_disallowed_aggregator_event(item):
 
 def main() -> int:
     aggregated: dict[str, dict] = {}
+    published_ids = set()
     if OUT.exists():
         try:
             saved = json.loads(OUT.read_text(encoding="utf-8"))
@@ -981,6 +1004,7 @@ def main() -> int:
                         continue
                     if item.get("id") and item.get("date", "") >= TODAY.isoformat():
                         aggregated[item["id"]] = item
+                        published_ids.add(item["id"])
         except (ValueError, OSError, AttributeError) as exc:
             logging.warning("Catálogo anterior inválido: %s", exc)
     new_ids = []
@@ -1035,7 +1059,7 @@ def main() -> int:
     if not aggregated:
         logging.warning("Não foram encontrados eventos válidos; não substituir o site por uma lista vazia.")
         return 0
-    ordered = sorted(deduplicate(list(aggregated.values())), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
+    ordered = sorted(deduplicate(list(aggregated.values()), preferred_ids=published_ids), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
     # O relatório de cada fonte acompanha o catálogo, mesmo com recolha parcial.
     # Não declarar que uma agenda foi cancelada apenas por não ter sido lida.
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

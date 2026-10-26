@@ -1814,3 +1814,46 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow-next{right:0;left:auto;}
 .results .v51-quick-filters.v64-quick-filters .v75-distance-group button.v83-arrow-prev,
 .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow-prev{left:0;right:auto;}
+
+/* v92 — controlos mais baixos, mantendo as duas faixas alinhadas.
+   A redução aplica-se às alturas, não ao tamanho das legendas. */
+.results .v51-quick-filters.v64-quick-filters{gap:4px;margin-bottom:6px}
+.results .v51-quick-filters.v64-quick-filters .v83-label,
+.results .v51-quick-filters.v64-quick-filters .v83-scroll-shell,
+.results .v51-quick-filters.v64-quick-filters .v83-strip,
+.results .v51-quick-filters.v64-quick-filters .v83-strip > button{
+ height:30px;min-height:30px;
+}
+.results .v51-quick-filters.v64-quick-filters .v83-strip > button{padding:2px 2px}
+.results .v51-quick-filters.v64-quick-filters .v83-arrow,
+.results .v51-quick-filters.v64-quick-filters .v75-distance-group button.v83-arrow,
+.results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow{
+ height:30px;min-height:30px;
+}
+.results .content-head.v65-toolbar{padding:5px;margin-bottom:7px}
+.results .v65-toolbar .toolbar-filter.v64-filter,
+.results .v65-toolbar .toolbar-sort.v65-sort{
+ height:32px;min-height:32px;
+}
+.results .v65-toolbar .toolbar-sort.v65-sort select{height:30px}
+.results .v65-toolbar .view-switch.v64-view-switch{padding:2px}
+.results .v65-toolbar .v64-view-switch button{
+ min-height:26px;padding-block:2px;
+}
+@media(max-width:540px){
+ .results .v51-quick-filters.v64-quick-filters .v83-label,
+ .results .v51-quick-filters.v64-quick-filters .v83-scroll-shell,
+ .results .v51-quick-filters.v64-quick-filters .v83-strip,
+ .results .v51-quick-filters.v64-quick-filters .v83-strip > button{
+  height:29px;min-height:29px;
+ }
+ .results .v51-quick-filters.v64-quick-filters .v83-arrow,
+ .results .v51-quick-filters.v64-quick-filters .v75-distance-group button.v83-arrow,
+ .results .v51-quick-filters.v64-quick-filters .v75-weekend-group button.v83-arrow{
+  height:29px;min-height:29px;
+ }
+ .results .content-head.v65-toolbar{padding:4px;margin-bottom:6px}
+ .results .v65-toolbar .toolbar-filter.v64-filter,
+ .results .v65-toolbar .toolbar-sort.v65-sort{height:30px;min-height:30px}
+ .results .v65-toolbar .v64-view-switch button{min-height:24px;padding-block:2px}
+}
