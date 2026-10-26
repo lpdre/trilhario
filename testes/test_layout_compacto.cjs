@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('fs');
+const css=fs.readFileSync(__dirname+'/../assets/css/trilhario.css','utf8');
+const html=fs.readFileSync(__dirname+'/../index.html','utf8');
+const section=css.slice(css.lastIndexOf('/* v92'));
+assert.ok(section.includes('.v83-strip > button'),'atalhos rápidos controlados pela regra final');
+assert.ok(section.includes('height:29px;min-height:29px'),'atalhos reduzidos no telemóvel');
+assert.ok(section.includes('height:30px;min-height:30px'),'barra de ferramentas mais baixa');
+assert.ok(section.includes('.v83-arrow'),'setas à mesma altura das faixas');
+assert.ok(section.includes('.v65-toolbar'),'filtros e vistas compactos');
+assert.ok(html.includes('assets/css/trilhario.css?v=92'),'cache CSS actualizado');
+assert.ok(html.includes('data-quick-km="40"'),'opção de 40 km continua disponível');
+assert.ok(html.includes('id="quickWeekendStrip"'),'atalhos de fim de semana preservados');
+console.log('OK: alturas dos dois grupos e barra de vistas reduzidas com setas alinhadas');

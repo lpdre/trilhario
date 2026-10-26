@@ -26,7 +26,7 @@ jobs:
         run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
       - name: Testes offline
         run: |
-          python -m py_compile recolher.py normalizar_eventos.py fontes_oficiais.py monitorizacao_fontes.py consolidar_catalogo.py localizacoes.py precalcular_rotas.py
+          python -m py_compile recolher.py normalizar_eventos.py fontes_oficiais.py monitorizacao_fontes.py consolidar_catalogo.py identidade_eventos.py localizacoes.py precalcular_rotas.py
           python -m unittest discover -s testes -p 'test_*.py' -v
           node --check assets/js/trilhario.js
           node --check assets/js/trilhario-routes.js
@@ -34,3 +34,4 @@ jobs:
           node testes/test_localizacoes_browser.cjs
           node testes/test_rotas_browser.cjs
           node testes/test_interface_browser.cjs
+          node testes/test_layout_compacto.cjs

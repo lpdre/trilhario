@@ -609,6 +609,11 @@ def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
         for field in ('km','gain','price','duration','time','town','start','image'):
             if prev.get(field) in (None,'','Por confirmar') and item.get(field) not in (None,'','Por confirmar'):
                 prev[field]=item[field]
+        # Um ID antigo não impede o aproveitamento de GPS confirmado agora.
+        if not prev.get('verified') and item.get('verified') is True and (
+                item.get('lat') is not None and item.get('lon') is not None):
+            for field in ('lat','lon','verified','gpsFromAnnouncement'):
+                if field in item:prev[field]=item[field]
     return [item for group in grouped.values() for item in group]+ungrouped
 
 

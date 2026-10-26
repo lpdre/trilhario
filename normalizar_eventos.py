@@ -570,6 +570,11 @@ def merge_exact_duplicates(events, preferred_ids=None):
         for field in ('km','gain','price','duration','time','image'):
             if not meaningful(winner.get(field)) and meaningful(loser.get(field)):
                 winner[field]=loser[field]
+        # A fonte acabou de publicar GPS validado: acrescentá-lo ao ID antigo,
+        # sem converter coordenadas de um evento distinto em fonte confirmada.
+        if not winner.get('verified') and loser.get('verified') is True and valid_gps_pair(loser):
+            for field in ('lat','lon','verified','gpsFromAnnouncement'):
+                if field in loser:winner[field]=loser[field]
         if winner is entry:
             group[group.index(old)]=entry
     return [entry for group in by_key.values() for entry in group]+ungrouped
