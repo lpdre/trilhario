@@ -13,6 +13,8 @@ import json
 import re
 import unicodedata
 
+from identidade_eventos import sessoes_diferentes
+
 ROOT = Path(__file__).resolve().parent
 EXCEPTIONS_PATH = ROOT / 'excepcoes_catalogo.json'
 
@@ -43,6 +45,9 @@ def record_key(item):
 
 def event_match(item, existing):
     if item.get('date') != existing.get('date') or normalized_title(item.get('organizer')) != normalized_title(existing.get('organizer')):
+        return False
+    # A confirmação manual nunca pode apagar uma saída distinta.
+    if sessoes_diferentes(item, existing):
         return False
     if record_key(item) == record_key(existing):
         return True
