@@ -33,3 +33,5 @@ jobs:
           node testes/test_catalogo_browser.cjs
           node testes/test_localizacoes_browser.cjs
           node testes/test_rotas_browser.cjs
+          node testes/test_interface_browser.cjs
+          node testes/test_comparacao_browser.cjs
