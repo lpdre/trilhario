@@ -40,3 +40,10 @@ node testes/test_localizacoes_browser.cjs
 - Retirada a função de exclusão de organizadores que devolvia sempre `False`.
 - Programas PDF sem eventos individuais confirmados não provocam pedidos HTTP desnecessários.
 - Mantida a protecção que rejeita registos antigos do agregador e a validação de fontes oficiais.
+
+## Auditoria v90 — Normalização
+- Eliminada uma excepção antiga para um anúncio do agregador e referências a favoritos já inexistentes.
+- Retirado o domínio do agregador das origens elegíveis para fotografias.
+- Deduplicação de eventos renomeada e simplificada, preservando IDs alternativos.
+- GPS parcial, mal formatado ou infinito é rejeitado com erro controlado, sem interromper a execução abruptamente.
+- Removida a correcção específica de 25-10-2026, mantendo a protecção genérica contra horas fictícias `00:00`.

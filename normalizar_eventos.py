@@ -8,6 +8,7 @@ claramente danificados. Não inventa coordenadas, horários, preços ou lugares.
 from __future__ import annotations
 
 import json
+import math
 import re
 import subprocess
 import sys
@@ -491,7 +492,7 @@ def read_official_photo(event):
                  'montanhismo-guarda.pt','amigosdamontanha.com','caminhando.pt',
                  'penomundo.pt','clubearlivre.org','trilhosnocturnos.com',
                  'geoparkestrela.pt','drenergies.com','sal.pt','geres.pt',
-                 'trilhosecaminhadas.pt','barbosa-trekking.pt','caminhadassmile.pt')
+                 'barbosa-trekking.pt','caminhadassmile.pt')
         domain=parts.hostname.lower().removeprefix('www.')
         if domain not in allowed:
             return None
@@ -508,8 +509,8 @@ def read_official_photo(event):
     except requests.RequestException:
         return None
 
-def tidy_aggregator_fields(event):
-    """Limpa rótulos do agregador que não fazem parte do organizador/morada."""
+def tidy_event_fields(event):
+    """Limpa rótulos espúrios de títulos, organizadores e locais."""
     org=str(event.get('organizer') or '')
     org=re.sub(r'\s+Contacto\s*:\s*.*$', '',org,flags=re.I).strip()
     if org: event['organizer']=org
@@ -522,17 +523,16 @@ def tidy_aggregator_fields(event):
         fixed=re.sub(r'\bFundao\b','Fundão',fixed,flags=re.I)
         fixed=fixed.strip(' \t.,;–-')
         if fixed: event[field]=fixed
-    # Aspas de cp1252 tratadas como caracteres de controlo por alguns agregadores.
+    # Aspas de cp1252 presentes em anúncios antigos.
     title=str(event.get('title') or '')
     event['title']=title.replace('\u0093','“').replace('\u0094','”').replace('\u0096','–')
     return event
 
 
-def remove_aggregator_duplicates(events):
-    """Fundir duplicados exactos com preferência pela fonte oficial.
+def merge_exact_duplicates(events):
+    """Fundir eventos idênticos por data, organizador e título.
 
-    Nunca usar apenas o URL como identidade: calendários podem conter várias
-    caminhadas na mesma página. Conservar IDs alternativos para os favoritos.
+    Não deduplicar apenas pelo URL; manter IDs alternativos para rastreabilidade.
     """
     by_key={}
     for entry in events:
@@ -544,9 +544,7 @@ def remove_aggregator_duplicates(events):
         if old is None:
             by_key[key]=entry
             continue
-        agg=lambda x:(urlsplit(str(x.get('url') or '')).hostname or '').removeprefix('www.')=='trilhosecaminhadas.pt'
-        winner=entry if ((agg(old) and not agg(entry)) or
-            (agg(old)==agg(entry) and not old.get('verified') and entry.get('verified'))) else old
+        winner=entry if (not old.get('verified') and entry.get('verified')) else old
         loser=old if winner is entry else entry
         aliases=set(winner.get('alias_ids') or []) | set(loser.get('alias_ids') or [])
         if loser.get('id') and loser.get('id')!=winner.get('id'):
@@ -571,12 +569,14 @@ def is_trilhos_caminhadas_record(event):
             str(event.get('source') or '').strip().casefold() == 'trilhos & caminhadas')
 
 
-def suppress_non_walks(event):
-    """Apenas exclusões verificadas: não apagar caminhadas por terem oficinas no programa."""
-    return (event.get('date')=='2026-10-24'
-            and urlsplit(str(event.get('url') or '')).path=='/percursos/evento_info.php'
-            and 'id=555' in str(event.get('url') or '')
-            and 'vamos ao barro e a azeitona' in folded(event.get('title')))
+def valid_gps_pair(event):
+    """Coordenadas parciais, não numéricas ou infinitas são inválidas."""
+    try:
+        lat=float(event['lat'])
+        lon=float(event['lon'])
+    except (KeyError, TypeError, ValueError, OverflowError):
+        return False
+    return math.isfinite(lat) and math.isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180
 
 
 def main():
@@ -592,7 +592,7 @@ def main():
     # chegam repetidos ou a fonte tem rótulos extra.
     for item in events:
         if isinstance(item,dict):
-            tidy_aggregator_fields(item)
+            tidy_event_fields(item)
             # A heurística antiga marcou como gratuitas dezenas de caminhadas pagas.
             # Sem confirmação explícita, preço desconhecido é preferível a 0 €.
             if item.get('organizer') == 'GreenTrekker' and item.get('price') == 0:
@@ -600,14 +600,14 @@ def main():
     initial_count=len(events)
     # Uma caminhada da RB ou de outro organizador só fica se tiver fonte
     # própria; as ligações antigas ao agregador não são reutilizadas.
-    events[:]=remove_aggregator_duplicates([e for e in events if isinstance(e,dict)
-        and not is_trilhos_caminhadas_record(e) and not suppress_non_walks(e)])
-    removed_aggregator=initial_count-len(events)
+    events[:]=merge_exact_duplicates([e for e in events if isinstance(e,dict)
+        and not is_trilhos_caminhadas_record(e)])
+    removed_invalid_or_duplicate=initial_count-len(events)
     # Só aqui entram as excepções antigas que continuam confirmadas. Nunca
     # acrescentar dados por JavaScript depois de publicar o JSON.
     from consolidar_catalogo import integrate, load_registry
     events[:], verified_corrections, exception_report = integrate(events, load_registry())
-    events[:]=remove_aggregator_duplicates(events)
+    events[:]=merge_exact_duplicates(events)
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
     previous = git_previous()
@@ -677,15 +677,9 @@ def main():
                 e['time']='';changed+=1
         # Eventos de dia inteiro do calendário Tribe podem ter 00:00, que não
         # é a hora real da caminhada. Só apresentar se existir hora publicada.
-        if e.get('organizer') == 'Clube de Montanhismo da Guarda':
-            if (e.get('date')=='2026-10-25' and
-                urlsplit(str(e.get('url') or '')).path.rstrip('/').endswith('/marcha-outubro-2026')):
-                for field,value in {'start':'Largo da Igreja, Prados, Celorico da Beira',
-                                    'town':'Prados, Celorico da Beira',
-                                    'time':'09:00','endTime':'12:45','duration':4}.items():
-                    if e.get(field)!=value:e[field]=value;changed+=1
-            elif e.get('time')=='00:00':
-                e['time']='';changed+=1
+        # Calendários Tribe podem apresentar 00:00 sem hora de início publicada.
+        if e.get('organizer') == 'Clube de Montanhismo da Guarda' and e.get('time') == '00:00':
+            e['time']='';changed+=1
         changed += normalizar_local_evento(e)
         # Conservar valores antigos APENAS se a identidade do ponto de partida se mantiver.
         # Caso contrário não voltar a confirmar GPS do evento antigo com uma morada nova.
@@ -737,9 +731,8 @@ def main():
         # A consulta ao anúncio oficial pode ter actualizado o ponto após a
         # recuperação dos campos antigos. Verificar novamente antes de publicar.
         if invalidate_stale_coordinates(e,old):changed+=1
-        if e.get('lat') is not None and e.get('lon') is not None:
-            if not (-90 <= float(e['lat']) <= 90 and -180 <= float(e['lon']) <= 180):
-                # Coordenadas geograficamente impossíveis não são consideradas válidas.
+        if e.get('lat') is not None or e.get('lon') is not None:
+            if not valid_gps_pair(e):
                 errors.append('Coordenadas GPS inválidas: '+str(ident))
         else:
             no_gps += 1
@@ -814,7 +807,7 @@ def main():
                   for name in ('com_eventos','sem_eventos_ou_indisponivel','erro')}
     lines = [f'Excepções verificadas: {exception_report["added"]} importadas; {exception_report["already_collected"]} já presentes; {exception_report["expired"]} caducadas',
              f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
-             f'Limpeza de anúncios: {removed_aggregator} duplicados, não caminhadas e registos de agregador retirados',
+             f'Limpeza de anúncios: {removed_invalid_or_duplicate} registos duplicados e anúncios de agregador retirados',
              f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
              f'Fotografias: {len(upcoming_weekends)} eventos nos 2 próximos fins de semana prioritários + primeiros {PHOTO_FIRST_EVENTS} futuros; {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
