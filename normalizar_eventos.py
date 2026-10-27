@@ -374,6 +374,11 @@ def parse_official_listing(organizer, html, url):
             lon=-(int(dms[4])+int(dms[5])/60+number(dms[6])/3600)
             if 36<=lat<=43 and -10<=lon<=-6:
                 found.update(lat=round(lat,8),lon=round(lon,8),verified=True)
+    elif organizer=='Hike Land':
+        # Nas fichas a tarifa aparece no bloco de características,
+        # antes de «O Preço Inclui», como «PREÇO: 15€ | Participante».
+        m=re.search(r'\bPre[cç]o\s*[:–—-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*\|\s*Participante\b',txt,re.I)
+        if m:found['price']=number(m[1])
     return found
 
 
@@ -732,6 +737,10 @@ def main():
         if not place_changed:
             old_fields+=('lat', 'lon', 'verified', 'gps_checked_at')
         for field in old_fields:
+            # Uma correcção confirmada (incluindo None para dado não publicado)
+            # prevalece sobre o catálogo anterior e não pode ser revertida.
+            if verified and field in verified:
+                continue
             # Não voltar a importar o preço zero errado de um catálogo anterior.
             if field == 'price' and e.get('organizer') == 'GreenTrekker' and old.get('price') == 0:
                 continue
