@@ -207,7 +207,13 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
     main=html.find('main') or html.find('article') or html
     text=clean(main.get_text(' ',strip=True))[:12000]
     if event.get('km') is None:
-        event['km']=number(r'\b(\d{1,3}(?:[.,]\d{1,2})?)\s*km\b',text,160)
+        # Caminhando.pt publica descrições geográficas com distâncias que não
+        # correspondem ao percurso. Só aceitar quilómetros com rótulo explícito.
+        if event.get('organizer') == 'Caminhando.pt':
+            km_pattern = r'\bDist[aâ]ncia(?:\s+do\s+percurso)?\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*km\b'
+        else:
+            km_pattern = r'\b(\d{1,3}(?:[.,]\d{1,2})?)\s*km\b'
+        event['km'] = number(km_pattern, text, 160)
     if event.get('gain') is None:
         gain=number(r'(?:D\+|desn[ií]vel(?: positivo| acumulado)?|ascens[aã]o)\s*[:\-]?\s*(\d{2,4})\s*m',text,4500)
         if gain is None:gain=number(r'\b(\d{2,4})\s*m\s*d\+(?=\s|$)',text+' ',4500)
