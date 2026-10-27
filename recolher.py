@@ -290,6 +290,18 @@ def enrich_jsonld(html: BeautifulSoup, event: dict) -> None:
         if dt:event['date']=dt.isoformat()
         timem=re.search(r'T(\d{2}:\d{2})',iso)
         if timem:event['time']=timem[1]
+    # Apenas uma data final publicada no Event da própria ficha.
+    # Nunca inferir o fim a partir de duração, alojamento ou texto livre.
+    end_iso=node.get('endDate')
+    if isinstance(end_iso,str) and event.get('date'):
+        try:
+            start_day=date.fromisoformat(str(event['date']))
+        except ValueError:
+            start_day=None
+        end_day=date_from(end_iso)
+        if start_day and end_day and end_day>start_day:
+            event['endDate']=end_day.isoformat()
+            event['multiDay']=True
     status=str(node.get('eventStatus') or '')
     if status.endswith('EventCancelled'):
         event['status']='Cancelado';event['status_checked_at']=TODAY.isoformat()
@@ -469,6 +481,14 @@ def valid_new_event(item: dict) -> bool:
         return False
     if not TODAY <= dt <= LIMIT_DATE:
         return False
+    # Uma data final explícita tem de pertencer à mesma edição e ser válida.
+    # A permanência na agenda continua a depender apenas da data inicial.
+    if item.get('endDate') is not None:
+        try:
+            if date.fromisoformat(str(item['endDate'])) < dt:
+                return False
+        except (TypeError, ValueError):
+            return False
     title = clean(item.get("title", ""))
     if not 7 <= len(title) <= 140 or NON_WALK_TITLES.search(title):
         return False
@@ -732,7 +752,12 @@ MONTANHAS_PREFIX_DATE = re.compile(r"^\s*(?:seg|ter|qua|qui|sex|s[aá]b|dom)[a-z
 
 
 def header_date_conflicts(item: dict) -> bool:
-    """Detecta data explícita contraditória, incluindo o prefixo Montanhas."""
+    """Detecta datas contraditórias em saídas individuais.
+
+    Títulos multidiários podem mencionar a data de fim e a de início.
+    """
+    if is_multiday_program(item):
+        return False
     if title_date_conflicts(item):
         return True
     m = MONTANHAS_PREFIX_DATE.search(item.get('title') or '')
@@ -1013,7 +1038,7 @@ def main() -> int:
                     # na página oficial; não reintroduzir registos suspeitos.
                     if item.get("organizer") == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                         continue
-                    if header_date_conflicts(item):
+                    if not is_multiday_program(item) and header_date_conflicts(item):
                         logging.warning('Registo antigo com data contraditória eliminado: %s',item.get('url'))
                         continue
                     if item.get("id") and item.get("date", "") >= TODAY.isoformat():
