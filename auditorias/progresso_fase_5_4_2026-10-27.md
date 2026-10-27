@@ -23,7 +23,8 @@ Formato de preço Hike Land: https://www.hikeland.pt/eventos/caminhada-no-bosque
 - Fotografia em falta não implica ausência de imagem na página oficial; o hotlink pode estar bloqueado.
 
 ## Próximos blocos (por concluir)
-- [ ] 5.4b — Preços: verificar por fonte os erros de obtenção de páginas, reforçar leitura do preço de inscrição e testar páginas reais; prioritários GreenTrekker e Hike Land. Não preencher por estimativa.
+- [x] 5.4b.i — Reforçada no colector a procura do preço da Hike Land e GreenTrekker na página completa (mesmo fora de `<main>`), com dois testes adicionais. Os dados actuais não foram preenchidos artificialmente.
+- [ ] 5.4b.ii — Confirmar na recolha seguinte quantos preços foram realmente recuperados; investigar campos ainda vazios e consultar fichas reais. Sem extrapolar preços para outros anúncios.
 - [ ] 5.4c — Distâncias, desníveis, duração e horas: detecção de contexto errado, incoerências e sobreposição com programas multidiários.
 - [ ] 5.4d — Imagens: rever fontes sem URL, taxa de cobertura dos dois fins de semana seguintes e limites de pedidos sem sobrecarregar o workflow.
 - [ ] Confirmar execução completa dos testes offline e resultado após a próxima recolha programada.
