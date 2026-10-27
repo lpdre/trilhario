@@ -82,9 +82,9 @@ def _event_range(segment, parser, today):
 def _event_date(title, context, parser, today):
     # Título oficial da RB costuma anunciar a data; Smile escreve-a sob o H1.
     for segment in (title, context[:235]):
-        if DATE_RANGE.search(segment[:180]):
-            interval=_event_range(segment,parser,today)
-            return interval[0] if interval else None
+        interval=_event_range(segment,parser,today)
+        if interval:return interval[0]
+        if DATE_RANGE.search(segment[:180]):return None
         match=DATE_TOKEN.search(segment)
         if not match:continue
         value=match.group(0).strip()
