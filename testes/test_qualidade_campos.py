@@ -60,6 +60,23 @@ class QualidadeCampos(unittest.TestCase):
             "GreenTrekker", html, "https://www.greentrekker.pt/agenda/teste/")
         self.assertEqual(fields.get("price"), 15)
 
+    def test_preco_hikeland_fora_do_main(self):
+        html = BeautifulSoup(
+            "<main><p>Descrição da caminhada</p></main>"
+            "<section>PREÇO: 12€ | Participante</section>", "html.parser")
+        event = {"organizer": "Hike Land", "price": None}
+        recolher.extra_source_meta(html, event, "Hike Land")
+        self.assertEqual(event["price"], 12)
+
+    def test_preco_greentrekker_fora_do_main(self):
+        html = BeautifulSoup(
+            "<main><p>Informação do trilho</p></main>"
+            "<section>Faça Já A Sua Reserva 15,00€ Por Pessoa</section>",
+            "html.parser")
+        event = {"organizer": "GreenTrekker", "price": None}
+        recolher.extra_source_meta(html, event, "GreenTrekker")
+        self.assertEqual(event["price"], 15)
+
     def test_arrabida_corrigida_sem_inventar_quilometragem(self):
         registry = load_registry()
         entries = [r for r in registry["corrections"]
