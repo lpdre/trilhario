@@ -29,7 +29,20 @@ VERIFIED_MULTIDAY_URLS = frozenset({
 
 
 def is_multiday_program(event: dict) -> bool:
-    """Detecta programas de vários dias por título ou URL oficialmente identificado."""
+    """Reconhece também programas explicitamente identificados na ficha oficial.
+
+    A data final identifica o programa, mas nunca prolonga a sua presença
+    na agenda: a elegibilidade temporal depende sempre da data de início.
+    """
+    if event.get('multiDay') is True:
+        return True
+    try:
+        start = date.fromisoformat(str(event.get('date') or ''))
+        end = date.fromisoformat(str(event.get('endDate') or ''))
+        if end > start:
+            return True
+    except (TypeError, ValueError):
+        pass
     if MULTIDAY.search(str(event.get('title') or '')):
         return True
     try:
