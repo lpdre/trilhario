@@ -3,6 +3,16 @@
   "purpose": "Correcções manuais verificadas e anúncios oficiais não recuperados pela recolha. Nunca substituir uma ficha recolhida pela fonte oficial.",
   "corrections": [
     {
+      "organizer": "Caminhando.pt",
+      "slug": "caminhando-nas-maravilhas-da-arrabida",
+      "date": "2026-10-31",
+      "verified_at": "2026-10-27",
+      "source": "anuncio_oficial",
+      "fields": {
+        "km": null
+      }
+    },
+    {
       "organizer": "GreenTrekker",
       "slug": "caminhada-de-lua-cheia-em-sintras-12",
       "date": "2026-10-25",
