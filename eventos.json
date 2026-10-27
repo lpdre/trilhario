@@ -927,7 +927,7 @@
       "region": "",
       "area": "",
       "time": "09:30",
-      "km": 35.0,
+      "km": null,
       "gain": null,
       "duration": 4.5,
       "price": 10.0,
