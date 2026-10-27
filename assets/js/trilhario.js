@@ -993,8 +993,6 @@ function travelRow(e){
      <span class="v74-trip-piece v74-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong> <small>(ida e volta)</small></span>
     </div>
    </div>`;
-  if(t.toll==null&&route?.precomputed)action=`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}" title="Calcular também as portagens">Calcular portagens</button>`;
-  else if(t.toll==null&&route?.tollStatus==='retry'&&tollsDue(route))action=`<button type="button" data-event-action="retryTolls" data-event-id="${esc(e.id)}">Repetir portagens</button>`;
  }else{
   const status=!hasOrigin?'Define a origem acima para calcular a deslocação.':
    unavailable?(ambiguousDeparture(e)?'Vários pontos de encontro ou travessia de barco · sem cálculo rodoviário.':'Local de partida por confirmar · sem cálculo.'):
@@ -1028,7 +1026,6 @@ document.addEventListener('click',function(event){
   case 'removeEvent':removeEvent(id);break;
   case 'mapSelect':mapSelect(id);break;
   case 'calculateOneRoute':calculateOneRoute(id);break;
-  case 'retryTolls':retryTolls(id);break;
   case 'openOriginSettings':openTravelPanel();break;
  }
 });
@@ -1489,8 +1486,9 @@ function tripNeedsRoute(e,force=false){
  const r=travelData(e),key=routeCacheKey(e);
  if(tripRetryAfter.has(key)&&Date.now()>=tripRetryAfter.get(key)){tripRetryAfter.delete(key);tripProblems.delete(key);}
  if(force||!routeFresh(e,r))return !tripProblems.has(key)||force;
- // A rota pré-calculada oferece distância e combustível instantâneos; portagens são opcionais.
- if(r?.precomputed)return false;
+ // A rota pré-calculada mostra já distância e combustível, mas precisa
+ // do traçado completo para consultar as portagens. Obter em segundo plano
+ // apenas para os cartões carregados por lotes, sem exigir um botão.
  return tollsDue(r)&&!getRouteGeometry(key,r)&&!tripProblems.has(key);
 }
 function scheduleCachedTolls(e,r,geometry){
@@ -1555,15 +1553,6 @@ function renderTravelProgress(){
  if(!status)return;
  const message=tripOriginProblem?tripOriginProblem:n?`${n} deslocaç${n===1?'ão':'ões'} em cálculo…`:'';
  status.textContent=message;status.hidden=!message;
-}
-function retryTolls(id){
- const e=allEvents().find(x=>x.id===id);if(!e)return;
- const r=travelData(e);if(!r||!routeFresh(e,r))return calculateOneRoute(id);
- if(r.tollRequestId){toast('As portagens já estão a ser consultadas.');return;}
- if(Date.now()<tollRetryAfter){toast('O serviço de portagens está temporariamente indisponível.');return;}
- r.tollNextRetry=0;
- queueTrips([e],false);
- refreshTravelCard(id);
 }
 function calculateOneRoute(id){
  const e=allEvents().find(x=>x.id===id);if(!e)return;
