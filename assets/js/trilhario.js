@@ -299,6 +299,7 @@ function updateWeekendQuickFilters(){
 }
 function eventHasNotStarted(e,clock=agendaClock()){
  if(!e||typeof e.date!=='string')return false;
+ if(e.multiDay&&typeof e.endDate==='string'&&e.endDate>=e.date)return e.endDate>=clock.date;
  if(e.date!==clock.date)return e.date>clock.date;
  // Se o organizador não indicar uma hora válida, conservar até ao fim desse dia.
  const match=typeof e.time==='string'?e.time.trim().match(/^([01]?\d|2[0-3])[:h]([0-5]\d)$/i):null;
@@ -509,6 +510,10 @@ function eventRow(x){
  // O cálculo é uma estimativa, não um horário publicado pelo organizador.
  const validClock=t=>typeof t==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(t);
  const begin=validClock(x.time)?x.time:'Por confirmar';
+ const multi=!!x.multiDay;
+ const endLabel=x.endDate&&/^20\d{2}-\d{2}-\d{2}$/.test(x.endDate)
+  ?new Date(x.endDate+'T12:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'short'}).replace('.','')
+  :'Data por confirmar';
  let finish='Por confirmar';
  if(validClock(x.endTime)){
    finish=x.endTime;
@@ -523,13 +528,13 @@ function eventRow(x){
    <div class="walk-card-details">
    <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}</a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
-   <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span></p>
+   <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span><span><span class="walk-caption">${multi?'Programa de vários dias até':'Fim previsto:'}</span> <strong>${esc(multi?endLabel:finish)}</strong></span></p>
    <p class="v51-difficulty"><span class="walk-caption">Dificuldade:</span> <strong>${esc(names[x.difficulty]||'Por indicar')}</strong></p>
    </div>
    ${photoUrl?`<img class="walk-photo" src="${esc(photoUrl)}" alt="Imagem ilustrativa publicada pelo organizador para ${esc(x.title)}" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="strict-origin-when-cross-origin" width="94" height="94" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'v51-no-photo',textContent:'↗'}))">`:'<div class="v51-no-photo" aria-hidden="true">↗</div>'}
   </div>
   <div class="walk-metrics">
-   <span><small>Distância</small><b>${distance}</b></span>
+   <span><small>${multi?'Dist. anunciada':'Distância'}</small><b>${distance}</b></span>
    <span><small title="Desnível positivo: subida acumulada em metros" aria-label="Desnível positivo (subida acumulada)">Desnível D+</small><b>${gain}</b></span>
    <span><small>Duração</small><b>${duration}</b></span>
    <span><small>Inscrição</small><b>${fmtP(x.price)}</b></span>

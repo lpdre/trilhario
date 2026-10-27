@@ -10,7 +10,8 @@ from datetime import date
 from urllib.parse import urlsplit
 import re
 
-# A agenda reúne caminhadas de um dia, não viagens, expedições ou fins de semana.
+# A agenda inclui caminhadas individuais e programas pedestres multidiários.
+# Detectar programas serve para os identificar, nunca para os excluir.
 MULTIDAY = re.compile(
     r"\b(?:fim\s+de\s+semana|viagem|expedi[cç][aã]o|"
     r"\d+\s*(?:dias|noites)|de\s+\d{1,2}\s+a\s+\d{1,2}\s+de)\b", re.I,
@@ -28,7 +29,7 @@ VERIFIED_MULTIDAY_URLS = frozenset({
 
 
 def is_multiday_program(event: dict) -> bool:
-    """Rejeita programas de vários dias por título ou URL oficialmente identificado."""
+    """Detecta programas de vários dias por título ou URL oficialmente identificado."""
     if MULTIDAY.search(str(event.get('title') or '')):
         return True
     try:

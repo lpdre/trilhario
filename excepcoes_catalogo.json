@@ -265,6 +265,77 @@
       "fields": {
         "title": "Montemuro: O Vale do Bestança | Cinfães"
       }
+    },
+    {
+      "organizer": "Trekking Roots",
+      "slug": "expedicao-outonal-a-ordesa-e-monte-perdido",
+      "date": "2026-10-29",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "multiDay": true,
+        "endDate": "2026-11-01"
+      }
+    },
+    {
+      "organizer": "Trekking Roots",
+      "slug": "rota-das-faias-e-o-melhor-do-outono-de-manteigas",
+      "date": "2026-11-07",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "multiDay": true,
+        "endDate": "2026-11-08"
+      }
+    },
+    {
+      "organizer": "Trekking Roots",
+      "slug": "bosques-magicos-do-courel",
+      "date": "2026-11-21",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "multiDay": true,
+        "endDate": "2026-11-22"
+      }
+    },
+    {
+      "organizer": "Mais Trilhos",
+      "slug": "parque-nacional-de-monfrague",
+      "date": "2026-11-28",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "multiDay": true,
+        "endDate": "2026-12-01",
+        "km": 34,
+        "gain": 1240
+      }
+    },
+    {
+      "organizer": "Caminhando.pt",
+      "slug": "caminhando-em-aracena-gruta-das-maravilhas-e-parque-mineiro-de-rio-tinto",
+      "date": "2026-11-28",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "multiDay": true,
+        "endDate": "2026-12-01",
+        "title": "Caminhando em Aracena, Gruta das Maravilhas e Parque Mineiro de Rio Tinto"
+      }
+    },
+    {
+      "organizer": "Mais Trilhos",
+      "slug": "passagem-de-ano-douro-internacional",
+      "date": "2026-12-31",
+      "verified_at": "2026-10-26",
+      "source": "anuncio_oficial",
+      "fields": {
+        "multiDay": true,
+        "endDate": "2027-01-03",
+        "km": 40,
+        "gain": 1580
+      }
     }
   ],
   "fallback_events": [

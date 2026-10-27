@@ -28,7 +28,7 @@ class TitulosDatas(unittest.TestCase):
                       'Viagem às Dolomitas'):
             with self.subTest(title=title):
                 self.assertTrue(MULTIDAY.search(title))
-                self.assertFalse(recolher.valid_new_event({
+                self.assertTrue(recolher.valid_new_event({
                     'title':title,'date':(recolher.TODAY+timedelta(days=8)).isoformat()}))
         self.assertFalse(MULTIDAY.search('GR Peneda-Gerês Etapas 18 e 19'))
         self.assertFalse(MULTIDAY.search('Caminhada no Bosque das Faias — Sábado Manhã'))
@@ -50,13 +50,23 @@ class TitulosDatas(unittest.TestCase):
             with self.subTest(url=url):
                 self.assertFalse(MULTIDAY.search(title))
                 self.assertTrue(is_multiday_program(event))
-                self.assertFalse(recolher.valid_new_event(event))
+                self.assertTrue(recolher.valid_new_event(event))
         regular={'title':'Rota das Faias e Covão D\'Ametade',
                  'url':'https://trekkingroots.pt/caminhada/rota-das-faias-e-covao-d-ametade-antiga-2026-06-15/'}
         self.assertFalse(is_multiday_program(regular))
         # URLs idênticos com outras origens não são bloqueados.
         self.assertFalse(is_multiday_program({'title':'Caminhada em Manteigas',
                  'url':'https://outro.pt/caminhada/bosques-magicos-do-courel'}))
+
+    def test_seis_programas_recuperados(self):
+        events=json.loads((ROOT/'eventos.json').read_text(encoding='utf-8'))['events']
+        slugs={str(e.get('url') or '').rstrip('/').split('/')[-1] for e in events}
+        for slug in ('expedicao-outonal-a-ordesa-e-monte-perdido',
+                     'rota-das-faias-e-o-melhor-do-outono-de-manteigas',
+                     'bosques-magicos-do-courel','parque-nacional-de-monfrague',
+                     'caminhando-em-aracena-gruta-das-maravilhas-e-parque-mineiro-de-rio-tinto',
+                     'passagem-de-ano-douro-internacional'):
+            with self.subTest(slug=slug):self.assertIn(slug,slugs)
 
     def test_datas_do_titulo_coincidentes(self):
         for title in ('Trilho da Serra (21 de Novembro)',
@@ -99,7 +109,7 @@ class TitulosDatas(unittest.TestCase):
         self.assertEqual(result[0]['title'],'Montemuro: O Vale do Bestança | Cinfães')
         self.assertEqual(result[0]['date'],day.isoformat())
 
-    def test_programas_guardados_nao_regressam_apos_falha_de_fonte(self):
+    def test_programas_guardados_conservados_apos_falha_de_fonte(self):
         future=(recolher.TODAY+timedelta(days=18)).isoformat()
         kept={'id':'um-dia','title':'Trilho do Monte','date':future,
               'organizer':'Clube A','url':'https://clube.pt/eventos/monte'}
@@ -111,18 +121,20 @@ class TitulosDatas(unittest.TestCase):
             with patch.object(recolher,'OUT',target),patch.object(recolher,'SOURCES',[]):
                 self.assertEqual(recolher.main(),0)
             events=json.loads(target.read_text(encoding='utf-8'))['events']
-        self.assertEqual([e['id'] for e in events],['um-dia'])
+        self.assertEqual({e['id'] for e in events},{'um-dia','viagem'})
 
-    def test_catalogo_publicado_sem_multidias_e_datas_explicitas_erradas(self):
+    def test_catalogo_com_multidias_e_datas_explicitas_validas(self):
         data=json.loads((ROOT/'eventos.json').read_text(encoding='utf-8'))
         events=data['events']
         self.assertTrue(events)
         self.assertEqual(len(events),len({e['id'] for e in events}))
         for e in events:
             with self.subTest(id=e['id']):
-                self.assertFalse(is_multiday_program(e))
                 self.assertFalse(GENERIC_TITLE.match(e.get('title') or ''))
-                self.assertFalse(title_date_conflicts(e))
+                if not is_multiday_program(e):
+                    self.assertFalse(title_date_conflicts(e))
+        self.assertTrue(any(e.get('multiDay') for e in events))
+        self.assertTrue(any(e.get('organizer')=='Mais Trilhos' and 'monfrague' in e.get('url','') for e in events))
 
 
 if __name__=='__main__':

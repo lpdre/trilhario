@@ -83,3 +83,9 @@ node testes/test_localizacoes_browser.cjs
 - Não excluir actividades apenas pelo preço elevado: o critério é a evidência do programa multidiário.
 - Catálogo reduzido de 199 para 195 eventos, com IDs e campos restantes preservados.
 - Relatório: `auditorias/fase_5_3_programas_multidiarios_2026-10-26.md`.
+
+## v96 — Reintrodução dos programas de vários dias
+- As exclusões automáticas dos programas multidiários foram revertidas por decisão do responsável pelo Trilhário.
+- Restaurados seis anúncios com IDs originais, identificados como programas de vários dias e com datas finais confirmadas.
+- Recolha e normalização mantêm anúncios multidiários, sem converter durações ou distâncias totais em valores de um único dia.
+- Os cartões mostram a data final do programa e mantêm-no visível até essa data.

@@ -257,10 +257,8 @@ def repair_caminhando(event, old):
             print('Caminhando.pt: não foi possível consultar',url,type(exc).__name__)
     return out
 
-# O Trilhário apresenta caminhadas de um só dia. Alguns anúncios têm
-# também a categoria Caminhada mas descrevem um pacote de vários dias.
-# Não basta testar a categoria: evitar fins-de-semana, viagens e programas
-# explicitamente assinalados como multidiários pelo organizador.
+# A Caminhando.pt também publica programas de vários dias com categoria
+# «Caminhada». Esta detecção serve só para classificá-los, nunca para excluir.
 CAMINHANDO_MULTIDAY_URL = re.compile(
     r'(?:^|/)(?:fim-de-semana|viagem|escapadinha|expedicao)(?:-|/|$)', re.I)
 CAMINHANDO_MULTIDAY_TITLE = re.compile(
@@ -636,14 +634,14 @@ def main():
     from consolidar_catalogo import integrate, load_registry
     events[:], verified_corrections, exception_report = integrate(events, load_registry())
     events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
-    # Blindagem adicional: dados antigos ou excepções nunca devem reintroduzir
-    # uma expedição de vários dias ou uma data contraditória no catálogo.
-    excluded_multiday = [e for e in events if is_multiday_program(e)]
-    excluded_date_conflicts = [e for e in events if title_date_conflicts(e)]
-    if excluded_multiday or excluded_date_conflicts:
-        for entry in excluded_multiday + excluded_date_conflicts:
-            print('Anúncio não elegível (título/data):', entry.get('id'), entry.get('url'))
-        blocked = {id(e) for e in excluded_multiday + excluded_date_conflicts}
+    # Programas multidiários são elegíveis. Neles, o título pode indicar
+    # datas posteriores ao começo. Validar conflitos só nas saídas de um dia.
+    excluded_date_conflicts = [e for e in events
+        if not (is_multiday_program(e) or is_caminhando_multiday(e)) and title_date_conflicts(e)]
+    if excluded_date_conflicts:
+        for entry in excluded_date_conflicts:
+            print('Anúncio de um dia com data contraditória:', entry.get('id'))
+        blocked = {id(e) for e in excluded_date_conflicts}
         events[:] = [e for e in events if id(e) not in blocked]
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
@@ -655,11 +653,10 @@ def main():
     no_gps = 0
     truncated = 0
     seen = set()
-    removed_multiday = [e for e in events if isinstance(e, dict) and is_caminhando_multiday(e)]
-    if removed_multiday:
-        # Retirar antes de validar/publicar e sem perturbar os IDs dos outros eventos.
-        events[:] = [e for e in events if not (isinstance(e, dict) and is_caminhando_multiday(e))]
-        print('Caminhando.pt: {} excursões de vários dias retiradas da agenda'.format(len(removed_multiday)))
+    # Classificar programas de vários dias sem os retirar da agenda.
+    for e in events:
+        if is_multiday_program(e) or is_caminhando_multiday(e):
+            e['multiDay'] = True
     # Dar prioridade aos pontos de encontro em falta na Mais Trilhos.
     # A verificação normal tinha um orçamento global de 35 consultas e podia
     # gastá-lo antes de chegar às caminhadas de Novembro e Dezembro.
@@ -726,6 +723,8 @@ def main():
         place_changed = ((new_start and old_start and new_start != old_start) or
                          (new_town and old_town and new_town != old_town))
         old_fields=('start', 'town', 'time', 'endTime', 'km', 'gain', 'duration', 'price', 'image', 'image_checked_at')
+        if old.get('date') == e.get('date'):
+            old_fields += ('endDate',)
         # 'status' antigo apenas se a fonte não foi confirmada nesta recolha.
         # Evita conservar "Esgotado" após uma nova listagem sem esse estado.
         if str(e.get('last_seen_at') or '') != datetime.now(timezone.utc).date().isoformat():
@@ -844,8 +843,8 @@ def main():
     lines = [f'Excepções verificadas: {exception_report["added"]} importadas; {exception_report["already_collected"]} já presentes; {exception_report["expired"]} caducadas',
              f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
              f'Limpeza de anúncios: {removed_invalid_or_duplicate} registos duplicados e anúncios de agregador retirados',
-             f'Caminhando.pt: {len(removed_multiday)} excursões multidiárias excluídas',
-             f'Títulos/datas: {len(excluded_multiday)} programas multidiários excluídos; {len(excluded_date_conflicts)} datas contraditórias bloqueadas',
+             f'Programas multidiários incluídos: {sum(1 for e in events if e.get("multiDay"))}',
+             f'Títulos/datas: {len(excluded_date_conflicts)} datas contraditórias de um dia bloqueadas',
              f'Fotografias: {len(upcoming_weekends)} eventos nos 2 próximos fins de semana prioritários + primeiros {PHOTO_FIRST_EVENTS} futuros; {image_added} novas, {image_visits} páginas consultadas (máx. {PHOTO_VISITS_PER_RUN}); imagens anteriores preservadas',
              f'{len(events)} eventos analisados; {changed} campos recuperados/corrigidos',
              f'{missing_departure} sem local publicado utilizável; {no_gps} sem coordenadas',

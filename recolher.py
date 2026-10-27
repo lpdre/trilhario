@@ -438,7 +438,7 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
 
 
 # Filtragem prudente: não usar anúncios de BTT, trails competitivos,
-# excursões longas, eventos de sala ou datas fora da janela de recolha.
+# eventos de sala ou datas fora da janela de recolha.
 NON_WALK_TITLES = re.compile(
     r"\b(?:btt|bike|bicicleta|pedalar|ciclismo|maratona|ultra\s?trail|"
     r"trail\s?running|corrida|jipes?|bugg?ys?|visita\s+guiada\s+ao\s+museu|"
@@ -457,11 +457,10 @@ def valid_new_event(item: dict) -> bool:
     title = clean(item.get("title", ""))
     if not 7 <= len(title) <= 140 or NON_WALK_TITLES.search(title):
         return False
-    if is_multiday_program(item):
+    multi = is_multiday_program(item)
+    if item.get("km") is not None and not (0 < float(item["km"]) <= (250 if multi else 40)):
         return False
-    if item.get("km") is not None and not (0 < float(item["km"]) <= 40):
-        return False
-    if item.get("duration") is not None and not (0 < float(item["duration"]) <= 14):
+    if item.get("duration") is not None and not (0 < float(item["duration"]) <= (168 if multi else 14)):
         return False
     return True
 
@@ -634,7 +633,7 @@ def collect_ndesafios(source: dict) -> list[dict]:
     for node in heading.next_elements:
         if getattr(node, 'name', None) in ('h1','h2','h3','h4','h5','h6'):
             head=folded(clean(node.get_text(' ',strip=True)))
-            if head in ('aventuras','programas de varios dias','workshops e formacoes'):
+            if head in ('aventuras','workshops e formacoes'):
                 break
         if getattr(node, 'name', None) != 'a' or not node.get('href'):
             continue
@@ -650,7 +649,7 @@ def collect_ndesafios(source: dict) -> list[dict]:
         if not announced or not TODAY<=announced<=LIMIT_DATE:
             continue
         title=clean(raw[:match.start()]).strip(' –-:|')
-        if not 7<=len(title)<=140 or NON_WALK_TITLES.search(title) or MULTIDAY.search(title):
+        if not 7<=len(title)<=140 or NON_WALK_TITLES.search(title):
             continue
         detail=fetch(href)
         if detail is None: # Não inventar metadados com uma página indisponível.
@@ -661,7 +660,7 @@ def collect_ndesafios(source: dict) -> list[dict]:
             t=clean(title_tag.get_text(' ',strip=True))
             if 7<=len(t)<=140:
                 title=t
-        if NON_WALK_TITLES.search(title) or MULTIDAY.search(title):
+        if NON_WALK_TITLES.search(title):
             continue
         # A data mais próxima do título costuma estar no h2/h3 do anúncio.
         heading_date=next((h for h in main.find_all(['h2','h3','h4'])[:8]
@@ -685,7 +684,7 @@ def collect_ndesafios(source: dict) -> list[dict]:
         clock=re.search(r'\b(?:[àa]s|inicio:?)\s*(\d{1,2})[h:](\d{2})\b',opening,re.I)
         if clock and int(clock[1])<24 and int(clock[2])<60:
             item['time']=f"{int(clock[1]):02d}:{clock[2]}"
-        if item.get('km') is not None and item['km']>40:
+        if item.get('km') is not None and item['km']>(250 if is_multiday_program(item) else 40):
             continue
         if not valid_new_event(item):
             continue
@@ -759,10 +758,9 @@ def parse_montanhas_detail(soup: BeautifulSoup, url: str) -> dict | None:
     if m is None:
         logging.warning('Montanhas Dentro: sem data principal inequívoca: %s', url)
         return None
-    # Uma caminhada de dois dias pode ter várias distâncias: não resumir
-    # ambas num único cartão com um dia errado.
-    if MONTANHAS_MULTIDAY.search(beginning) or NON_WALK_TITLES.search(title):
-        logging.info('Montanhas Dentro: actividade não elegível (multi-dia/não pedestre): %s', title)
+    # Os programas pedestres de vários dias são elegíveis.
+    if NON_WALK_TITLES.search(title):
+        logging.info('Montanhas Dentro: actividade não pedestre: %s', title)
         return None
     after_date = beginning[m.end():m.end() + 115]
     # É um campo de tipo do anúncio: '19:00 Caminhada 4,5 km'.
@@ -892,12 +890,10 @@ def collect_source(source: dict) -> list[dict]:
         # Links genéricos na navegação destas páginas não são caminhadas.
         if source["organizer"] in {"Indoeu", "Caminhadas Smile"} and not date_from(block):
             continue
-        if source["organizer"] == "Caminhadas Smile" and re.search(r"\b\d{1,2}\s*[-–]\s*\d{1,2}\s+(?:JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\b", block, re.I):
-            continue  # excursões com vários dias
         event_date = date_from(block) or date_from(url)
         if event_date and (event_date < TODAY or event_date > LIMIT_DATE):
             continue
-        if NON_WALK_TITLES.search(title) or MULTIDAY.search(title):
+        if NON_WALK_TITLES.search(title):
             continue
         # Fontes recentes têm elementos fora de contexto: exigir pelo menos
         # terminologia de marcha no cartão ou título, salvo paginação datada.
@@ -962,18 +958,16 @@ def collect_source(source: dict) -> list[dict]:
             continue
         if not (7 <= len(item["title"]) <= 140):
             continue
-        if source["organizer"] in {"Trekkin", "Montanhas Dentro"} and re.search(r"\b(?:dois dias|2 dias|3 dias|fim de semana|noites?)\b", folded(block)):
-            continue  # não misturar viagens de vários dias com caminhadas de um dia
         if "via ferrata" in folded(item["title"]):
             continue
-        if item["duration"] is not None and item["duration"] > 14:
-            continue  # para já, apenas saídas de um dia
-        if item["km"] is not None and item["km"] > 40:
+        if item["duration"] is not None and item["duration"] > (168 if is_multiday_program(item) else 14):
             continue
-        if header_date_conflicts(item):
+        if item["km"] is not None and item["km"] > (250 if is_multiday_program(item) else 40):
+            continue
+        if not is_multiday_program(item) and header_date_conflicts(item):
             logging.warning("Data do título não coincide com a data recolhida: %s", url)
             continue
-        if not valid_new_event(item) or MULTIDAY.search(block[:220]):
+        if not valid_new_event(item):
             continue
         result.append(item)
         time.sleep(0.12)
@@ -1006,9 +1000,6 @@ def main() -> int:
                         continue
                     if header_date_conflicts(item):
                         logging.warning('Registo antigo com data contraditória eliminado: %s',item.get('url'))
-                        continue
-                    if is_multiday_program(item):
-                        logging.info('A retirar programa de vários dias guardado: %s', item.get('url'))
                         continue
                     if item.get("id") and item.get("date", "") >= TODAY.isoformat():
                         aggregated[item["id"]] = item
@@ -1044,12 +1035,12 @@ def main() -> int:
                 # Um [] pode significar 0 eventos ou erro: nunca declarar êxito.
                 logging.warning('Fonte %s: sem resultados confirmados (ausência ou falha)',name)
             for item in found:
-                if is_disallowed_aggregator_event(item) or is_multiday_program(item):
+                if is_disallowed_aggregator_event(item):
                     continue
                 if item.get('organizer') == MONTANHAS_ORG and item.get('date_verified') != 'official_detail':
                     # Não aceitar datas desta empresa reenviadas por agregadores.
                     continue
-                if header_date_conflicts(item):
+                if not is_multiday_program(item) and header_date_conflicts(item):
                     continue
                 if item["id"] not in aggregated:
                     new_ids.append(item["id"])
