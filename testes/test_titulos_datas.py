@@ -145,7 +145,8 @@ class TitulosDatas(unittest.TestCase):
                 item={'title':title,'date':'2026-11-07',
                       'endDate':'2026-11-08','multiDay':True}
                 self.assertFalse(recolher.header_date_conflicts(item))
-                self.assertTrue(recolher.valid_new_event(item))
+                with patch.object(recolher,'TODAY',date(2026,10,27)), patch.object(recolher,'LIMIT_DATE',date(2027,3,26)):
+                    self.assertTrue(recolher.valid_new_event(item))
 
     def test_enddate_publicada_em_jsonld_do_proprio_evento(self):
         url='https://clube.pt/caminhada/expedicao'
