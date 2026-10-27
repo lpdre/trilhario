@@ -687,10 +687,21 @@ def main():
             errors.append('ID vazio ou duplicado')
         seen.add(ident)
         try:
-            if date.fromisoformat(e['date']) < datetime.now(timezone.utc).date():
+            start_date = date.fromisoformat(e['date'])
+            if start_date < datetime.now(timezone.utc).date():
                 errors.append('Evento com data no passado: '+str(ident))
         except (ValueError, TypeError, KeyError):
             errors.append('Data inválida: '+str(ident))
+            start_date = None
+        # A data final é informativa, mas nunca pode preceder a inicial.
+        # Falta de endDate é legítima: não inferir um fim por aproximação.
+        if e.get('endDate') not in (None, ''):
+            try:
+                end_date = date.fromisoformat(str(e['endDate']))
+                if start_date is not None and end_date < start_date:
+                    errors.append('Fim anterior ao início: '+str(ident))
+            except (ValueError, TypeError):
+                errors.append('Data final inválida: '+str(ident))
         if not e.get('url', '').startswith(('https://', 'http://')):
             errors.append('Ligação inválida: '+str(ident))
         official_key=(e.get('organizer'), urlsplit(str(e.get('url') or '')).path.rstrip('/').split('/')[-1])
