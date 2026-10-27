@@ -88,4 +88,11 @@ node testes/test_localizacoes_browser.cjs
 - As exclusões automáticas dos programas multidiários foram revertidas por decisão do responsável pelo Trilhário.
 - Restaurados seis anúncios com IDs originais, identificados como programas de vários dias e com datas finais confirmadas.
 - Recolha e normalização mantêm anúncios multidiários, sem converter durações ou distâncias totais em valores de um único dia.
-- Os cartões mostram a data final do programa e mantêm-no visível até essa data.
+- Os cartões mostram a data final do programa, mas a agenda deixa de o apresentar no dia seguinte ao início. A data final serve apenas para descrever a duração, não para prolongar inscrições.
+
+## Revisão de programas multidiários — 27/10/2026
+- Ajustada a expiração: o dia de início é o último dia em que o programa aparece, independentemente da data final.
+- Datas finais só são obtidas quando explicitamente publicadas e validadas (`endDate >= date`).
+- JSON-LD com `endDate` e intervalos identificáveis nas fichas RB/Smile passam a ser reconhecidos; programas sem informação suficiente não recebem datas finais presumidas.
+- Testes de regressão independentes da presença de edições antigas no catálogo, evitando bloquear recolhas quando essas edições expiram.
+- A inclusão de programas pedestres de vários dias mantém-se; não voltar a aplicar exclusões globais por duração ou preço.
