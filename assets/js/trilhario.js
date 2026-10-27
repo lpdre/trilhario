@@ -315,7 +315,20 @@ let agendaCurrentFingerprint='',agendaDisplayedDate='';
 function refreshAgendaForClock(){
  if(document.hidden)return;
  const clock=agendaClock(),current=agendaUpcomingFingerprint(clock);
- if(current!==agendaCurrentFingerprint||clock.date!==agendaDisplayedDate){populateOrganizers();render();}
+ if(current!==agendaCurrentFingerprint||clock.date!==agendaDisplayedDate){
+  populateOrganizers();render();return;
+ }
+ // Sem botão de portagens: retomar apenas tentativas vencidas de cartões
+ // próximos do ecrã, aproveitando a verificação de agenda já existente.
+ if(ORGANIZERS_PAGE_MODE||state.view!=='list'||!travelPrefs.origin)return;
+ const list=$('listView');if(!list)return;
+ const near=new Set(),height=window.innerHeight||document.documentElement.clientHeight||0;
+ for(const row of list.querySelectorAll('.walk-row[data-eid]')){
+  const bounds=row.getBoundingClientRect();
+  if(bounds.bottom>=-300&&bounds.top<=height+300)near.add(row.dataset.eid);
+  if(near.size>=TRAVEL_BATCH_SIZE)break;
+ }
+ if(near.size)queueTrips(allEvents().filter(e=>near.has(e.id)),false);
 }
 function renderCatalogStatus(){
  // O estado normal do catálogo não ocupa espaço na página.
