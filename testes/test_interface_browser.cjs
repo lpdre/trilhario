@@ -22,4 +22,32 @@ const trip={travelPrefs:{origin:'Aveiro',consumption:5,fuel:2},ambiguousDepartur
 vm.runInNewContext(section('function tripCalc(e){','function timeStr('),trip);
 const calc=trip.tripCalc({price:30});
 assert.equal(calc.km,159);assert.equal(calc.minutes,160);assert.equal(calc.fuel,15.9);assert.equal(calc.toll,7);assert.equal(calc.total,22.9);
-console.log('OK: comparação removida, cartões, filtros, dificuldade e viagens intactos');
+// As portagens devem ser calculadas sem botões nos cartões.
+const tripCard={
+  travelPrefs:{origin:'Aveiro'},tripCalc:()=>({km:145.5,minutes:120,fuel:15,toll:null,total:null}),
+  travelData:()=>({precomputed:true}),routeCacheKey:()=> 'aveiro|evento',
+  tripProblems:new Map(),departureCandidates:()=>['Arouca'],
+  ambiguousDeparture:()=>false,tripOriginProblem:'',
+  fmtN:x=>String(x),timeStr:()=> '2h 00min',travelMoney:()=> '15,00 €',
+  esc:x=>String(x??'')
+};
+vm.runInNewContext(section('function travelRow(e){','// Delegação:'),tripCard);
+const withoutTolls=tripCard.travelRow({id:'evento'});
+assert.ok(withoutTolls.includes('Portagens <strong>—</strong>'),'portagens em falta sem inventar zero');
+assert.ok(withoutTolls.includes('Combustível'),'combustível continua disponível');
+assert.ok(!withoutTolls.includes('Calcular portagens'),'botão manual eliminado');
+assert.ok(!withoutTolls.includes('Repetir portagens'),'botão de repetição eliminado');
+assert.ok(!withoutTolls.includes('data-event-action="calculateOneRoute"'),'cálculo automático, sem botão na viagem válida');
+
+const auto={
+  travelData:()=>({precomputed:true}),routeCacheKey:()=> 'aveiro|evento',
+  tripRetryAfter:new Map(),tripProblems:new Map(),
+  routeFresh:()=>true,tollsDue:()=>true,getRouteGeometry:()=>null
+};
+vm.runInNewContext(section('function tripNeedsRoute(e,force=false){','function scheduleCachedTolls('),auto);
+assert.equal(auto.tripNeedsRoute({id:'evento'}),true,'rota pré-calculada necessita de traçado para portagens');
+auto.getRouteGeometry=()=>({out:[[0,0],[1,1]],back:[[1,1],[0,0]]});
+assert.equal(auto.tripNeedsRoute({id:'evento'}),false,'não repetir cálculo com traçado disponível');
+auto.getRouteGeometry=()=>null;auto.tollsDue=()=>false;
+assert.equal(auto.tripNeedsRoute({id:'evento'}),false,'respeitar validade e espera das portagens');
+console.log('OK: comparação removida, cartões, filtros, dificuldade, viagens e portagens automáticas');
