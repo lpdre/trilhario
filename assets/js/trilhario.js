@@ -299,7 +299,9 @@ function updateWeekendQuickFilters(){
 }
 function eventHasNotStarted(e,clock=agendaClock()){
  if(!e||typeof e.date!=='string')return false;
- if(e.multiDay&&typeof e.endDate==='string'&&e.endDate>=e.date)return e.endDate>=clock.date;
+ // Programas de vários dias deixam a agenda no dia seguinte ao início,
+ // não no dia seguinte ao fim: depois do arranque já não são inscrições úteis.
+ if(e.multiDay)return e.date>=clock.date;
  if(e.date!==clock.date)return e.date>clock.date;
  // Se o organizador não indicar uma hora válida, conservar até ao fim desse dia.
  const match=typeof e.time==='string'?e.time.trim().match(/^([01]?\d|2[0-3])[:h]([0-5]\d)$/i):null;
