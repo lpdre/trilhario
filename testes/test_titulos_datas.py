@@ -148,6 +148,38 @@ class TitulosDatas(unittest.TestCase):
                 with patch.object(recolher,'TODAY',date(2026,10,27)), patch.object(recolher,'LIMIT_DATE',date(2027,3,26)):
                     self.assertTrue(recolher.valid_new_event(item))
 
+    def test_recolha_rb_smile_admite_intervalos_de_dois_dias(self):
+        from datetime import date
+        from fontes_oficiais import collect_official
+        today=date(2026,10,27)
+        for mode,organizer,base in (
+            ('rb','RB Hiking & Trekking','https://barbosa-trekking.pt/'),
+            ('smile','Caminhadas Smile','https://www.caminhadassmile.pt/'),
+        ):
+            with self.subTest(mode=mode):
+                link=base+'travessia-de-7-a-8-de-novembro'
+                listing=BeautifulSoup(
+                    '<main><a href="/travessia-de-7-a-8-de-novembro">'
+                    'Travessia pedestre</a></main>','html.parser')
+                detail=BeautifulSoup(
+                    '<main><h1>Caminhada de 7 a 8 de novembro de 2026</h1>'
+                    '<p>Programa pedestre na serra.</p></main>','html.parser')
+                pages={base:listing,link:detail}
+                source={'organizer':organizer,'url':base,'mode':mode}
+                with patch.object(recolher,'TODAY',today),patch.object(recolher,'LIMIT_DATE',date(2027,3,26)),patch('fontes_oficiais.time.sleep'):
+                    events=collect_official(
+                        source,fetch=lambda url:pages.get(url),
+                        date_from=recolher.date_from,
+                        new_event=recolher.new_event,
+                        valid_new_event=recolher.valid_new_event,
+                        parse_meta=recolher.parse_meta,
+                        enrich_jsonld=recolher.enrich_jsonld,
+                        today=today)
+                self.assertEqual(len(events),1)
+                self.assertEqual(events[0]['date'],'2026-11-07')
+                self.assertEqual(events[0]['endDate'],'2026-11-08')
+                self.assertTrue(events[0]['multiDay'])
+
     def test_enddate_publicada_em_jsonld_do_proprio_evento(self):
         url='https://clube.pt/caminhada/expedicao'
         html=BeautifulSoup(
