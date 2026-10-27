@@ -335,7 +335,7 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         # depois dos 12 000 caracteres lidos por parse_meta. Procurar o valor
         # APENAS nessa secção evita confundir preços de anúncios relacionados.
         if item.get("price") is None or item.get("price") == 0:
-            full_text = clean(scope.get_text(" ", strip=True))
+            full_text = clean(html.get_text(" ", strip=True))
             for heading in re.finditer(r"(?:fa[cç]a\s+j[aá]\s+a\s+sua\s+reserva|reservas\s+fechadas!?)", full_text, re.I):
                 booking = full_text[heading.end():heading.end() + 240]
                 m_price = re.search(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|euros?)", booking, re.I)
@@ -359,6 +359,15 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
                 break
         # Hora no formato «Início: 9:15 horas» (extractor genérico aceita-o).
     elif organizer == "Hike Land":
+        # O preço da ficha pode estar fora do <main>, no bloco de inscrição.
+        # A exigência de «€ | Participante» evita preços de ofertas relacionadas.
+        if item.get("price") is None:
+            full_text = clean(html.get_text(" ", strip=True))
+            mprice = re.search(
+                r"\bpre[cç]o\s*[:–—-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*\|\s*participante\b",
+                full_text, re.I)
+            if mprice:
+                item["price"] = float(mprice[1].replace(",", "."))
         if not item.get("time"):
             mtime = re.search(r"in[ií]cio\s*:\s*\d{1,2}\s+de\s+\w+\s*[|–-]\s*(\d{1,2}):(\d{2})", value, re.I)
             if mtime and int(mtime[1]) < 24 and int(mtime[2]) < 60:
