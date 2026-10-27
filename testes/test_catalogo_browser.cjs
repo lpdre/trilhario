@@ -34,6 +34,25 @@ ctx.remoteFeedState='ready';ctx.remoteEvents=[{id:'real',date:'2026-11-01',title
 ctx.custom=[{id:'meu',date:'2026-11-02',title:'Evento pessoal',organizer:'Eu'}];
 items=ctx.allEvents();
 assert.equal(items.length,2,'eventos inseridos pelo utilizador preservados');
+// A data final descreve o programa; não o mantém na agenda depois do início.
+const clockStart=s.indexOf('function eventHasNotStarted(');
+const clockEnd=s.indexOf('function agendaUpcomingFingerprint(',clockStart);
+assert(clockStart>=0&&clockEnd>clockStart);
+const dateContext={agendaClock:()=>({date:'2026-10-29',minute:12*60})};
+vm.runInNewContext(s.slice(clockStart,clockEnd),dateContext);
+const trip={id:'expedicao',date:'2026-10-29',endDate:'2026-11-01',
+            multiDay:true,time:'08:00'};
+assert.equal(dateContext.eventHasNotStarted(trip,{date:'2026-10-29',minute:23*60}),true,
+             'programa multidiario visivel durante o dia inicial');
+assert.equal(dateContext.eventHasNotStarted(trip,{date:'2026-10-30',minute:0}),false,
+             'programa multidiario oculto no dia seguinte ao inicio');
+assert.equal(dateContext.eventHasNotStarted({...trip,date:'2026-10-31'},
+             {date:'2026-10-30',minute:0}),true,'programa futuro continua visivel');
+assert.equal(dateContext.eventHasNotStarted(
+             {date:'2026-10-29',time:'08:00'},
+             {date:'2026-10-29',minute:9*60}),false,
+             'regra de horario de eventos individuais mantida');
+
 const html=fs.readFileSync(__dirname+'/../index.html','utf8');
 const css=fs.readFileSync(__dirname+'/../assets/css/trilhario.css','utf8');
 assert.equal(s.includes('const SEED='),false,'catálogo fictício não deve existir');
