@@ -2,8 +2,8 @@
 """Fontes oficiais RB Hiking e Caminhadas Smile para o Trilhário.
 
 Sem importação circular do recolher.py: o colector principal fornece os seus
-validadores e a função fetch. Só publica caminhadas de UM dia com página
-individual e data identificável nessa mesma página. Nunca lê o agregador.
+validadores e a função fetch. Publica caminhadas de um ou vários dias com
+data inicial identificável na ficha. Nunca lê o agregador.
 """
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ ORGANIZERS = {
     'smile': ('Caminhadas Smile', 'caminhadassmile.pt'),
 }
 NON_HIKE = re.compile(
-    r'\b(?:pedalar|bicicleta|btt|ciclismo|viagem|voucher|carnaval|p[aá]scoa|'
-    r'excurs[aã]o|cruzeiro|tour\s+de\s+autocarro|passagem\s+de\s+ano)\b', re.I
+    r'\b(?:pedalar|bicicleta|btt|ciclismo|voucher|carnaval|p[aá]scoa|'
+    r'excurs[aã]o|cruzeiro|tour\s+de\s+autocarro)\b', re.I
 )
 WALKING = re.compile(
     r'caminhad|trekking|trilho|percurso\s+pedestre|rota\s+pedestre|levada|'
@@ -32,9 +32,17 @@ STATIC_SLUGS = {'', 'contactos', 'contacto', 'home', 'inscricoes',
                 'blog', 'normas-de-seguranca', 'atividades', 'actividades',
                 'normas-de-seguranca-em-caminhadas', 'parceiros', 'comments',
                 'comentarios', 'siga-nos', 'eventos', 'faq'}
-# Não aceitar intervalos explícitos de vários dias logo junto da data do evento.
+# Reconhecer intervalos anunciados, sem inventar datas finais.
 DATE_RANGE = re.compile(r'(?:\d{1,2}\s*[-–—]\s*\d{1,2}\s+[a-zA-ZÀ-ÿ]+|'
                         r'\d{1,2}\s+[a-zA-ZÀ-ÿ]+\s*(?:a|até|[-–—])\s*\d{1,2})',re.I)
+MONTH = r"(?:jan(?:eiro)?|fev(?:ereiro)?|mar(?:[cç]o)?|abr(?:il)?|mai(?:o)?|jun(?:ho)?|jul(?:ho)?|ago(?:sto)?|set(?:embro)?|out(?:ubro)?|nov(?:embro)?|dez(?:embro)?)"
+DATE_RANGE_SAME_MONTH = re.compile(
+    rf"(?<!\d)(?P<first>\d{{1,2}})\s*(?:[-–—]|\ba(?:té)?\b)\s*(?P<last>\d{{1,2}})\s+"
+    rf"(?:de\s+)?(?P<month>{MONTH})(?:\s+(?:de\s+)?(?P<year>20\d{{2}}))?\b", re.I)
+DATE_RANGE_DIFFERENT_MONTH = re.compile(
+    rf"(?<!\d)(?P<first>\d{{1,2}})\s+(?:de\s+)?(?P<month1>{MONTH})\s*"
+    rf"(?:a|até|[-–—])\s*(?P<last>\d{{1,2}})\s+(?:de\s+)?(?P<month2>{MONTH})"
+    rf"(?:\s+(?:de\s+)?(?P<year>20\d{{2}}))?\b", re.I)
 DATE_TOKEN = re.compile(r'(?<!\d)\d{1,2}\s+(?:de\s+)?(?:jan(?:eiro)?|fev(?:ereiro)?|'
                         r'mar(?:[cç]o)?|abr(?:il)?|mai(?:o)?|jun(?:ho)?|jul(?:ho)?|'
                         r'ago(?:sto)?|set(?:embro)?|out(?:ubro)?|nov(?:embro)?|'
@@ -56,10 +64,27 @@ def _page_head(page):
     return title, context
 
 
+def _event_range(segment, parser, today):
+    """Datas inicial e final explícitas no cabeçalho de uma atividade."""
+    for pattern in (DATE_RANGE_SAME_MONTH, DATE_RANGE_DIFFERENT_MONTH):
+        m=pattern.search(segment[:235])
+        if not m:continue
+        info=m.groupdict()
+        year=int(info['year']) if info.get('year') else today.year
+        first_month=info.get('month') or info['month1']
+        last_month=info.get('month') or info.get('month2')
+        start=parser(f"{info['first']} {first_month} {year}",short_year=year)
+        end=parser(f"{info['last']} {last_month} {year}",short_year=year)
+        if start and end and end>start:return start,end
+    return None
+
+
 def _event_date(title, context, parser, today):
     # Título oficial da RB costuma anunciar a data; Smile escreve-a sob o H1.
     for segment in (title, context[:235]):
-        if DATE_RANGE.search(segment[:180]):return None
+        if DATE_RANGE.search(segment[:180]):
+            interval=_event_range(segment,parser,today)
+            return interval[0] if interval else None
         match=DATE_TOKEN.search(segment)
         if not match:continue
         value=match.group(0).strip()
@@ -69,7 +94,6 @@ def _event_date(title, context, parser, today):
         dt=parser(value,short_year=today.year)
         if dt:return dt
     return None
-
 
 def _candidate_urls(listing, source_url, host):
     seen=set()
@@ -209,16 +233,20 @@ def collect_official(source, *, fetch, date_from, new_event, valid_new_event, pa
         if not title or NON_HIKE.search(title) or not WALKING.search(title):continue
         when=_event_date(title,context,date_from,today)
         if when is None:continue
+        interval=_event_range(title,date_from,today) or _event_range(context,date_from,today)
         item=new_event(organizer,link,title,when,date_verified='official_detail')
         # Só a ficha oficial individual contribui com informações da caminhada.
         enrich_jsonld(page,item)
         # Não permitir que o JSON-LD de um evento relacionado mude a data
         # que foi anunciada no próprio cabeçalho.
         item['date']=when.isoformat()
+        if interval and interval[0]==when:
+            item['multiDay']=True
+            item['endDate']=interval[1].isoformat()
         if kind=='smile':_parse_smile_details(page,item)
         else:_parse_rb_details(page,item)
         parse_meta(page,item)
         if valid_new_event(item):result.append(item)
         time.sleep(0.08)
-    logging.info('%s: %d caminhadas oficiais de um dia (de %d fichas potenciais)',organizer,len(result),len(urls))
+    logging.info('%s: %d caminhadas oficiais (de %d fichas potenciais)',organizer,len(result),len(urls))
     return result
