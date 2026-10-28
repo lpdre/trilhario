@@ -457,6 +457,7 @@ def extract_event_image(html, source_url):
         if tag and tag.get('content'):
             image_candidates.append(tag['content'])
     # JSON-LD também publica a fotografia do evento sem depender dos selectores visuais.
+    event_nodes=[]
     for tag in soup.select('script[type="application/ld+json"]')[:10]:
         try: root=_json.loads(tag.string or tag.get_text())
         except (ValueError,TypeError):continue
@@ -470,9 +471,24 @@ def extract_event_image(html, source_url):
             typ=node.get('@type')
             if isinstance(typ,str):typ=[typ]
             if any(str(t).endswith('Event') for t in (typ or [])):
-                val=node.get('image')
-                if isinstance(val,list):image_candidates.extend(val)
-                elif val:image_candidates.append(val)
+                event_nodes.append(node)
+    # Mesma regra de identidade de recolher.enrich_jsonld: preferir a ficha
+    # correspondente e só aceitar um Event sem URL quando for o único.
+    # Nunca usar uma foto de um anúncio relacionado para preencher uma falta.
+    page_url=str(source_url or '').split('#')[0].rstrip('/')
+    def node_url(node):
+        value=node.get('url') or node.get('@id') or ''
+        return value.split('#')[0].rstrip('/') if isinstance(value,str) else ''
+    matches=[node for node in event_nodes if page_url and node_url(node)==page_url]
+    selected=None
+    if len(matches)==1:
+        selected=matches[0]
+    elif len(event_nodes)==1 and not node_url(event_nodes[0]):
+        selected=event_nodes[0]
+    if selected is not None:
+        val=selected.get('image')
+        if isinstance(val,list):image_candidates.extend(val)
+        elif val:image_candidates.append(val)
     # Não procurar imagens aleatórias no rodapé, anúncios de outros eventos ou logótipos.
     for cand in image_candidates:
         if isinstance(cand,dict):cand=cand.get('url') or cand.get('contentUrl')
