@@ -481,8 +481,12 @@ def extract_event_image(html, source_url):
     return None
 
 
+class PhotoLookupError(RuntimeError):
+    """A página não pôde ser consultada; não confirma ausência de fotografia."""
+
+
 def read_official_photo(event):
-    """Consultar só o site original do evento (nunca descarregar a imagem)."""
+    """Consultar a página oficial; falhas HTTP/rede levantam PhotoLookupError."""
     import requests
     try:
         target=str(event.get('url') or '')
@@ -510,8 +514,8 @@ def read_official_photo(event):
                 if len(buf)>PHOTO_MAX_HTML_BYTES:break
             encoding=resp.encoding or 'utf-8'
             return extract_event_image(bytes(buf).decode(encoding,errors='replace'),resp.url)
-    except requests.RequestException:
-        return None
+    except requests.RequestException as exc:
+        raise PhotoLookupError('Consulta da fotografia falhou') from exc
 
 def tidy_event_fields(event):
     """Limpa rótulos espúrios de títulos, organizadores e locais."""
@@ -849,7 +853,13 @@ def main():
         if recently_checked or image_visits>=PHOTO_VISITS_PER_RUN:
             continue
         image_visits+=1
-        photo=read_official_photo(e)
+        try:
+            photo=read_official_photo(e)
+        except PhotoLookupError:
+            # A visita conta para o limite, mas uma falha não inicia os 28 dias
+            # de espera. Permitir nova tentativa na próxima execução normal.
+            print('Fotografia: consulta falhou; nova tentativa pendente:', e.get('url'))
+            continue
         e['image_checked_at']=today.isoformat()
         if photo:
             e['image']=photo
