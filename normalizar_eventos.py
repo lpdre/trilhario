@@ -636,7 +636,7 @@ def main():
     removed_invalid_or_duplicate=initial_count-len(events)
     # Só aqui entram as excepções antigas que continuam confirmadas. Nunca
     # acrescentar dados por JavaScript depois de publicar o JSON.
-    from consolidar_catalogo import integrate, load_registry
+    from consolidar_catalogo import integrate, load_registry, normalized_title, url_key
     events[:], verified_corrections, exception_report = integrate(events, load_registry())
     events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
     # Programas multidiários são elegíveis. Neles, o título pode indicar
@@ -711,6 +711,17 @@ def main():
                 if e.get(field)!=value:
                     e[field]=value;changed+=1
         old = by_id.get(ident, {})
+        # Um ID/URL pode ser reutilizado noutra edição. Só recuperar campos
+        # quando data, organizador e ficha coincidem; mudar a data não prova
+        # um adiamento. O ID publicado e os dados actuais mantêm-se intactos.
+        old_url = url_key(old.get('url'))
+        old_organizer = normalized_title(old.get('organizer'))
+        if not (start_date is not None and old.get('date') == e.get('date')
+                and old_organizer and old_organizer == normalized_title(e.get('organizer'))
+                and old_url and old_url == url_key(e.get('url'))
+                # Parâmetros podem identificar eventos diferentes na mesma página.
+                and urlsplit(str(old.get('url'))).query == urlsplit(str(e.get('url'))).query):
+            old = {}
         # Caminhando.pt: corrigir título poluído, horas e encontro a partir do
         # próprio cartão e, quando preciso, da página original da actividade.
         if e.get('organizer') == 'Caminhando.pt':
