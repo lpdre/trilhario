@@ -38,6 +38,35 @@ class QualidadeCampos(unittest.TestCase):
         recolher.parse_meta(html, event)
         self.assertEqual(event["km"], 13)
 
+    def test_caminhando_distancia_com_rotulo_depois_do_valor(self):
+        for value, expected in (("12 km's", 12), ("11,5 km's", 11.5),
+                                ("11.5 km", 11.5), ("12 km’s", 12)):
+            with self.subTest(value=value):
+                html = BeautifulSoup(
+                    "<main><p>A serra tem 35 km.</p>"
+                    "<section><h2>Características do Percurso</h2>"
+                    f"<div><span>{value}</span><span>Distância</span></div>"
+                    "</section></main>", "html.parser")
+                event = {"organizer": "Caminhando.pt", "km": None}
+                recolher.parse_meta(html, event)
+                self.assertEqual(event["km"], expected)
+
+    def test_caminhando_distancia_invalida_nao_aproveita_fragmentos(self):
+        for value in ("0", "0,0", "-12", "161", "1000", "1000,5"):
+            with self.subTest(value=value):
+                html = BeautifulSoup(
+                    f"<main><p>A serra tem 35 km.</p><div>{value} km's Distância</div></main>",
+                    "html.parser")
+                event = {"organizer": "Caminhando.pt", "km": None}
+                recolher.parse_meta(html, event)
+                self.assertIsNone(event["km"])
+
+    def test_caminhando_distancia_existente_preservada(self):
+        html = BeautifulSoup("<main>12 km's Distância</main>", "html.parser")
+        event = {"organizer": "Caminhando.pt", "km": 14}
+        recolher.parse_meta(html, event)
+        self.assertEqual(event["km"], 14)
+
     def test_preco_hikeland_ancorado_no_valor_por_participante(self):
         html = (
             "<main><p>Preço: 15€ | Participante</p>"

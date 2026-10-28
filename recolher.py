@@ -214,6 +214,12 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
         else:
             km_pattern = r'\b(\d{1,3}(?:[.,]\d{1,2})?)\s*km\b'
         event['km'] = number(km_pattern, text, 160)
+        if event.get('organizer') == 'Caminhando.pt' and event['km'] is None:
+            # O bloco de características também apresenta «12 km's Distância».
+            # Exigir o rótulo e não aceitar a cauda de um número inválido.
+            event['km'] = number(
+                r"(?<![\w.,+\-−])(\d{1,3}(?:[.,]\d{1,2})?)\s*km(?:['’]s)?\s+Dist[aâ]ncia\b",
+                text, 160)
     if event.get('gain') is None:
         gain=number(r'(?:D\+|desn[ií]vel(?: positivo| acumulado)?|ascens[aã]o)\s*[:\-]?\s*(\d{2,4})\s*m',text,4500)
         if gain is None:gain=number(r'\b(\d{2,4})\s*m\s*d\+(?=\s|$)',text+' ',4500)
