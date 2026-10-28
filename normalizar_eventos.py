@@ -20,6 +20,7 @@ import time
 from localizacoes import limpar_local, normalizar_local_evento
 from identidade_eventos import sessoes_diferentes
 from qualidade_anuncios import GENERIC_TITLE, title_date_conflicts, is_multiday_program
+from precos import normalizar_texto_precos
 
 ROOT = Path(__file__).resolve().parent
 CATALOG = ROOT / 'eventos.json'
@@ -365,7 +366,7 @@ def parse_official_listing(organizer, html, url):
         if m:found['km']=number(m[1])
         m=re.search(r'\bDesn[ií]vel\s+(\d{2,4})\s*m\b',txt,re.I)
         if m:found['gain']=int(m[1])
-        m=re.search(r'(?:Fa[cç]a J[aá] A Sua Reserva|Reservas Fechadas!?)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',txt,re.I)
+        m=re.search(r'(?:Fa[cç]a J[aá] A Sua Reserva|Reservas Fechadas!?)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',normalizar_texto_precos(txt),re.I)
         if m:found['price']=number(m[1])
         # O formato GPS tem dois valores completos: nunca usar apenas latitude.
         dms=re.search(r'Lat:\s*N\s*(\d{1,2})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]\s*Long:\s*W\s*(\d{1,3})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]',txt,re.I)

@@ -24,6 +24,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts, is_multiday_program
+from precos import normalizar_texto_precos
 from identidade_eventos import sessoes_diferentes
 
 ROOT = Path(__file__).resolve().parent
@@ -219,19 +220,20 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
         if gain is None:gain=number(r'\b(\d{2,4})\s*m\s*d\+(?=\s|$)',text+' ',4500)
         if gain is not None:event['gain']=round(gain)
     if event.get('price') is None:
+        price_text=normalizar_texto_precos(text)
         # Primeiro tarifa de participante/adulto; não adoptar o preço de criança.
         sections=[r'\bpre[cç]o\s+(?:por\s+)?participante\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€',
                   r'\b(?:pre[cç]o|valor|inscri[cç][aã]o)\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€',
                   r'\b(?:adultos?|participantes?)\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€']
         for pat in sections:
-            m=re.search(pat,text,re.I)
+            m=re.search(pat,price_text,re.I)
             if m:
                 val=float(m[1].replace(',','.'))
                 if 0<=val<=500:event['price']=val;break
         if event.get('price') is None:
             # Não tomar o preço de crianças como preço geral.
-            prices=list(re.finditer(r'(?<!\d)(\d{1,3}(?:[.,]\d{1,2})?)\s*€',text,re.I))
-            adult=[m for m in prices if not re.search(r'\b(?:crian[cç]as?|menores?|infantil)\b',text[max(0,m.start()-45):m.start()],re.I)]
+            prices=list(re.finditer(r'(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*€',price_text,re.I))
+            adult=[m for m in prices if not re.search(r'\b(?:crian[cç]as?|menores?|infantil)\b',price_text[max(0,m.start()-45):m.start()],re.I)]
             if len(adult)==1:
                 val=float(adult[0][1].replace(',','.'))
                 if 0<=val<=500:event['price']=val
@@ -349,7 +351,7 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         if item.get("price") is None or item.get("price") == 0:
             full_text = clean(html.get_text(" ", strip=True))
             for heading in re.finditer(r"(?:fa[cç]a\s+j[aá]\s+a\s+sua\s+reserva|reservas\s+fechadas!?)", full_text, re.I):
-                booking = full_text[heading.end():heading.end() + 240]
+                booking = normalizar_texto_precos(full_text[heading.end():heading.end() + 240])
                 m_price = re.search(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|euros?)", booking, re.I)
                 if m_price:
                     price = float(m_price[1].replace(",", "."))
