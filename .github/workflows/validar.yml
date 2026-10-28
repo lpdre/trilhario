@@ -1,6 +1,18 @@
 name: Validar Trilhário
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/**'
+      - 'index.html'
+      - 'testes/**'
+      - '*.py'
+      - 'netlify/functions/**'
+      - 'netlify.toml'
+      - 'portagens-config.json'
+      - 'scripts/build-netlify.cjs'
+      - '.github/workflows/validar.yml'
   pull_request:
     paths:
       - 'assets/**'
