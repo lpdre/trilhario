@@ -371,6 +371,10 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
                 break
         # Hora no formato «Início: 9:15 horas» (extractor genérico aceita-o).
     elif organizer == "Hike Land":
+        from hikeland import parse_characteristics
+        for field, field_value in parse_characteristics(html).items():
+            if item.get(field) is None:
+                item[field] = field_value
         # O preço da ficha pode estar fora do <main>, no bloco de inscrição.
         # A exigência de «€ | Participante» evita preços de ofertas relacionadas.
         if item.get("price") is None:

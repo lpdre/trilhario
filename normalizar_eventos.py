@@ -375,10 +375,12 @@ def parse_official_listing(organizer, html, url):
             if 36<=lat<=43 and -10<=lon<=-6:
                 found.update(lat=round(lat,8),lon=round(lon,8),verified=True)
     elif organizer=='Hike Land':
+        from hikeland import parse_characteristics
+        found.update(parse_characteristics(soup))
         # Nas fichas a tarifa aparece no bloco de características,
         # antes de «O Preço Inclui», como «PREÇO: 15€ | Participante».
         m=re.search(r'\bPre[cç]o\s*[:–—-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*\|\s*Participante\b',txt,re.I)
-        if m:found['price']=number(m[1])
+        if m and 'price' not in found:found['price']=number(m[1])
     return found
 
 
