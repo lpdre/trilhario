@@ -24,6 +24,7 @@ const calc=trip.tripCalc({price:30});
 assert.equal(calc.km,159);assert.equal(calc.minutes,160);assert.equal(calc.fuel,15.9);assert.equal(calc.toll,7);assert.equal(calc.total,22.9);
 // As portagens devem ser calculadas sem botões nos cartões.
 const tripCard={
+  tollApiEndpoint:'/.netlify/functions/portagens',
   travelPrefs:{origin:'Aveiro'},tripCalc:()=>({km:145.5,minutes:120,fuel:15,toll:null,total:null}),
   travelData:()=>({precomputed:true}),routeCacheKey:()=> 'aveiro|evento',
   tripProblems:new Map(),departureCandidates:()=>['Arouca'],
