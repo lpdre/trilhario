@@ -96,3 +96,11 @@ node testes/test_localizacoes_browser.cjs
 - JSON-LD com `endDate` e intervalos identificáveis nas fichas RB/Smile passam a ser reconhecidos; programas sem informação suficiente não recebem datas finais presumidas.
 - Testes de regressão independentes da presença de edições antigas no catálogo, evitando bloquear recolhas quando essas edições expiram.
 - A inclusão de programas pedestres de vários dias mantém-se; não voltar a aplicar exclusões globais por duração ou preço.
+
+## Portagens: GitHub Pages e Netlify
+- GitHub Pages publica apenas ficheiros estáticos e não executa `netlify/functions/portagens.js`.
+- O Netlify executa a função no seu próprio domínio, com `netlify.toml` a publicar apenas a interface em `dist/`.
+- Para consultar esse backend a partir de `https://lpdre.github.io/trilhario/`, indicar em `portagens-config.json` o endereço HTTPS confirmado da função Netlify, como `https://<dominio-real>.netlify.app/.netlify/functions/portagens`. Não utilizar um URL presumido.
+- A função aceita CORS apenas do GitHub Pages deste projecto, incluindo preflight `OPTIONS`; a própria versão Netlify usa a função no mesmo domínio.
+- Sem backend configurado no GitHub Pages, o Trilhário mantém distância/combustível mas não inventa valores de portagens nem tenta rotas adicionais apenas para consultar uma função inexistente.
+- O pedido `GET` à função verifica apenas a presença do backend; para validar o preço da IP, é necessário testar um percurso real com `POST`.

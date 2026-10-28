@@ -904,7 +904,7 @@ function tollFresh(r,now=Date.now()){
  timeValid(r.tollChecked,TOLL_MAX_AGE_MS,now));
 }
 function tollsDue(r,now=Date.now()){
- if(!r||r.tollSource==='manual'||tollFresh(r,now))return false;
+ if(!tollApiEndpoint||!r||r.tollSource==='manual'||tollFresh(r,now))return false;
  return now>=Math.max(Number(r.tollNextRetry||0),tollRetryAfter);
 }
 // Polyline5, compatível com as coordenadas [longitude, latitude] do OSRM.
@@ -1001,7 +1001,7 @@ function travelRow(e){
     <div class="v74-trip-line v74-trip-prices">
      <span class="v74-trip-piece">Combustível <strong>${travelMoney(t.fuel)}</strong></span>
      <span class="v74-trip-divider" aria-hidden="true">|</span>
-     <span class="v74-trip-piece">Portagens <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
+     <span class="v74-trip-piece">Portagens <strong ${!tollApiEndpoint?'title="Serviço de portagens não configurado nesta publicação"':''}>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
      <span class="v74-trip-divider" aria-hidden="true">|</span>
      <span class="v74-trip-piece v74-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong> <small>(ida e volta)</small></span>
     </div>
@@ -1443,14 +1443,31 @@ async function roadRoute(p,q){
 }
 // A IP recebe o percurso real e devolve portagem para Classe 1, só ida.
 // Usamos uma função do próprio Netlify para não depender de CORS no navegador.
+// Netlify executa a função de portagens. No GitHub Pages é necessário
+// configurar o endereço HTTPS desse backend em portagens-config.json.
+let tollApiEndpoint=/\.github\.io$/i.test(location.hostname)?'':'/.netlify/functions/portagens';
+async function loadTollApiEndpoint(){
+ if(!/\.github\.io$/i.test(location.hostname))return;
+ try{
+  const response=await fetch('portagens-config.json',{cache:'no-store'});
+  if(!response.ok)return;
+  const config=await response.json(),value=String(config?.endpoint||'').trim();
+  if(!value)return;
+  const url=new URL(value);
+  if(url.protocol==='https:'&&url.username===''&&url.password===''&&
+     url.pathname.endsWith('/.netlify/functions/portagens')&&!url.search&&!url.hash)
+   tollApiEndpoint=url.href;
+ }catch(error){console.info('Backend de portagens não configurado.',error?.message||error);}
+}
 const TOLL_RETRY_MS=3*60*1000,TOLL_UNKNOWN_MS=12*60*60*1000;
 let tollRetryAfter=0,tollRequestSerial=0;
 // Erros de rede são temporários; ausência de estimativa não é uma portagem de zero euros.
 async function autoTollsForGeometry(geometry){
+ if(!tollApiEndpoint)return {status:'unknown'};
  if(!Array.isArray(geometry)||geometry.length<2)return {status:'unknown'};
  if(Date.now()<tollRetryAfter)return {status:'retry'};
  try{
-  const {response,data:result}=await fetchTimedJson('/.netlify/functions/portagens',{
+  const {response,data:result}=await fetchTimedJson(tollApiEndpoint,{
    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({coordinates:geometry})
   },17000);
   if(!response.ok){
@@ -1691,7 +1708,7 @@ $('orgPageSearch').addEventListener('input',renderOrganizersPage);
 populateOrganizers();
 render();
 renderTravelProgress();
-loadPrecomputedRoutes().finally(loadEventFeed);
+Promise.all([loadPrecomputedRoutes(),loadTollApiEndpoint()]).finally(loadEventFeed);
 // A lista também se actualiza sozinha ao chegar a hora de início de uma caminhada.
 setInterval(refreshAgendaForClock,30000);
 document.addEventListener('visibilitychange',refreshAgendaForClock);
