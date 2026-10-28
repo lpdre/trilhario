@@ -760,7 +760,7 @@ def main():
                 changed += 1
         # Verificação nas páginas originais para os eventos que têm informação em falta.
         # Limite global de visitas controlado por main() para não bloquear o workflow.
-        if not verified and (ident in prioritized_attempted or network_lookups < 35):
+        if ident in prioritized_attempted or network_lookups < 35:
             if ident in prioritized_attempted:
                 fetched = prioritized.get(ident) or {}
             else:
@@ -769,6 +769,11 @@ def main():
                 fetched = enrich_official(e, old)
             if fetched:
                 for field,value in fetched.items():
+                    # Uma exceção protege apenas os campos que corrige, incluindo
+                    # None quando a fonte não publica esse dado. Os restantes
+                    # campos continuam elegíveis para recuperação oficial.
+                    if verified and field in verified:
+                        continue
                     from_official_meeting = (e.get('organizer') == 'Mais Trilhos'
                                              and field == 'start' and meaningful(value)
                                              and value != e.get('start'))
