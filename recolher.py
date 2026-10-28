@@ -449,7 +449,13 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         mprice = re.search(r"\b(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:euros?|€)\s+por\s+pessoa", value, re.I)
         if mprice:
             item["price"] = float(mprice[1].replace(',', '.'))
-        start = re.search(r"(?:Horário e local)\s+\d{1,2}/\d{1,2}/20\d{2},?\s*\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?\s+(.{8,105}?)(?:\s+Sobre o evento|\s+Descrição)", value, re.I)
+        # Consumir também a data final dos programas de vários dias antes do local.
+        # Sem local, não permitir que o intervalo opcional seja capturado como morada.
+        start = re.search(
+            r"Horário e local\s+\d{1,2}/\d{1,2}/20\d{2},?\s*\d{1,2}:\d{2}"
+            r"(?:\s*[–—-]\s*(?:\d{1,2}/\d{1,2}/20\d{2},?\s*)?\d{1,2}:\d{2})?"
+            r"\s+(?![–—-]|\d{1,2}/\d{1,2}/20\d{2})(.{8,105}?)(?:\s+Sobre o evento|\s+Descrição)",
+            value, re.I)
         if start:
             item["start"] = clean(start[1])
         if 'esgotado' in folded(value[:1600]):
