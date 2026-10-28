@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 import unicodedata
+from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
@@ -858,10 +859,13 @@ def main():
     if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
     health=data.get('sources_health') or {}
-    state_counts={name:sum(1 for item in health.values() if isinstance(item,dict) and item.get('state')==name)
-                  for name in ('com_eventos','sem_eventos_ou_indisponivel','erro')}
+    # Contar os estados efectivamente publicados pela monitorização, incluindo
+    # falhas específicas e recolhas parciais, sem os limitar à enumeração antiga.
+    state_counts=Counter(str(item.get('state') or 'nao_verificada')
+                         for item in health.values() if isinstance(item,dict))
+    source_summary='; '.join(f'{count} {state}' for state,count in sorted(state_counts.items()))
     lines = [f'Excepções verificadas: {exception_report["added"]} importadas; {exception_report["already_collected"]} já presentes; {exception_report["expired"]} caducadas',
-             f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
+             'Fontes: '+(source_summary or 'sem diagnóstico disponível'),
              f'Limpeza de anúncios: {removed_invalid_or_duplicate} registos duplicados e anúncios de agregador retirados',
              f'Programas multidiários incluídos: {sum(1 for e in events if e.get("multiDay"))}',
              f'Títulos/datas: {len(excluded_date_conflicts)} datas contraditórias de um dia bloqueadas',
