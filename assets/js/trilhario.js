@@ -1001,7 +1001,7 @@ function travelRow(e){
     <div class="v74-trip-line v74-trip-prices">
      <span class="v74-trip-piece">Combustível <strong>${travelMoney(t.fuel)}</strong></span>
      <span class="v74-trip-divider" aria-hidden="true">|</span>
-     <span class="v74-trip-piece">Portagens <strong ${!tollApiEndpoint?'title="Serviço de portagens não configurado nesta publicação"':''}>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
+     <span class="v74-trip-piece">Portagens <strong>${t.toll==null?'—':travelMoney(t.toll)}</strong></span>
      <span class="v74-trip-divider" aria-hidden="true">|</span>
      <span class="v74-trip-piece v74-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong> <small>(ida e volta)</small></span>
     </div>
