@@ -786,6 +786,12 @@ def main():
         # A consulta ao anúncio oficial pode ter actualizado o ponto após a
         # recuperação dos campos antigos. Verificar novamente antes de publicar.
         if invalidate_stale_coordinates(e,old):changed+=1
+        # Campos sem hora continuam desconhecidos; os restantes têm de ser HH:MM.
+        # Não comparar início/fim sem datas: o programa pode atravessar a meia-noite.
+        for field in ('time', 'endTime'):
+            value = e.get(field)
+            if value not in (None, '') and not clock_valid(value):
+                errors.append('Hora inválida em '+field+': '+str(ident))
         if e.get('lat') is not None or e.get('lon') is not None:
             if not valid_gps_pair(e):
                 errors.append('Coordenadas GPS inválidas: '+str(ident))
