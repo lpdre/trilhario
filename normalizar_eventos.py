@@ -186,12 +186,17 @@ def parse_caminhando_detail(html,url):
     txt=' '.join(main.get_text(' ',strip=True).split())
     # O site imprime "Horário (Domingo) 9:20 - 14:00 Ponto de Encontro ...".
     head=txt[:13000]
+    # Não procurar um horário em descrições ou cartões de outros eventos.
+    # Conservar o rótulo final, usado como delimitador do ponto de encontro.
+    boundary=re.search(r'\b(?:Detalhes do Evento|Descri[cç][aã]o do Evento|'
+                       r'Eventos relacionados)\b',head,re.I)
+    schedule_head=head[:boundary.end()] if boundary else head
     match=re.search(
         r'\bHor[aá]rio\s+(?:\([^)]{2,30}\)\s*)?'
         r'(?P<begin>(?:[01]?\d|2[0-3]):[0-5]\d)\s*[-–—]\s*'
         r'(?P<end>(?:[01]?\d|2[0-3]):[0-5]\d)\s+'
         r'Ponto de Encontro\s+(?P<place>.+?)\s+'
-        r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',head,re.I)
+        r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',schedule_head,re.I)
     out={}
     if match:
         begin,end=match['begin'].zfill(5),match['end'].zfill(5)
