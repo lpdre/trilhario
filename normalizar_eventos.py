@@ -18,7 +18,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
 import time
 from localizacoes import limpar_local, normalizar_local_evento
-from identidade_eventos import sessoes_diferentes
+from identidade_eventos import sessoes_diferentes, refresh_observed_values
 from qualidade_anuncios import GENERIC_TITLE, title_date_conflicts, is_multiday_program
 
 ROOT = Path(__file__).resolve().parent
@@ -565,6 +565,7 @@ def merge_exact_duplicates(events, preferred_ids=None):
         else:
             winner=entry if (not old.get('verified') and entry.get('verified')) else old
         loser=old if winner is entry else entry
+        refresh_observed_values(winner, loser)
         aliases=set(winner.get('alias_ids') or []) | set(loser.get('alias_ids') or [])
         if loser.get('id') and loser.get('id')!=winner.get('id'):
             aliases.add(loser['id'])

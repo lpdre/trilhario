@@ -68,3 +68,42 @@ def sessoes_diferentes(first, second):
     if detail_a and detail_b and detail_a != detail_b:
         return True
     return False
+
+
+def refresh_observed_values(target, candidate, current_ids=None):
+    """Separar o ID canónico dos valores explicitamente recolhidos mais tarde."""
+    from datetime import date
+    import math
+    detail = _detail_url(target)
+    if (not detail or detail != _detail_url(candidate)
+            or target.get('date') != candidate.get('date')
+            or not _fold(target.get('organizer'))
+            or _fold(target.get('organizer')) != _fold(candidate.get('organizer'))
+            or sessoes_diferentes(target, candidate)
+            or urlsplit(str(target.get('url'))).query != urlsplit(str(candidate.get('url'))).query):
+        return
+    current_ids = current_ids if current_ids is not None else set()
+    target_current = target.get('id') in current_ids
+    candidate_current = candidate.get('id') in current_ids
+    if target_current != candidate_current:
+        newer = candidate_current
+    else:
+        try:
+            before = date.fromisoformat(str(target.get('last_seen_at')))
+            after = date.fromisoformat(str(candidate.get('last_seen_at')))
+            newer = before < after <= date.today()
+        except ValueError:
+            newer = False
+    if not newer:
+        return
+    for field in ('price', 'km', 'gain', 'duration', 'difficulty'):
+        value = candidate.get(field)
+        if (type(value) in (int, float) and value >= 0
+                and (type(value) is int or math.isfinite(value))):
+            if field == 'difficulty' and (type(value) is not int or not 1 <= value <= 5):
+                continue
+            target[field] = value
+    if candidate.get('last_seen_at'):
+        target['last_seen_at'] = candidate['last_seen_at']
+    if candidate_current:
+        current_ids.add(target.get('id'))

@@ -24,7 +24,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts, is_multiday_program
-from identidade_eventos import sessoes_diferentes
+from identidade_eventos import sessoes_diferentes, refresh_observed_values
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "eventos.json"
@@ -599,7 +599,7 @@ def similarity_key(item: dict) -> tuple[str,str,str]:
     return (item.get('date',''),org,title)
 
 
-def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
+def deduplicate(events: list[dict], preferred_ids=None, current_ids=None) -> list[dict]:
     """Fundir apenas anúncios compatíveis da mesma data e organizador.
 
     IDs já publicados têm prioridade sobre IDs novos gerados por uma alteração
@@ -608,6 +608,7 @@ def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
     """
     from difflib import SequenceMatcher
     preferred_ids = set(preferred_ids or ())
+    current_ids = set(current_ids or ())
     grouped = {}
     ungrouped = []
     def rank(item):
@@ -633,6 +634,7 @@ def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
             return overlap>=0.86 and SequenceMatcher(None,old_title,title).ratio()>=0.94
         prev=next((x for x in group if duplicates(x)),None)
         if prev is None:group.append(item);continue
+        refresh_observed_values(prev, item, current_ids)
         aliases=set(prev.get('alias_ids') or [])|set(item.get('alias_ids') or [])
         if item.get('id') and item.get('id')!=prev.get('id'):aliases.add(item['id'])
         aliases.discard(prev.get('id'))
@@ -1046,6 +1048,7 @@ def main() -> int:
                         published_ids.add(item["id"])
         except (ValueError, OSError, AttributeError) as exc:
             logging.warning("Catálogo anterior inválido: %s", exc)
+    current_ids = set()
     new_ids = []
     succeeded = 0
     sources_health = {}
@@ -1090,6 +1093,7 @@ def main() -> int:
                     if item.get('status_checked_at') and item.get('status')=='':
                         # A ausência de esgotado deve ser revalidada, não herdada.
                         item['status']=''
+                current_ids.add(item["id"])
                 aggregated[item["id"]] = item
         except Exception:
             sources_health[source['organizer']]={'state':'erro','count':0,
@@ -1098,7 +1102,7 @@ def main() -> int:
     if not aggregated:
         logging.warning("Não foram encontrados eventos válidos; não substituir o site por uma lista vazia.")
         return 0
-    ordered = sorted(deduplicate(list(aggregated.values()), preferred_ids=published_ids), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
+    ordered = sorted(deduplicate(list(aggregated.values()), preferred_ids=published_ids, current_ids=current_ids), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
     # O relatório de cada fonte acompanha o catálogo, mesmo com recolha parcial.
     # Não declarar que uma agenda foi cancelada apenas por não ter sido lida.
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
