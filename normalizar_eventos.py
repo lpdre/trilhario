@@ -382,7 +382,7 @@ def parse_official_listing(organizer, html, url):
     return found
 
 
-def enrich_official(e, previous):
+def enrich_official(e, previous, page_cache=None):
     """Códigos e limites defensivos para páginas oficiais com formatos conhecidos."""
     try:
         parsed=urlsplit(str(e.get('url') or ''))
@@ -394,12 +394,17 @@ def enrich_official(e, previous):
         if (all(meaningful(e.get(k)) for k in required)
             and not GENERIC_TITLE.match(str(e.get('title') or ''))):
             return {}
+        if page_cache is not None and e['url'] in page_cache:
+            return parse_official_listing(e['organizer'],page_cache[e['url']],e['url'])
         import requests
         response=requests.get(e['url'],timeout=9,headers={'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)'})
         response.raise_for_status()
         if 'text/html' not in response.headers.get('Content-Type','text/html'):
             return {}
-        return parse_official_listing(e['organizer'],response.text,e['url'])
+        html=response.text
+        if page_cache is not None:
+            page_cache[e['url']]=html
+        return parse_official_listing(e['organizer'],html,e['url'])
     except Exception as exc:
         print('Página oficial não verificada:',e.get('url'),type(exc).__name__)
         return {}
@@ -665,6 +670,8 @@ def main():
     # Dar prioridade aos pontos de encontro em falta na Mais Trilhos.
     # A verificação normal tinha um orçamento global de 35 consultas e podia
     # gastá-lo antes de chegar às caminhadas de Novembro e Dezembro.
+    # Cache de HTML apenas desta execução; não recuperar preços de execuções antigas.
+    page_cache = {}
     prioritized = {}
     prioritized_attempted = set()
     for entry in sorted((x for x in events if isinstance(x,dict)), key=lambda x: str(x.get('date',''))):
@@ -676,7 +683,7 @@ def main():
             and str(entry.get('date') or '') >= datetime.now(timezone.utc).date().isoformat()):
             ident = entry.get('id')
             prioritized_attempted.add(ident)
-            prioritized[ident] = enrich_official(entry, {})
+            prioritized[ident] = enrich_official(entry, {}, page_cache=page_cache)
     network_lookups = 0
     for e in events:
         if not isinstance(e, dict):
@@ -760,13 +767,14 @@ def main():
                 changed += 1
         # Verificação nas páginas originais para os eventos que têm informação em falta.
         # Limite global de visitas controlado por main() para não bloquear o workflow.
-        if not verified and (ident in prioritized_attempted or network_lookups < 35):
+        if not verified and (ident in prioritized_attempted or e.get('url') in page_cache or network_lookups < 35):
             if ident in prioritized_attempted:
                 fetched = prioritized.get(ident) or {}
             else:
-                if e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land'):
+                if (e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land')
+                        and e.get('url') not in page_cache):
                     network_lookups += 1
-                fetched = enrich_official(e, old)
+                fetched = enrich_official(e, old, page_cache=page_cache)
             if fetched:
                 for field,value in fetched.items():
                     from_official_meeting = (e.get('organizer') == 'Mais Trilhos'
