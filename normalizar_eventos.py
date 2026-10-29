@@ -206,12 +206,18 @@ def parse_caminhando_detail(html,url):
     lon=caminhar_dms_coordinate(head,'Longitude')
     if lat is not None and lon is not None and 36<=lat<=43 and -10<=lon<=-6:
         out.update(lat=round(lat,8),lon=round(lon,8),verified=True)
-    # O H1 contém exclusivamente o nome, ao contrário da âncora do calendário.
-    h1=main.find('h1') or soup.find('h1')
-    if h1:
-        title=' '.join(h1.get_text(' ',strip=True).split())
-        if 7<=len(title)<=140 and not re.search(r'\b(?:agenda|eventos|pesquisa livre)\b',title,re.I):
-            out['title']=title
+    # Um H1 pode ser apenas uma secção (por exemplo, «Localização»).
+    # O URL serve só para confirmar a relação com a ficha; nunca gera um nome.
+    slug = unquote(urlsplit(url).path.rstrip('/').split('/')[-1])
+    expected = set(re.findall(r'[a-z]{4,}', folded(slug)))
+    for heading in main.find_all('h1'):
+        title = ' '.join(heading.get_text(' ', strip=True).split())
+        words = set(re.findall(r'[a-z]{4,}', folded(title)))
+        if (7 <= len(title) <= 140 and expected
+                and len(expected & words) / len(expected) >= 0.55
+                and not re.search(r'\b(?:agenda|eventos|pesquisa livre|localiza[cç][aã]o|pontos de interesse)\b', title, re.I)):
+            out['title'] = title
+            break
     return out
 
 def repair_caminhando(event, old):
