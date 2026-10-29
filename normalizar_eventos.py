@@ -382,17 +382,23 @@ def parse_official_listing(organizer, html, url):
     return found
 
 
+def needs_official_enrichment(event):
+    """Só consultar fontes e campos suportados pelo extrator desta fase."""
+    try:
+        host = (urlsplit(str(event.get('url') or '')).hostname or '').removeprefix('www.')
+    except ValueError:
+        return False
+    organizer = event.get('organizer')
+    if host not in OFFICIAL_DOMAINS or OFFICIAL_DOMAINS[host] != organizer:
+        return False
+    required = ('price',) if organizer == 'Hike Land' else ('start','km','gain','duration','price','time')
+    return any(not meaningful(event.get(field)) for field in required)
+
+
 def enrich_official(e, previous):
     """Códigos e limites defensivos para páginas oficiais com formatos conhecidos."""
     try:
-        parsed=urlsplit(str(e.get('url') or ''))
-        host=(parsed.hostname or '').removeprefix('www.')
-        if host not in OFFICIAL_DOMAINS or OFFICIAL_DOMAINS[host]!=e.get('organizer'):
-            return {}
-        # Só verificar campos cuja extracção ainda está incompleta, para reduzir consultas.
-        required=('start','km','gain','duration','price','time')
-        if (all(meaningful(e.get(k)) for k in required)
-            and not GENERIC_TITLE.match(str(e.get('title') or ''))):
+        if not needs_official_enrichment(e):
             return {}
         import requests
         response=requests.get(e['url'],timeout=9,headers={'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)'})
@@ -764,9 +770,10 @@ def main():
             if ident in prioritized_attempted:
                 fetched = prioritized.get(ident) or {}
             else:
-                if e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land'):
+                fetched = {}
+                if needs_official_enrichment(e):
                     network_lookups += 1
-                fetched = enrich_official(e, old)
+                    fetched = enrich_official(e, old)
             if fetched:
                 for field,value in fetched.items():
                     from_official_meeting = (e.get('organizer') == 'Mais Trilhos'
