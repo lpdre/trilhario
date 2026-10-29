@@ -786,6 +786,15 @@ def main():
         # A consulta ao anúncio oficial pode ter actualizado o ponto após a
         # recuperação dos campos antigos. Verificar novamente antes de publicar.
         if invalidate_stale_coordinates(e,old):changed+=1
+        # Valores desconhecidos são legítimos; números negativos, booleanos,
+        # texto e NaN/Infinity não são medidas publicáveis.
+        # Sem tetos de um dia: programas multidiários podem ter valores elevados.
+        for field in ('price', 'km', 'gain', 'duration'):
+            value = e.get(field)
+            if value is not None and (
+                    type(value) not in (int, float) or value < 0
+                    or (type(value) is float and not math.isfinite(value))):
+                errors.append('Valor numérico inválido em '+field+': '+str(ident))
         if e.get('lat') is not None or e.get('lon') is not None:
             if not valid_gps_pair(e):
                 errors.append('Coordenadas GPS inválidas: '+str(ident))
