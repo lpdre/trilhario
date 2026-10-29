@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, parse_qsl, urlencode
 
 
 UNKNOWN_PLACES = {'', 'por confirmar', 'a confirmar', 'por definir',
@@ -45,7 +45,13 @@ def _detail_url(event):
         path = parsed.path.rstrip('/').lower()
         if parsed.scheme not in ('https', 'http') or not host or not DETAIL_PATH.search(path):
             return ''
-        return host + path
+        # A ficha pode distinguir sessões na query. Só retirar rastreio conhecido.
+        params = [(key, value) for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+                  if not key.lower().startswith('utm_')
+                  and key.lower() not in {'fbclid', 'gclid', 'msclkid'}]
+        # Ordenar chaves, preservando a ordem dos valores de chaves repetidas.
+        query = urlencode(sorted(params, key=lambda pair: pair[0]))
+        return host + path + ('?' + query if query else '')
     except ValueError:
         return ''
 
