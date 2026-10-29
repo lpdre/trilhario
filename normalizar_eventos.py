@@ -18,7 +18,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
 import time
 from localizacoes import limpar_local, normalizar_local_evento
-from identidade_eventos import sessoes_diferentes
+from identidade_eventos import sessoes_diferentes, sanitize_aliases
 from qualidade_anuncios import GENERIC_TITLE, title_date_conflicts, is_multiday_program
 
 ROOT = Path(__file__).resolve().parent
@@ -650,6 +650,7 @@ def main():
         events[:] = [e for e in events if id(e) not in blocked]
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
+    sanitize_aliases(events)
     by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
     errors = []
     changed = 0

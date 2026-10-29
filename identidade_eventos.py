@@ -68,3 +68,24 @@ def sessoes_diferentes(first, second):
     if detail_a and detail_b and detail_a != detail_b:
         return True
     return False
+
+
+def event_aliases(event):
+    values = event.get('alias_ids')
+    return {value for value in values if isinstance(value, str) and value} if isinstance(values, list) else set()
+
+
+def sanitize_aliases(events):
+    """Conservar aliases inequívocos sem roubar IDs de outros anúncios."""
+    primary_ids = {event.get('id') for event in events}
+    owners = {}
+    for event in events:
+        for alias in event_aliases(event):
+            owners.setdefault(alias, set()).add(event.get('id'))
+    for event in events:
+        aliases = sorted(alias for alias in event_aliases(event)
+                         if alias not in primary_ids and len(owners[alias]) == 1)
+        if aliases:
+            event['alias_ids'] = aliases
+        else:
+            event.pop('alias_ids', None)

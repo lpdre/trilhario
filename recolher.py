@@ -24,7 +24,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts, is_multiday_program
-from identidade_eventos import sessoes_diferentes
+from identidade_eventos import sessoes_diferentes, event_aliases, sanitize_aliases
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "eventos.json"
@@ -1090,6 +1090,21 @@ def main() -> int:
                     if item.get('status_checked_at') and item.get('status')=='':
                         # A ausência de esgotado deve ser revalidada, não herdada.
                         item['status']=''
+                old = aggregated.get(item['id'], {})
+                from consolidar_catalogo import normalized_title, url_key
+                same_source = (old and normalized_title(old.get('organizer'))
+                    and normalized_title(old.get('organizer'))
+                    == normalized_title(item.get('organizer'))
+                    and url_key(old.get('url')) and url_key(old.get('url')) == url_key(item.get('url'))
+                    and urlparse(str(old.get('url'))).query == urlparse(str(item.get('url'))).query)
+                if same_source:
+                    # IDs alternativos pertencem à identidade publicada. A dificuldade,
+                    # ao contrário dos aliases, só pode ser recuperada na mesma edição.
+                    item['alias_ids'] = sorted(event_aliases(old) | event_aliases(item))
+                    difficulty = old.get('difficulty')
+                    if (old.get('date') == item.get('date') and item.get('difficulty') is None
+                            and type(difficulty) is int and 1 <= difficulty <= 5):
+                        item['difficulty'] = difficulty
                 aggregated[item["id"]] = item
         except Exception:
             sources_health[source['organizer']]={'state':'erro','count':0,
@@ -1099,6 +1114,7 @@ def main() -> int:
         logging.warning("Não foram encontrados eventos válidos; não substituir o site por uma lista vazia.")
         return 0
     ordered = sorted(deduplicate(list(aggregated.values()), preferred_ids=published_ids), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
+    sanitize_aliases(ordered)
     # O relatório de cada fonte acompanha o catálogo, mesmo com recolha parcial.
     # Não declarar que uma agenda foi cancelada apenas por não ter sido lida.
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
