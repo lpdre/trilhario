@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'precalcular_rotas.py'
-      - 'normalizar_eventos.py'
-      - 'testes/test_catalogo_unico.py'
+      - '*.py'
+      - 'testes/**'
+      - 'excepcoes_catalogo.json'
       - '.github/workflows/actualizar.yml'
 
 permissions:
@@ -129,7 +129,13 @@ jobs:
           git add -- eventos.json rotas_precalculadas.json
           git commit -m "Actualizar catálogo e rotas pré-calculadas"
           git fetch origin "${GITHUB_REF_NAME}"
-          git rebase "origin/${GITHUB_REF_NAME}"
+          # O catálogo foi produzido e validado com GITHUB_SHA. Se o ramo
+          # avançou, uma nova execução deve recolher com a nova versão.
+          if [ "$(git rev-parse FETCH_HEAD)" != "${GITHUB_SHA}" ]; then
+            echo "::error::O ramo remoto avançou após a versão validada; catálogo não publicado. Executar novamente a recolha."
+            exit 1
+          fi
+          # Sem force: um avanço entre fetch e push também bloqueia a publicação.
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
       - name: Pedir nova publicação do GitHub Pages (se activado)

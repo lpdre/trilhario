@@ -24,7 +24,8 @@ from urllib.parse import urldefrag, urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 from qualidade_anuncios import MULTIDAY, GENERIC_TITLE, title_date_conflicts, is_multiday_program
-from identidade_eventos import sessoes_diferentes
+from precos import normalizar_texto_precos
+from identidade_eventos import sessoes_diferentes, event_aliases, sanitize_aliases, refresh_observed_values
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "eventos.json"
@@ -214,24 +215,31 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
         else:
             km_pattern = r'\b(\d{1,3}(?:[.,]\d{1,2})?)\s*km\b'
         event['km'] = number(km_pattern, text, 160)
+        if event.get('organizer') == 'Caminhando.pt' and event['km'] is None:
+            # O bloco de características também apresenta «12 km's Distância».
+            # Exigir o rótulo e não aceitar a cauda de um número inválido.
+            event['km'] = number(
+                r"(?<![\w.,+\-−])(\d{1,3}(?:[.,]\d{1,2})?)\s*km(?:['’]s)?\s+Dist[aâ]ncia\b",
+                text, 160)
     if event.get('gain') is None:
         gain=number(r'(?:D\+|desn[ií]vel(?: positivo| acumulado)?|ascens[aã]o)\s*[:\-]?\s*(\d{2,4})\s*m',text,4500)
         if gain is None:gain=number(r'\b(\d{2,4})\s*m\s*d\+(?=\s|$)',text+' ',4500)
         if gain is not None:event['gain']=round(gain)
     if event.get('price') is None:
+        price_text=normalizar_texto_precos(text)
         # Primeiro tarifa de participante/adulto; não adoptar o preço de criança.
         sections=[r'\bpre[cç]o\s+(?:por\s+)?participante\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€',
                   r'\b(?:pre[cç]o|valor|inscri[cç][aã]o)\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€',
                   r'\b(?:adultos?|participantes?)\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€']
         for pat in sections:
-            m=re.search(pat,text,re.I)
+            m=re.search(pat,price_text,re.I)
             if m:
                 val=float(m[1].replace(',','.'))
                 if 0<=val<=500:event['price']=val;break
         if event.get('price') is None:
             # Não tomar o preço de crianças como preço geral.
-            prices=list(re.finditer(r'(?<!\d)(\d{1,3}(?:[.,]\d{1,2})?)\s*€',text,re.I))
-            adult=[m for m in prices if not re.search(r'\b(?:crian[cç]as?|menores?|infantil)\b',text[max(0,m.start()-45):m.start()],re.I)]
+            prices=list(re.finditer(r'(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*€',price_text,re.I))
+            adult=[m for m in prices if not re.search(r'\b(?:crian[cç]as?|menores?|infantil)\b',price_text[max(0,m.start()-45):m.start()],re.I)]
             if len(adult)==1:
                 val=float(adult[0][1].replace(',','.'))
                 if 0<=val<=500:event['price']=val
@@ -349,7 +357,7 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         if item.get("price") is None or item.get("price") == 0:
             full_text = clean(html.get_text(" ", strip=True))
             for heading in re.finditer(r"(?:fa[cç]a\s+j[aá]\s+a\s+sua\s+reserva|reservas\s+fechadas!?)", full_text, re.I):
-                booking = full_text[heading.end():heading.end() + 240]
+                booking = normalizar_texto_precos(full_text[heading.end():heading.end() + 240])
                 m_price = re.search(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|euros?)", booking, re.I)
                 if m_price:
                     price = float(m_price[1].replace(",", "."))
@@ -371,6 +379,10 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
                 break
         # Hora no formato «Início: 9:15 horas» (extractor genérico aceita-o).
     elif organizer == "Hike Land":
+        from hikeland import parse_characteristics
+        for field, field_value in parse_characteristics(html).items():
+            if item.get(field) is None:
+                item[field] = field_value
         # O preço da ficha pode estar fora do <main>, no bloco de inscrição.
         # A exigência de «€ | Participante» evita preços de ofertas relacionadas.
         if item.get("price") is None:
@@ -449,7 +461,13 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         mprice = re.search(r"\b(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:euros?|€)\s+por\s+pessoa", value, re.I)
         if mprice:
             item["price"] = float(mprice[1].replace(',', '.'))
-        start = re.search(r"(?:Horário e local)\s+\d{1,2}/\d{1,2}/20\d{2},?\s*\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?\s+(.{8,105}?)(?:\s+Sobre o evento|\s+Descrição)", value, re.I)
+        # Consumir também a data final dos programas de vários dias antes do local.
+        # Sem local, não permitir que o intervalo opcional seja capturado como morada.
+        start = re.search(
+            r"Horário e local\s+\d{1,2}/\d{1,2}/20\d{2},?\s*\d{1,2}:\d{2}"
+            r"(?:\s*[–—-]\s*(?:\d{1,2}/\d{1,2}/20\d{2},?\s*)?\d{1,2}:\d{2})?"
+            r"\s+(?![–—-]|\d{1,2}/\d{1,2}/20\d{2})(.{8,105}?)(?:\s+Sobre o evento|\s+Descrição)",
+            value, re.I)
         if start:
             item["start"] = clean(start[1])
         if 'esgotado' in folded(value[:1600]):
@@ -599,7 +617,7 @@ def similarity_key(item: dict) -> tuple[str,str,str]:
     return (item.get('date',''),org,title)
 
 
-def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
+def deduplicate(events: list[dict], preferred_ids=None, current_ids=None) -> list[dict]:
     """Fundir apenas anúncios compatíveis da mesma data e organizador.
 
     IDs já publicados têm prioridade sobre IDs novos gerados por uma alteração
@@ -608,6 +626,7 @@ def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
     """
     from difflib import SequenceMatcher
     preferred_ids = set(preferred_ids or ())
+    current_ids = set(current_ids or ())
     grouped = {}
     ungrouped = []
     def rank(item):
@@ -633,6 +652,7 @@ def deduplicate(events: list[dict], preferred_ids=None) -> list[dict]:
             return overlap>=0.86 and SequenceMatcher(None,old_title,title).ratio()>=0.94
         prev=next((x for x in group if duplicates(x)),None)
         if prev is None:group.append(item);continue
+        refresh_observed_values(prev, item, current_ids)
         aliases=set(prev.get('alias_ids') or [])|set(item.get('alias_ids') or [])
         if item.get('id') and item.get('id')!=prev.get('id'):aliases.add(item['id'])
         aliases.discard(prev.get('id'))
@@ -1046,6 +1066,7 @@ def main() -> int:
                         published_ids.add(item["id"])
         except (ValueError, OSError, AttributeError) as exc:
             logging.warning("Catálogo anterior inválido: %s", exc)
+    current_ids = set()
     new_ids = []
     succeeded = 0
     sources_health = {}
@@ -1090,6 +1111,22 @@ def main() -> int:
                     if item.get('status_checked_at') and item.get('status')=='':
                         # A ausência de esgotado deve ser revalidada, não herdada.
                         item['status']=''
+                old = aggregated.get(item['id'], {})
+                from consolidar_catalogo import normalized_title, url_key
+                same_source = (old and normalized_title(old.get('organizer'))
+                    and normalized_title(old.get('organizer'))
+                    == normalized_title(item.get('organizer'))
+                    and url_key(old.get('url')) and url_key(old.get('url')) == url_key(item.get('url'))
+                    and urlparse(str(old.get('url'))).query == urlparse(str(item.get('url'))).query)
+                if same_source:
+                    # IDs alternativos pertencem à identidade publicada. A dificuldade,
+                    # ao contrário dos aliases, só pode ser recuperada na mesma edição.
+                    item['alias_ids'] = sorted(event_aliases(old) | event_aliases(item))
+                    difficulty = old.get('difficulty')
+                    if (old.get('date') == item.get('date') and item.get('difficulty') is None
+                            and type(difficulty) is int and 1 <= difficulty <= 5):
+                        item['difficulty'] = difficulty
+                current_ids.add(item["id"])
                 aggregated[item["id"]] = item
         except Exception:
             sources_health[source['organizer']]={'state':'erro','count':0,
@@ -1098,7 +1135,8 @@ def main() -> int:
     if not aggregated:
         logging.warning("Não foram encontrados eventos válidos; não substituir o site por uma lista vazia.")
         return 0
-    ordered = sorted(deduplicate(list(aggregated.values()), preferred_ids=published_ids), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
+    ordered = sorted(deduplicate(list(aggregated.values()), preferred_ids=published_ids, current_ids=current_ids), key=lambda x:(x["date"],x.get("time") or "99:99",x["title"]))
+    sanitize_aliases(ordered)
     # O relatório de cada fonte acompanha o catálogo, mesmo com recolha parcial.
     # Não declarar que uma agenda foi cancelada apenas por não ter sido lida.
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

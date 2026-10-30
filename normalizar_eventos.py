@@ -13,13 +13,15 @@ import re
 import subprocess
 import sys
 import unicodedata
+from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, unquote, urljoin
 import time
 from localizacoes import limpar_local, normalizar_local_evento
-from identidade_eventos import sessoes_diferentes
+from identidade_eventos import sessoes_diferentes, sanitize_aliases, refresh_observed_values
 from qualidade_anuncios import GENERIC_TITLE, title_date_conflicts, is_multiday_program
+from precos import normalizar_texto_precos
 
 ROOT = Path(__file__).resolve().parent
 CATALOG = ROOT / 'eventos.json'
@@ -186,12 +188,17 @@ def parse_caminhando_detail(html,url):
     txt=' '.join(main.get_text(' ',strip=True).split())
     # O site imprime "Horário (Domingo) 9:20 - 14:00 Ponto de Encontro ...".
     head=txt[:13000]
+    # Não procurar um horário em descrições ou cartões de outros eventos.
+    # Conservar o rótulo final, usado como delimitador do ponto de encontro.
+    boundary=re.search(r'\b(?:Detalhes do Evento|Descri[cç][aã]o do Evento|'
+                       r'Eventos relacionados)\b',head,re.I)
+    schedule_head=head[:boundary.end()] if boundary else head
     match=re.search(
         r'\bHor[aá]rio\s+(?:\([^)]{2,30}\)\s*)?'
         r'(?P<begin>(?:[01]?\d|2[0-3]):[0-5]\d)\s*[-–—]\s*'
         r'(?P<end>(?:[01]?\d|2[0-3]):[0-5]\d)\s+'
         r'Ponto de Encontro\s+(?P<place>.+?)\s+'
-        r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',head,re.I)
+        r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',schedule_head,re.I)
     out={}
     if match:
         begin,end=match['begin'].zfill(5),match['end'].zfill(5)
@@ -206,12 +213,18 @@ def parse_caminhando_detail(html,url):
     lon=caminhar_dms_coordinate(head,'Longitude')
     if lat is not None and lon is not None and 36<=lat<=43 and -10<=lon<=-6:
         out.update(lat=round(lat,8),lon=round(lon,8),verified=True)
-    # O H1 contém exclusivamente o nome, ao contrário da âncora do calendário.
-    h1=main.find('h1') or soup.find('h1')
-    if h1:
-        title=' '.join(h1.get_text(' ',strip=True).split())
-        if 7<=len(title)<=140 and not re.search(r'\b(?:agenda|eventos|pesquisa livre)\b',title,re.I):
-            out['title']=title
+    # Um H1 pode ser apenas uma secção (por exemplo, «Localização»).
+    # O URL serve só para confirmar a relação com a ficha; nunca gera um nome.
+    slug = unquote(urlsplit(url).path.rstrip('/').split('/')[-1])
+    expected = set(re.findall(r'[a-z]{4,}', folded(slug)))
+    for heading in main.find_all('h1'):
+        title = ' '.join(heading.get_text(' ', strip=True).split())
+        words = set(re.findall(r'[a-z]{4,}', folded(title)))
+        if (7 <= len(title) <= 140 and expected
+                and len(expected & words) / len(expected) >= 0.55
+                and not re.search(r'\b(?:agenda|eventos|pesquisa livre|localiza[cç][aã]o|pontos de interesse)\b', title, re.I)):
+            out['title'] = title
+            break
     return out
 
 def repair_caminhando(event, old):
@@ -365,7 +378,7 @@ def parse_official_listing(organizer, html, url):
         if m:found['km']=number(m[1])
         m=re.search(r'\bDesn[ií]vel\s+(\d{2,4})\s*m\b',txt,re.I)
         if m:found['gain']=int(m[1])
-        m=re.search(r'(?:Fa[cç]a J[aá] A Sua Reserva|Reservas Fechadas!?)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',txt,re.I)
+        m=re.search(r'(?:Fa[cç]a J[aá] A Sua Reserva|Reservas Fechadas!?)\s+(\d{1,3}(?:[.,]\d{1,2})?)\s*€',normalizar_texto_precos(txt),re.I)
         if m:found['price']=number(m[1])
         # O formato GPS tem dois valores completos: nunca usar apenas latitude.
         dms=re.search(r'Lat:\s*N\s*(\d{1,2})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]\s*Long:\s*W\s*(\d{1,3})[°º]\s*(\d{1,2})\s*[\'’′]\s*(\d{1,2}(?:[.,]\d+)?)\s*["”″]',txt,re.I)
@@ -375,31 +388,44 @@ def parse_official_listing(organizer, html, url):
             if 36<=lat<=43 and -10<=lon<=-6:
                 found.update(lat=round(lat,8),lon=round(lon,8),verified=True)
     elif organizer=='Hike Land':
+        from hikeland import parse_characteristics
+        found.update(parse_characteristics(soup))
         # Nas fichas a tarifa aparece no bloco de características,
         # antes de «O Preço Inclui», como «PREÇO: 15€ | Participante».
         m=re.search(r'\bPre[cç]o\s*[:–—-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*\|\s*Participante\b',txt,re.I)
-        if m:found['price']=number(m[1])
+        if m and 'price' not in found:found['price']=number(m[1])
     return found
 
 
-def enrich_official(e, previous):
+def needs_official_enrichment(event):
+    """Só consultar fontes e campos suportados pelo extrator desta fase."""
+    try:
+        host = (urlsplit(str(event.get('url') or '')).hostname or '').removeprefix('www.')
+    except ValueError:
+        return False
+    organizer = event.get('organizer')
+    if host not in OFFICIAL_DOMAINS or OFFICIAL_DOMAINS[host] != organizer:
+        return False
+    required = ('price','km','gain','duration') if organizer == 'Hike Land' else ('start','km','gain','duration','price','time')
+    return any(not meaningful(event.get(field)) for field in required)
+
+
+def enrich_official(e, previous, page_cache=None):
     """Códigos e limites defensivos para páginas oficiais com formatos conhecidos."""
     try:
-        parsed=urlsplit(str(e.get('url') or ''))
-        host=(parsed.hostname or '').removeprefix('www.')
-        if host not in OFFICIAL_DOMAINS or OFFICIAL_DOMAINS[host]!=e.get('organizer'):
+        if not needs_official_enrichment(e):
             return {}
-        # Só verificar campos cuja extracção ainda está incompleta, para reduzir consultas.
-        required=('start','km','gain','duration','price','time')
-        if (all(meaningful(e.get(k)) for k in required)
-            and not GENERIC_TITLE.match(str(e.get('title') or ''))):
-            return {}
+        if page_cache is not None and e['url'] in page_cache:
+            return parse_official_listing(e['organizer'],page_cache[e['url']],e['url'])
         import requests
         response=requests.get(e['url'],timeout=9,headers={'User-Agent':'TrilharioAgenda/0.1 (+https://github.com/lpdre/trilhario)'})
         response.raise_for_status()
         if 'text/html' not in response.headers.get('Content-Type','text/html'):
             return {}
-        return parse_official_listing(e['organizer'],response.text,e['url'])
+        html=response.text
+        if page_cache is not None:
+            page_cache[e['url']]=html
+        return parse_official_listing(e['organizer'],html,e['url'])
     except Exception as exc:
         print('Página oficial não verificada:',e.get('url'),type(exc).__name__)
         return {}
@@ -457,6 +483,7 @@ def extract_event_image(html, source_url):
         if tag and tag.get('content'):
             image_candidates.append(tag['content'])
     # JSON-LD também publica a fotografia do evento sem depender dos selectores visuais.
+    event_nodes=[]
     for tag in soup.select('script[type="application/ld+json"]')[:10]:
         try: root=_json.loads(tag.string or tag.get_text())
         except (ValueError,TypeError):continue
@@ -470,9 +497,24 @@ def extract_event_image(html, source_url):
             typ=node.get('@type')
             if isinstance(typ,str):typ=[typ]
             if any(str(t).endswith('Event') for t in (typ or [])):
-                val=node.get('image')
-                if isinstance(val,list):image_candidates.extend(val)
-                elif val:image_candidates.append(val)
+                event_nodes.append(node)
+    # Mesma regra de identidade de recolher.enrich_jsonld: preferir a ficha
+    # correspondente e só aceitar um Event sem URL quando for o único.
+    # Nunca usar uma foto de um anúncio relacionado para preencher uma falta.
+    page_url=str(source_url or '').split('#')[0].rstrip('/')
+    def node_url(node):
+        value=node.get('url') or node.get('@id') or ''
+        return value.split('#')[0].rstrip('/') if isinstance(value,str) else ''
+    matches=[node for node in event_nodes if page_url and node_url(node)==page_url]
+    selected=None
+    if len(matches)==1:
+        selected=matches[0]
+    elif len(event_nodes)==1 and not node_url(event_nodes[0]):
+        selected=event_nodes[0]
+    if selected is not None:
+        val=selected.get('image')
+        if isinstance(val,list):image_candidates.extend(val)
+        elif val:image_candidates.append(val)
     # Não procurar imagens aleatórias no rodapé, anúncios de outros eventos ou logótipos.
     for cand in image_candidates:
         if isinstance(cand,dict):cand=cand.get('url') or cand.get('contentUrl')
@@ -481,8 +523,12 @@ def extract_event_image(html, source_url):
     return None
 
 
+class PhotoLookupError(RuntimeError):
+    """A página não pôde ser consultada; não confirma ausência de fotografia."""
+
+
 def read_official_photo(event):
-    """Consultar só o site original do evento (nunca descarregar a imagem)."""
+    """Consultar a página oficial; falhas HTTP/rede levantam PhotoLookupError."""
     import requests
     try:
         target=str(event.get('url') or '')
@@ -510,8 +556,8 @@ def read_official_photo(event):
                 if len(buf)>PHOTO_MAX_HTML_BYTES:break
             encoding=resp.encoding or 'utf-8'
             return extract_event_image(bytes(buf).decode(encoding,errors='replace'),resp.url)
-    except requests.RequestException:
-        return None
+    except requests.RequestException as exc:
+        raise PhotoLookupError('Consulta da fotografia falhou') from exc
 
 def tidy_event_fields(event):
     """Limpa rótulos espúrios de títulos, organizadores e locais."""
@@ -565,6 +611,7 @@ def merge_exact_duplicates(events, preferred_ids=None):
         else:
             winner=entry if (not old.get('verified') and entry.get('verified')) else old
         loser=old if winner is entry else entry
+        refresh_observed_values(winner, loser)
         aliases=set(winner.get('alias_ids') or []) | set(loser.get('alias_ids') or [])
         if loser.get('id') and loser.get('id')!=winner.get('id'):
             aliases.add(loser['id'])
@@ -636,7 +683,7 @@ def main():
     removed_invalid_or_duplicate=initial_count-len(events)
     # Só aqui entram as excepções antigas que continuam confirmadas. Nunca
     # acrescentar dados por JavaScript depois de publicar o JSON.
-    from consolidar_catalogo import integrate, load_registry
+    from consolidar_catalogo import integrate, load_registry, normalized_title, url_key
     events[:], verified_corrections, exception_report = integrate(events, load_registry())
     events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
     # Programas multidiários são elegíveis. Neles, o título pode indicar
@@ -650,6 +697,7 @@ def main():
         events[:] = [e for e in events if id(e) not in blocked]
     if isinstance(data.get('sources_health'),dict):
         data['sources_health'].pop('Trilhos & Caminhadas',None)
+    sanitize_aliases(events)
     by_id = {e.get('id'): e for e in previous if isinstance(e, dict) and e.get('id')}
     errors = []
     changed = 0
@@ -665,6 +713,8 @@ def main():
     # Dar prioridade aos pontos de encontro em falta na Mais Trilhos.
     # A verificação normal tinha um orçamento global de 35 consultas e podia
     # gastá-lo antes de chegar às caminhadas de Novembro e Dezembro.
+    # Cache de HTML apenas desta execução; não recuperar preços de execuções antigas.
+    page_cache = {}
     prioritized = {}
     prioritized_attempted = set()
     for entry in sorted((x for x in events if isinstance(x,dict)), key=lambda x: str(x.get('date',''))):
@@ -676,7 +726,7 @@ def main():
             and str(entry.get('date') or '') >= datetime.now(timezone.utc).date().isoformat()):
             ident = entry.get('id')
             prioritized_attempted.add(ident)
-            prioritized[ident] = enrich_official(entry, {})
+            prioritized[ident] = enrich_official(entry, {}, page_cache=page_cache)
     network_lookups = 0
     for e in events:
         if not isinstance(e, dict):
@@ -711,6 +761,17 @@ def main():
                 if e.get(field)!=value:
                     e[field]=value;changed+=1
         old = by_id.get(ident, {})
+        # Um ID/URL pode ser reutilizado noutra edição. Só recuperar campos
+        # quando data, organizador e ficha coincidem; mudar a data não prova
+        # um adiamento. O ID publicado e os dados actuais mantêm-se intactos.
+        old_url = url_key(old.get('url'))
+        old_organizer = normalized_title(old.get('organizer'))
+        if not (start_date is not None and old.get('date') == e.get('date')
+                and old_organizer and old_organizer == normalized_title(e.get('organizer'))
+                and old_url and old_url == url_key(e.get('url'))
+                # Parâmetros podem identificar eventos diferentes na mesma página.
+                and urlsplit(str(old.get('url'))).query == urlsplit(str(e.get('url'))).query):
+            old = {}
         # Caminhando.pt: corrigir título poluído, horas e encontro a partir do
         # próprio cartão e, quando preciso, da página original da actividade.
         if e.get('organizer') == 'Caminhando.pt':
@@ -760,15 +821,22 @@ def main():
                 changed += 1
         # Verificação nas páginas originais para os eventos que têm informação em falta.
         # Limite global de visitas controlado por main() para não bloquear o workflow.
-        if not verified and (ident in prioritized_attempted or network_lookups < 35):
+        if ident in prioritized_attempted or e.get('url') in page_cache or network_lookups < 35:
             if ident in prioritized_attempted:
                 fetched = prioritized.get(ident) or {}
             else:
-                if e.get('organizer') in ('Mais Trilhos','GreenTrekker','Hike Land'):
-                    network_lookups += 1
-                fetched = enrich_official(e, old)
+                fetched = {}
+                if needs_official_enrichment(e):
+                    if e.get('url') not in page_cache:
+                        network_lookups += 1
+                    fetched = enrich_official(e, old, page_cache=page_cache)
             if fetched:
                 for field,value in fetched.items():
+                    # Uma exceção protege apenas os campos que corrige, incluindo
+                    # None quando a fonte não publica esse dado. Os restantes
+                    # campos continuam elegíveis para recuperação oficial.
+                    if verified and field in verified:
+                        continue
                     from_official_meeting = (e.get('organizer') == 'Mais Trilhos'
                                              and field == 'start' and meaningful(value)
                                              and value != e.get('start'))
@@ -786,6 +854,21 @@ def main():
         # A consulta ao anúncio oficial pode ter actualizado o ponto após a
         # recuperação dos campos antigos. Verificar novamente antes de publicar.
         if invalidate_stale_coordinates(e,old):changed+=1
+        # Valores desconhecidos são legítimos; números negativos, booleanos,
+        # texto e NaN/Infinity não são medidas publicáveis.
+        # Sem tetos de um dia: programas multidiários podem ter valores elevados.
+        for field in ('price', 'km', 'gain', 'duration'):
+            value = e.get(field)
+            if value is not None and (
+                    type(value) not in (int, float) or value < 0
+                    or (type(value) is float and not math.isfinite(value))):
+                errors.append('Valor numérico inválido em '+field+': '+str(ident))
+        # Campos sem hora continuam desconhecidos; os restantes têm de ser HH:MM.
+        # Não comparar início/fim sem datas: o programa pode atravessar a meia-noite.
+        for field in ('time', 'endTime'):
+            value = e.get(field)
+            if value not in (None, '') and not clock_valid(value):
+                errors.append('Hora inválida em '+field+': '+str(ident))
         if e.get('lat') is not None or e.get('lon') is not None:
             if not valid_gps_pair(e):
                 errors.append('Coordenadas GPS inválidas: '+str(ident))
@@ -849,7 +932,13 @@ def main():
         if recently_checked or image_visits>=PHOTO_VISITS_PER_RUN:
             continue
         image_visits+=1
-        photo=read_official_photo(e)
+        try:
+            photo=read_official_photo(e)
+        except PhotoLookupError:
+            # A visita conta para o limite, mas uma falha não inicia os 28 dias
+            # de espera. Permitir nova tentativa na próxima execução normal.
+            print('Fotografia: consulta falhou; nova tentativa pendente:', e.get('url'))
+            continue
         e['image_checked_at']=today.isoformat()
         if photo:
             e['image']=photo
@@ -858,10 +947,13 @@ def main():
     if previous and len(previous) >= 30 and len(events) < int(len(previous)*0.45):
         errors.append('Queda anormal no catálogo: '+str(len(previous))+' → '+str(len(events)))
     health=data.get('sources_health') or {}
-    state_counts={name:sum(1 for item in health.values() if isinstance(item,dict) and item.get('state')==name)
-                  for name in ('com_eventos','sem_eventos_ou_indisponivel','erro')}
+    # Contar os estados efectivamente publicados pela monitorização, incluindo
+    # falhas específicas e recolhas parciais, sem os limitar à enumeração antiga.
+    state_counts=Counter(str(item.get('state') or 'nao_verificada')
+                         for item in health.values() if isinstance(item,dict))
+    source_summary='; '.join(f'{count} {state}' for state,count in sorted(state_counts.items()))
     lines = [f'Excepções verificadas: {exception_report["added"]} importadas; {exception_report["already_collected"]} já presentes; {exception_report["expired"]} caducadas',
-             f'Fontes: {state_counts["com_eventos"]} com eventos; {state_counts["sem_eventos_ou_indisponivel"]} sem confirmação; {state_counts["erro"]} com erro',
+             'Fontes: '+(source_summary or 'sem diagnóstico disponível'),
              f'Limpeza de anúncios: {removed_invalid_or_duplicate} registos duplicados e anúncios de agregador retirados',
              f'Programas multidiários incluídos: {sum(1 for e in events if e.get("multiDay"))}',
              f'Títulos/datas: {len(excluded_date_conflicts)} datas contraditórias de um dia bloqueadas',
