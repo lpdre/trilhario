@@ -351,6 +351,22 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
     scope = html.find("main") or html.find("article") or html
     value = clean(scope.get_text(" ", strip=True))[:16000]
     if organizer == "GreenTrekker":
+        # As características de percurso da GreenTrekker podem ser de uma
+        # etapa e não do programa completo. Só aceitar uma data de fim
+        # explicitamente publicada na ficha individual.
+        finish = re.search(
+            r'\bHora\s+de\s+Fim\s+\d{1,2}:[0-5]\d\s*\(\s*(\d{1,2})-([A-Za-zÀ-ÿ]{3,10})-(20\d{2})\s*\)',
+            value, re.I)
+        if finish and item.get('date'):
+            month = MONTHS.get(folded(finish[2]))
+            try:
+                start_day = date.fromisoformat(str(item['date']))
+                end_day = date(int(finish[3]), month, int(finish[1])) if month else None
+            except (ValueError, TypeError):
+                end_day = None
+            if end_day and end_day > start_day:
+                item['endDate'] = end_day.isoformat()
+                item['multiDay'] = True
         # Os preços surgem normalmente em «Faça Já A Sua Reserva», frequentemente
         # depois dos 12 000 caracteres lidos por parse_meta. Procurar o valor
         # APENAS nessa secção evita confundir preços de anúncios relacionados.
@@ -986,6 +1002,15 @@ def collect_source(source: dict) -> list[dict]:
             if mloc and folded(clean(mloc[1])) != "local por definir":
                 item["town"] = clean(mloc[1])
         detail = fetch(url)
+        if detail is None and source["organizer"] == "GreenTrekker" and "://www.greentrekker.pt/" in url:
+            # Algumas fichas oficiais respondem apenas no domínio sem www.
+            alternate = url.replace("://www.greentrekker.pt/", "://greentrekker.pt/", 1)
+            detail = fetch(alternate)
+            if detail is not None:
+                item["url"] = alternate
+        if detail is None and source["organizer"] == "GreenTrekker":
+            # Não publicar um evento cuja ficha oficial não é acessível.
+            continue
         if detail is not None:
             enrich_jsonld(detail, item)
             parse_meta(detail, item)
