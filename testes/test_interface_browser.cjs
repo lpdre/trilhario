@@ -12,12 +12,30 @@ vm.runInNewContext(section('function eventRow(x){','function chips(){'),card);
 const row=card.eventRow({id:'t',date:'2026-11-01',title:'Trilho das Faias',organizer:'X',start:'Arouca',time:'09:00',duration:4,km:15,gain:450,price:18,difficulty:4});
 assert.ok(row.includes('Trilho das Faias'));
 assert.ok(row.includes('Dificuldade:'));
+assert.ok(row.includes('Distância'),'os trilhos de um dia mantêm as métricas');
+const multiday=card.eventRow({id:'multi',date:'2026-11-06',endDate:'2026-11-08',multiDay:true,
+ title:'Travessia da Serra',organizer:'X',start:'Manteigas',time:'20:00',
+ duration:7,km:16,gain:700,price:120,difficulty:4});
+assert.ok(multiday.includes('Travessia da Serra'));
+assert.ok(multiday.includes('20:00'),'programa apresenta a hora de início');
+assert.ok(multiday.includes('Programa de vários dias'));
+assert.ok(!multiday.includes('walk-metrics'),'não mostrar métricas de uma etapa como se fossem do programa');
+assert.ok(!multiday.includes('Dificuldade:'),'não mostrar dificuldade de uma única etapa');
+assert.ok(!multiday.includes('Fim previsto:'),'não calcular o fim de um programa a partir de uma etapa');
+const inferred=card.eventRow({id:'multi-inferido',date:'2026-11-06',endDate:'2026-11-08',
+ title:'Programa pedestre',organizer:'X',start:'Serra',time:'09:00',km:15,gain:500});
+assert.ok(!inferred.includes('walk-metrics'),'data final posterior também identifica programa multidiário');
 const e=[{id:'a',date:'2026-11-01',time:'09:00',title:'A',organizer:'X',km:18,gain:500},{id:'b',date:'2026-11-02',time:'09:00',title:'B',organizer:'Y',km:10,gain:200},{id:'c',date:'2026-11-03',time:'09:00',title:'C',organizer:'X',km:26,gain:900}];
 const filt={KM_CAP:50,GAIN_CAP:2500,state:{weekend:'all',day:'all',organizer:'X',kmMin:15,kmMax:50,gainMin:400,gainMax:2500},agendaClock:()=>({}),weekendWindows:()=>({}),eventHasNotStarted:()=>true,allEvents:()=>e};
 vm.runInNewContext(section('function selected({ignoreDay=false}={})','function dateShort('),filt);
 assert.deepEqual([...filt.selected()].map(x=>x.id),['a','c']);
 filt.state.day='2026-11-03';
 assert.deepEqual([...filt.selected()].map(x=>x.id),['c']);
+filt.state.day='all';
+filt.allEvents=()=>[...e,{id:'multi',date:'2026-11-04',endDate:'2026-11-06',
+ multiDay:true,time:'09:00',title:'Programa',organizer:'X',km:18,gain:500}];
+assert.deepEqual([...filt.selected()].map(x=>x.id),['a','c'],
+ 'programas de vários dias não entram em filtros de quilómetros e D+ de um dia');
 const trip={travelPrefs:{origin:'Aveiro',consumption:5,fuel:2},ambiguousDeparture:()=>false,routeFresh:()=>true,tollFresh:r=>r.tollChecked>0,travelData:()=>({kmOne:75,kmBack:84,minutesOne:70,minutesBack:90,tollOut:3,tollBack:4,tollChecked:123})};
 vm.runInNewContext(section('function tripCalc(e){','function timeStr('),trip);
 const calc=trip.tripCalc({price:30});
