@@ -39,3 +39,33 @@ assert.equal(query({town:'Arouca',verified:false},'Parque de Campismo do Merujal
 assert.equal(query({town:'Arouca',verified:false},'Merujal, Arouca'),'Merujal, Arouca, Portugal');
 assert.equal(query({town:'Por confirmar',verified:true,lat:40.8,lon:-8.2},'Merujal'),'40.8,-8.2');
 console.log('OK: locais de partida e pesquisas Maps sem localidades fictícias ('+examples.size+' casos)');
+
+const geoScope={fold:v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),
+ localPartidaLegivel:scope.localPartidaLegivel,displayDeparture:e=>e.start,
+ isPlacePlaceholder:scope.isPlacePlaceholder,hasCoords:e=>e.lat!=null&&e.lon!=null};
+vm.runInNewContext(source.slice(source.indexOf('const GEO_STOPWORDS='),source.indexOf('function saveGeocode(')),geoScope);
+assert.equal(geoScope.matchesGeographicalQuery('Campo de Futebol da Bezerra, Portugal','Campo de Futebol, Outra aldeia, Portugal'),false);
+vm.runInNewContext(source.slice(source.indexOf('function cleanLocationHint('),source.indexOf('async function roadRoute(')),geoScope);
+const bezerra={id:'web-8bde9933cd0ecb9',title:'Em Busca da Porta do Vento e Mágicos Carvalhais | Porto de Mós',
+ url:'https://www.hikeland.pt/eventos/em-busca-da-porta-do-vento-e-magicos-carvalhais-porto-de-mos-6',
+ start:'Campo de Futebol da Bezerra',town:'Campo de Futebol da Bezerra'};
+const candidates=geoScope.departureCandidates(bezerra);
+assert.ok(candidates.length);
+assert.ok(candidates.every(c=>c.query.includes('Porto de Mós')),JSON.stringify(candidates));
+assert.equal(geoScope.matchesGeographicalQuery(candidates[0].query,'Campo de Futebol da Bezerra, Outro concelho'),false);
+assert.equal(geoScope.matchesGeographicalQuery(candidates[0].query,'Campo de Futebol da Bezerra, Porto de Mós, Leiria'),true);
+assert.notEqual(geoScope.endpointFingerprint(bezerra),geoScope.endpointFingerprint({...bezerra,title:'Caminhada | Outro município'}));
+const gps=geoScope.departureCandidates({...bezerra,verified:true,lat:39.56,lon:-8.84});
+assert.equal(gps[0].precision,'gps');
+assert.equal(gps[0].coords.lat,39.56);
+console.log('OK: Bezerra exige contexto Porto de Mós e não aceita outro campo de futebol');
+
+geoScope.GEOCODER_VERSION=Number(source.match(/GEOCODER_VERSION=(\d+)/)[1]);
+geoScope.ROUNDTRIP_VERSION=1;
+geoScope.ROUTE_MAX_AGE_MS=10000;
+geoScope.PRECALC_MAX_AGE_MS=10000;
+geoScope.timeValid=()=>true;
+vm.runInNewContext(source.slice(source.indexOf('function routeFresh('),source.indexOf('function tollFresh(')),geoScope);
+assert.ok(geoScope.GEOCODER_VERSION>36);
+assert.equal(geoScope.routeFresh(bezerra,{roundTripVersion:1,geocoderVersion:36,
+ destinationFingerprint:geoScope.endpointFingerprint(bezerra),kmOne:40.8,kmBack:40.8,updated:Date.now(),tollOut:.65,tollBack:.65}),false);
