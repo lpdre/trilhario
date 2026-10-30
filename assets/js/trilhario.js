@@ -108,7 +108,7 @@ let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tr
 let tripFilterSignature='',tripBatchObserver=null,tripWorking=false;
 let tollJobs=[],tollWorking=false;
 const ROUNDTRIP_VERSION=37; // v37: ida e volta com percursos independentes; cache antiga não é fiável.
-const GEOCODER_VERSION=36,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
+const GEOCODER_VERSION=37,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
 
 
 // Fontes monitorizadas; a presença aqui não significa vagas ou eventos confirmados.
@@ -1188,7 +1188,7 @@ async function fetchTimedJson(url,options={},ms=GEO_TIMEOUT_MS){
   return {response,data};
  }finally{clearTimeout(timer)}
 }
-const GEO_STOPWORDS=new Set(['portugal','posto','turismo','parque','estacionamento','junto','centro','municipal','igreja','estrada','local','partida','aldeia','freguesia','praca','largo','avenida','rua','cafe','estacao','rodoviaria','frente','lado','sobre','perto','edificio','nacional','castelo','santuario','travessa','mercado','de','do','da','dos','das','em','no','na','um','uma']);
+const GEO_STOPWORDS=new Set(['campo','futebol','portugal','posto','turismo','parque','estacionamento','junto','centro','municipal','igreja','estrada','local','partida','aldeia','freguesia','praca','largo','avenida','rua','cafe','estacao','rodoviaria','frente','lado','sobre','perto','edificio','nacional','castelo','santuario','travessa','mercado','de','do','da','dos','das','em','no','na','um','uma']);
 function geoTokens(text){return [...new Set(fold(String(text||'')).split(/[^a-z0-9]+/).filter(w=>w.length>=3&&!GEO_STOPWORDS.has(w)&&!/^[0-9]+$/.test(w)))];}
 // Não aceitar "Café Central, Faro" para uma pesquisa por "Café Central, Braga".
 function matchesGeographicalQuery(query,description){
@@ -1343,6 +1343,8 @@ function departureCandidates(e){
   let p=cleanLocationHint(place);
   if(!isUsablePlace(p))return;
   p=p.replace(/\s*,?\s*Portugal\s*$/i,'').trim();
+  // O município explícito no anúncio restringe também pesquisas por POI/aldeia.
+  if(context&&!fold(p).includes(fold(context)))p+=', '+context;
   const key=fold(p).replace(/[^a-z0-9]/g,'');if(!key||seen.has(key))return;
   seen.add(key);candidates.push({query:p+', Portugal',precision,label:p});
  };
@@ -1355,6 +1357,9 @@ function departureCandidates(e){
   if(info.includes('tomar'))return 'Tomar';
   if(info.includes('arouca'))return 'Arouca';
   if(info.includes('almada')||info.includes('mata-dos-medos'))return 'Almada';
+  // Aceitar apenas um sufixo municipal explícito, sem inferir pelo nome do trilho.
+  const suffix=String(e.title||'').split('|');
+  if(suffix.length>1){const place=LOCALIDADES_31.find(p=>fold(p)===fold(suffix.at(-1).trim()));if(place)return place;}
   return '';
  })();
  if(isUsablePlace(start)){
@@ -1417,7 +1422,7 @@ function departureCandidates(e){
  if(hasCoords(e))candidates.push({coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'aproximado',label:'ponto de referência'});
  return candidates.filter(x=>!x.coords).slice(0,4).concat(candidates.filter(x=>x.coords).slice(0,1)); // Poucas tentativas, preservando GPS se houver.
 }
-function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade|Ver\s+no\s+Google\s+Maps/i.test(String(e.start||''))?'geo-refinado-v30':'';return [e.start||'',e.town||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
+function endpointFingerprint(e){const refined=/Pousadas Vedras|Fraguinha|Covas de Ferro|Mendiga|Malveira da Serra|Santuário Nossa Senhora das Neves|Covão da Ametade|Ver\s+no\s+Google\s+Maps/i.test(String(e.start||''))?'geo-refinado-v30':'';return [e.start||'',e.town||'',e.title||'',e.lat??'',e.lon??'',!!e.verified,refined].join('|');}
 async function locateEndpoint(e){
  const candidates=departureCandidates(e),failed=[];
  for(const item of candidates){
