@@ -180,6 +180,23 @@ class TitulosDatas(unittest.TestCase):
                 self.assertEqual(events[0]['endDate'],'2026-11-08')
                 self.assertTrue(events[0]['multiDay'])
 
+    def test_greentrekker_detecta_etapas_em_programa_multidiario(self):
+        detail=BeautifulSoup(
+            '<main><h1>Travessia do Planalto Central</h1>'
+            '<p>Hora de Fim 16:00 (01-Nov-2026)</p>'
+            '<p>Sábado 31 Out: Duração 7 h Distância 16 Km Desnível 700 m</p>'
+            '</main>', 'html.parser')
+        event={'organizer':'GreenTrekker','title':'Travessia do Planalto Central',
+               'date':'2026-10-30','time':'20:00'}
+        recolher.extra_source_meta(detail,event,'GreenTrekker')
+        self.assertEqual(event['endDate'],'2026-11-01')
+        self.assertTrue(event['multiDay'])
+        self.assertTrue(is_multiday_program(event))
+        single={'organizer':'GreenTrekker','title':'Trilho de um dia',
+                'date':'2026-11-01','time':'09:00'}
+        recolher.extra_source_meta(detail,single,'GreenTrekker')
+        self.assertNotIn('multiDay',single)
+
     def test_enddate_publicada_em_jsonld_do_proprio_evento(self):
         url='https://clube.pt/caminhada/expedicao'
         html=BeautifulSoup(
