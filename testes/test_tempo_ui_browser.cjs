@@ -24,14 +24,13 @@ assert.doesNotThrow(()=>vm.runInNewContext(addon,{
 }));
 
 let installed=null,mounts=0,changed=null;
+const route={appendChild:node=>{row.slot=node;node.parentElement=route;mounts++;}};
 const row={
  dataset:{eid:'trilho-7'},
  slot:null,
  querySelector(selector){
   if(selector==='.v86-weather')return this.slot;
-  if(selector==='.v74-trip-route')return {
-   appendChild:node=>{this.slot=node;mounts++;}
-  };
+  if(selector==='.v74-trip-route')return route;
   return null;
  }
 };
@@ -64,6 +63,7 @@ assert.equal(row.slot.className,'v86-weather');
 assert.equal(row.slot.dataset.weatherId,'trilho-7');
 assert.equal(row.slot.textContent,'…','mostrar consulta enquanto carrega a temperatura');
 assert.equal(installed.length,1);
+assert.equal(row.slot.parentElement,route,'indicador permanece na linha do percurso');
 changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'mutações repetidas não duplicam indicadores');
 
@@ -87,11 +87,12 @@ assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia'
    return [];
   }
  };
+ const realRoute={appendChild:n=>{slot=n;n.parentElement=realRoute}};
  const realRow={
   dataset:{eid:event.id},
   querySelector(selector){
    if(selector==='.v86-weather')return slot;
-   if(selector==='.v74-trip-route')return {appendChild:n=>{slot=n}};
+   if(selector==='.v74-trip-route')return realRoute;
    return null;
   }
  };
@@ -121,7 +122,10 @@ assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia'
  assert.equal(slot.textContent,'…','o indicador é visível enquanto consulta');
  // Dar oportunidade às promessas internas de recolher e apresentar a previsão.
  for(let i=0;i<25;i++)await Promise.resolve();
- assert.equal(slot.textContent,'⛅ 11°C');
+ assert.equal(slot.textContent,'11°C');
+ assert.equal(slot['data-weather-icon'],'⛅','símbolo meteorológico independente da temperatura');
+ assert.match(slot.href,/open-meteo\.com\/en\/docs\/ecmwf-api\?/);
+ assert.equal(slot.target,'_blank');
  assert.match(slot.title,/ECMWF IFS via Open-Meteo/);
  assert.equal(networkCalls,1);
  console.log('OK: módulos separados, indicadores e temperatura real simulada no cartão');
