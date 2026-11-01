@@ -380,6 +380,24 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
                     if 0 < price <= 500:
                         item["price"] = price
                         break
+    elif organizer == "Caminhando.pt":
+        # O calendário mistura datas, horários e morada no link, mesmo quando
+        # o H1 e o horário da ficha individual estão correctos. Extrair aqui,
+        # antes de publicar o catálogo, sem depender da reparação posterior.
+        from normalizar_eventos import parse_caminhando_detail
+        details = parse_caminhando_detail(str(html), str(item.get('url') or ''),
+                                          item.get('date'))
+        for field, detail_value in details.items():
+            item[field] = detail_value
+    elif organizer == "Trekking Roots":
+        # A ficha mostra ESGOTADO acima da descrição, mas as sugestões de
+        # outras caminhadas não podem contaminar o estado deste evento.
+        heading = value.split('Descrição', 1)[0][:1800]
+        if re.search(r'\bEsgotad[oa]\b', heading, re.I):
+            item['status'] = 'Esgotado'
+        else:
+            item['status'] = ''
+        item['status_checked_at'] = TODAY.isoformat()
     elif organizer == "Indoeu":
         # Neste site o ponto de encontro surge como título e depois um item de lista,
         # sem dois pontos, pelo que não era detectado pelo colector genérico.
