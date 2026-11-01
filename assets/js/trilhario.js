@@ -514,6 +514,9 @@ function warmUpcomingWeekendPhotos(){
 function eventRow(x){
  const spot=displayDeparture(x),verified=!!x.verified;
  const photoUrl=eventPhotoUrl(x);
+ const status=String(x.status||'').trim();
+ const availability=/^(?:esgotado|lotado|cancelado|adiado)$/i.test(status)
+  ? `<span class="walk-event-state" aria-label="Estado do evento">${esc(status==='Lotado'?'Esgotado':status)}</span>` : '';
   const organizerUrl=organizerHomepage(x),mapsUrl=isPlacePlaceholder(spot)?null:googleMapsDeparture(x,spot);
  const dt=new Date(x.date+'T12:00:00');
  const month=dt.toLocaleDateString('pt-PT',{month:'short'}).replace('.','').toUpperCase();
@@ -538,7 +541,7 @@ function eventRow(x){
   <div class="walk-main">
    <h3 title="${esc(legibleEventTitle(x))}">${safeExternalUrl(x.url)?`<a class="walk-title-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(legibleEventTitle(x))}">${esc(legibleEventTitle(x))}</a>`:esc(legibleEventTitle(x))}</h3>
    <div class="walk-card-details">
-   <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}</p>
+   <p class="walk-organizer"><span class="walk-caption">Organizador:</span> ${organizerUrl?`<a class="walk-text-link" href="${esc(organizerUrl)}" target="_blank" rel="noopener noreferrer" title="Abrir site de ${esc(x.organizer)}">${esc(x.organizer)}</a>`:`<strong>${esc(x.organizer)}</strong>`}${eventFreshnessNote(x)}${availability}</p>
    <p class="walk-start"><span class="walk-caption">Local de partida:</span> ${mapsUrl?`<a class="walk-text-link" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer" title="Localizar no Google Maps">${esc(spot)}</a>`:`<strong>${esc(spot)}</strong>`}${verified?'':!isPlacePlaceholder(spot)?'':''}</p>
    <p class="walk-times"><span><span class="walk-caption">Início:</span> <strong>${esc(begin)}</strong></span><span class="walk-time-divider" aria-hidden="true">·</span>${multi?'<span class="walk-caption">Programa de vários dias</span>':`<span><span class="walk-caption">Fim previsto:</span> <strong>${esc(finish)}</strong></span>`}</p>
    ${multi?'':`<p class="v51-difficulty"><span class="walk-caption">Dificuldade:</span> <strong>${esc(names[x.difficulty]||'Por indicar')}</strong></p>`}
