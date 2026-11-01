@@ -119,6 +119,32 @@ assert.deepEqual(Weather.locationPlan({
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
  assert.equal(geoCalls,1);
+ // Dados reais do catálogo de 7 de Novembro: dois organizadores
+ // recolhem passageiros em Lisboa ou no Porto para a Rota das Faias.
+ // Verificar endereço final, não apenas a localidade escolhida.
+ const catalogue=JSON.parse(fs.readFileSync(path.join(__dirname,'../eventos.json'),'utf8')).events;
+ const actualIds=['web-6af928d82a9819f','web-e4ed9df2552123a'];
+ const examples=[
+  {id:actualIds[0],title:'Caminhando na Rota das Faias - Serra da Estrela',
+   date:'2026-11-07',multiDay:true,town:'Lisboa',
+   start:'Terminal Rodoviário Junto à Estação do Oriente (PERTO DO AKI)',
+   lat:38.76750556,lon:-9.10195278,verified:true},
+  {id:actualIds[1],title:'Rota das Faias e o Melhor do Outono de Manteigas',
+   date:'2026-11-07',multiDay:true,town:'Manteigas',
+   start:'Porto (ponto de encontro)',lat:41.162813,lon:-8.592803,verified:true}
+ ];
+ for(const fallbackRecord of examples){
+  const actual=catalogue.find(item=>item.id===fallbackRecord.id)||fallbackRecord;
+  assert.deepEqual(Weather.locationPlan(actual),
+   {kind:'place',name:'Manteigas',approximate:true},
+   'o ponto de recolha do anúncio '+fallbackRecord.id+' não pode ser destino meteorológico');
+  const isolated=Weather.create({fetchImpl,today:()=> '2026-11-01'});
+  const result=await isolated.forecast(actual);
+  assert.equal(result.url,value.url,
+   'o link Windy do anúncio '+fallbackRecord.id+' tem de centrar o mapa em Manteigas');
+  assert.ok(!result.url.includes('41.1628,-8.5928')&&!result.url.includes('38.7675,-9.1019'),
+   'não utilizar o GPS do transporte para o mapa de previsão');
+ }
  const fuelHike={id:'carvao',title:'Pelos trilhos do carvão',
   date:'2026-11-07',town:'Por confirmar',
   start:'Junto à Câmara Municipal,Rua 1º de Maio, Manteigas'};
@@ -144,9 +170,10 @@ assert.deepEqual(Weather.locationPlan({
  const browserForecast=await browserEngine.forecast(precise);
  assert.equal(browserForecast.temp,13,'fetch global do navegador deve alimentar a previsão');
  assert.equal(browserForecast.symbol,'⛅','o cartão deve receber o símbolo do tempo');
+ const callsBeforeOutOfRange=calls;
  const other=await controller.forecast({...multi,date:'2026-11-28'});
  assert.equal(other,null,'nunca consultar datas fora dos dois fins de semana');
- assert.equal(calls,2);
+ assert.equal(calls,callsBeforeOutOfRange,'datas fora dos fins de semana não consultam a API');
  const node={dataset:{weatherId:'m'},isConnected:true,textContent:'',
   title:'',setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]}};
  controller.observe([node]);
