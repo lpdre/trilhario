@@ -398,6 +398,18 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
         else:
             item['status'] = ''
         item['status_checked_at'] = TODAY.isoformat()
+        # O local indicado no topo pode ser o destino da atividade (Manteigas)
+        # enquanto o mapa oficial assinala o encontro para o transporte.
+        # Identificar Porto só quando coincide GPS oficial + partida do Porto.
+        gps = re.search(r'\bCoordenadas\s+GPS\s+'
+                        r'(?P<lat>\d{1,2}\.\d+)\s*,\s*'
+                        r'(?P<lon>-\d{1,2}\.\d+)', value, re.I)
+        if gps and re.search(r'\bTransporte\s+do\s+Porto\b', value, re.I):
+            lat, lon = float(gps['lat']), float(gps['lon'])
+            if 41.12 <= lat <= 41.21 and -8.75 <= lon <= -8.50:
+                item.update(start='Porto (ponto de encontro)',
+                            lat=lat, lon=lon, verified=True,
+                            gpsFromAnnouncement=True)
     elif organizer == "Indoeu":
         # Neste site o ponto de encontro surge como título e depois um item de lista,
         # sem dois pontos, pelo que não era detectado pelo colector genérico.
