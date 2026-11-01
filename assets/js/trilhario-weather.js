@@ -270,5 +270,5 @@
   }
   return {forecast,observe};
  }
- return {weekendDates,condition,noonForecast,locationPlan,placeOptions,sourcePage,create};
+ return {weekendDates,condition,noonForecast,locationPlan,placeOptions,create};
 });
