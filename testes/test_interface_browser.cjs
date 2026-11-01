@@ -48,15 +48,30 @@ const tripCard={
   tripProblems:new Map(),departureCandidates:()=>['Arouca'],
   ambiguousDeparture:()=>false,tripOriginProblem:'',
   fmtN:x=>String(x),timeStr:()=> '2h 00min',travelMoney:()=> '15,00 €',
-  esc:x=>String(x??'')
+  esc:x=>String(x??''),tollPendingLabel:()=> 'A calcular portagens…'
 };
 vm.runInNewContext(section('function travelRow(e){','// Delegação:'),tripCard);
 const withoutTolls=tripCard.travelRow({id:'evento'});
 assert.ok(withoutTolls.includes('Portagens <strong>—</strong>'),'portagens em falta sem inventar zero');
 assert.ok(withoutTolls.includes('Combustível'),'combustível continua disponível');
+assert.ok(withoutTolls.includes('v74-toll-note'),'explicar portagens pendentes no cartão');
 assert.ok(!withoutTolls.includes('Calcular portagens'),'botão manual eliminado');
 assert.ok(!withoutTolls.includes('Repetir portagens'),'botão de repetição eliminado');
 assert.ok(!withoutTolls.includes('data-event-action="calculateOneRoute"'),'cálculo automático, sem botão na viagem válida');
+
+
+// O estado não pode ficar escondido num travessão durante horas.
+const tollLabels={tollApiEndpoint:'/.netlify/functions/portagens',
+ tollFresh:r=>Number.isFinite(r?.tollChecked),tollRetryAfter:0};
+vm.runInNewContext(section('function tollPendingLabel(', 'function travelRow('),tollLabels);
+const now=1_000_000;
+assert.equal(tollLabels.tollPendingLabel({tollRequestId:8},now),'A consultar portagens…');
+assert.match(tollLabels.tollPendingLabel({tollStatus:'retry',tollNextRetry:now+120_000},now),/2 min/);
+assert.match(tollLabels.tollPendingLabel({tollStatus:'unknown',tollNextRetry:now+900_000},now),/15 min/);
+assert.match(tollLabels.tollPendingLabel({tollStatus:'retry'},now),/Nova tentativa automática pendente/);
+assert.equal(tollLabels.tollPendingLabel({tollChecked:999},now),'');
+tollLabels.tollApiEndpoint='';
+assert.match(tollLabels.tollPendingLabel({},now),/indisponível/);
 
 const auto={
   travelData:()=>({precomputed:true}),routeCacheKey:()=> 'aveiro|evento',
