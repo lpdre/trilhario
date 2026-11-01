@@ -1866,20 +1866,30 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 /* Estado confirmado pelo organizador: perceptível também em ecrãs pequenos. */
 .walk-organizer .walk-event-state{display:inline-block;margin-left:8px;font-weight:800;color:#a1392c;white-space:nowrap}
 
-/* v86 — temperatura e estado do tempo ocupam o canto direito da primeira linha.
- * A largura do cartão mantém-se: no telemóvel os valores de viagem podem quebrar.
- */
+/* Previsão na linha da viagem, com símbolo maior e ligação à fonte.
+ * O combustível e as portagens mantêm a segunda linha intacta. */
 .walk-row.v51-card.v56-card .v86-weather{
  display:inline-flex;align-items:center;justify-content:flex-end;
- margin-left:auto;gap:4px;white-space:nowrap;flex:0 0 auto;
- min-width:0;color:#235a45;font-weight:850;font-size:12px;line-height:1.1;
- font-variant-numeric:tabular-nums;
+ margin-left:auto;gap:3px;white-space:nowrap;flex:0 0 auto;
+ min-width:0;min-height:25px;padding:1px 3px;
+ color:#235a45;font-weight:850;font-size:12px;line-height:1.1;
+ font-variant-numeric:tabular-nums;text-decoration:none;border-radius:5px;
+}
+.walk-row.v51-card.v56-card .v86-weather::before{
+ content:attr(data-weather-icon);font-size:21px;line-height:1;
+ display:inline-block;flex:0 0 auto;
+}
+.walk-row.v51-card.v56-card .v86-weather[href]{cursor:pointer}
+.walk-row.v51-card.v56-card .v86-weather[href]:hover,
+.walk-row.v51-card.v56-card .v86-weather[href]:focus-visible{
+ background:#e0eadd;text-decoration:underline;outline-offset:2px;
 }
 .walk-row.v51-card.v56-card .v86-weather:empty{display:none}
 .walk-row.v51-card.v56-card .v74-trip-route{width:100%}
 .walk-row.v51-card.v56-card .v53-trip>.v86-weather{margin-left:auto}
 @media(max-width:540px){
- .walk-row.v51-card.v56-card .v86-weather{font-size:11.5px;gap:2px}
+ .walk-row.v51-card.v56-card .v86-weather{font-size:11.5px;gap:3px}
+ .walk-row.v51-card.v56-card .v86-weather::before{font-size:20px}
  .walk-row.v51-card.v56-card .v74-trip-route{row-gap:3px}
 }
 
