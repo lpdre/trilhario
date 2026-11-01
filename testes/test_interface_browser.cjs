@@ -62,6 +62,8 @@ assert.ok(!withoutTolls.includes('data-event-action="calculateOneRoute"'),'cálc
 const withForecast=tripCard.travelRow({id:'com-tempo',date:'2026-11-07'});
 assert.ok(withForecast.includes('data-weather-id="com-tempo"'),
  'cartão do fim de semana inclui espaço de previsão persistente');
+assert.ok(!withForecast.includes('>…</span>'),
+ 'sem módulo opcional não mostrar carregamento infinito');
 assert.ok(!withoutTolls.includes('data-weather-id='),
  'eventos fora da janela não ocupam espaço de meteorologia');
 
