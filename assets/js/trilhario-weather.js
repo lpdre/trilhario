@@ -139,8 +139,10 @@
     return null;
    });
   }
-  async function getHours(lat,lon){
-   const key=lat.toFixed(2)+','+lon.toFixed(2);
+  async function getHours(lat,lon,day){
+   // Uma resposta com arrays mas sem valores para o dia pedido não é válida;
+   // nesse caso experimentar o fornecedor alternativo.
+   const key=lat.toFixed(2)+','+lon.toFixed(2)+'|'+day;
    return cached(weatherCache,key,async()=>{
     const args=new URLSearchParams({
      latitude:lat.toFixed(4),longitude:lon.toFixed(4),
@@ -152,9 +154,7 @@
      [FORECAST_API,'ECMWF IFS'],[FORECAST_FALLBACK,'Open-Meteo']
     ]){
      const response=await fetchJson(endpoint+'?'+args);
-     if(Array.isArray(response?.hourly?.time)&&
-        Array.isArray(response?.hourly?.temperature_2m)&&
-        Array.isArray(response?.hourly?.weather_code))
+     if(noonForecast(response,day))
       return {hourly:response.hourly,source};
     }
     return null;
@@ -166,7 +166,7 @@
    if(!plan)return null;
    const point=plan.kind==='gps'?plan:await resolvePlace(plan.name);
    if(!point)return null;
-   const data=await getHours(point.lat,point.lon);
+   const data=await getHours(point.lat,point.lon,event.date);
    const value=noonForecast(data,event.date);
    return value?{...value,name:point.name||plan.name,source:data.source}:null;
   }
