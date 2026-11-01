@@ -139,20 +139,33 @@
     return null;
    });
   }
+  function sourcePage(point,source){
+   const lat=Number(point?.lat),lon=Number(point?.lon);
+   if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+   const args=new URLSearchParams({
+    latitude:lat.toFixed(4),longitude:lon.toFixed(4),
+    hourly:'temperature_2m,weather_code',timezone:'Europe/Lisbon',
+    forecast_days:source==='ECMWF IFS'?'10':'15'
+   });
+   const page=source==='ECMWF IFS'
+    ?'https://open-meteo.com/en/docs/ecmwf-api'
+    :'https://open-meteo.com/en/docs';
+   return page+'?'+args.toString();
+  }
   async function getHours(lat,lon,day){
    // Uma resposta com arrays mas sem valores para o dia pedido não é válida;
    // nesse caso experimentar o fornecedor alternativo.
    const key=lat.toFixed(2)+','+lon.toFixed(2)+'|'+day;
    return cached(weatherCache,key,async()=>{
-    const args=new URLSearchParams({
-     latitude:lat.toFixed(4),longitude:lon.toFixed(4),
-     hourly:'temperature_2m,weather_code',timezone:'Europe/Lisbon',forecast_days:'15'
-    });
-    // Preferir o ECMWF IFS, como no Windy. Se o serviço específico não
-    // devolver dados válidos, tentar a previsão geral Open-Meteo.
-    for(const [endpoint,source] of [
-     [FORECAST_API,'ECMWF IFS'],[FORECAST_FALLBACK,'Open-Meteo']
+    // A API ECMWF disponibiliza 10 dias; a previsão geral chega a 16.
+    // Usar 15 dias no ECMWF causava falhas evitáveis em todas as consultas.
+    for(const [endpoint,source,days] of [
+     [FORECAST_API,'ECMWF IFS','10'],[FORECAST_FALLBACK,'Open-Meteo','15']
     ]){
+     const args=new URLSearchParams({
+      latitude:lat.toFixed(4),longitude:lon.toFixed(4),
+      hourly:'temperature_2m,weather_code',timezone:'Europe/Lisbon',forecast_days:days
+     });
      const response=await fetchJson(endpoint+'?'+args);
      if(noonForecast(response,day))
       return {hourly:response.hourly,source};
@@ -168,22 +181,31 @@
    if(!point)return null;
    const data=await getHours(point.lat,point.lon,event.date);
    const value=noonForecast(data,event.date);
-   return value?{...value,name:point.name||plan.name,source:data.source}:null;
+   return value?{...value,name:point.name||plan.name,source:data.source,
+    url:sourcePage(point,data.source)}:null;
   }
   function display(node,event,result){
    if(!node||!node.isConnected||node.dataset.weatherId!==String(event.id))return;
    if(!result){
+    node.removeAttribute('href');
+    node.removeAttribute('data-weather-icon');
     node.textContent='—';
     node.title='Previsão meteorológica temporariamente indisponível';
     node.setAttribute('aria-label',node.title);
     return;
    }
-   node.textContent=result.symbol+' '+result.temp+'°C';
+   node.textContent=result.temp+'°C';
+   node.setAttribute('data-weather-icon',result.symbol);
    const location=result.name||'zona da caminhada';
    const description=result.label+', '+result.temp+'°C, às 12h de '+event.date+
     ', em '+location+'. Previsão '+(result.source||'ECMWF IFS')+' via Open-Meteo (aproximada).';
    node.title=description;
-   node.setAttribute('aria-label',description);
+   node.setAttribute('aria-label',description+(result.url?' Abrir fonte da previsão.':''));
+   if(result.url){
+    node.setAttribute('href',result.url);
+    node.setAttribute('target','_blank');
+    node.setAttribute('rel','noopener noreferrer');
+   }else node.removeAttribute('href');
   }
   function eventKey(e){
    return [e.id,e.date,e.town||'',e.start||'',e.lat??'',e.lon??''].join('|');
@@ -248,5 +270,5 @@
   }
   return {forecast,observe};
  }
- return {weekendDates,condition,noonForecast,locationPlan,placeOptions,create};
+ return {weekendDates,condition,noonForecast,locationPlan,placeOptions,sourcePage,create};
 });
