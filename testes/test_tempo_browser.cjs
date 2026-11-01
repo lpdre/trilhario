@@ -76,7 +76,7 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  const node={dataset:{weatherId:'m'},isConnected:true,textContent:'',
   title:'',setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]}};
  controller.observe([node]);
- await new Promise(resolve=>setImmediate(resolve));
+ for(let i=0;i<30;i++)await Promise.resolve();
  assert.equal(node.textContent,'⛅ 13°C');
  assert.match(node.title,/ECMWF IFS via Open-Meteo/);
  const noLocation=await controller.forecast({...multi,town:'Por confirmar'});
