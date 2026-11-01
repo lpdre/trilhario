@@ -31,18 +31,20 @@
       existing?.remove?.();
       continue;
      }
-     // Só mostrar o carregamento após confirmar que o módulo está funcional.
-     // Se a camada opcional falhar, o núcleo deixa o espaço vazio.
+     const route=row.querySelector('.v74-trip-route');
+     const line=route||row.querySelector('.walk-trip-line');
+     if(!line)continue;
+     // Colocar o símbolo na linha da distância/tempo da viagem, nunca
+     // ao lado dos preços: evita empurrar o combustível no telemóvel.
      if(existing){
+      if(route&&existing.parentElement!==route)route.appendChild(existing);
       if(!existing.textContent.trim()){
        existing.textContent='…';
        existing.title='A consultar a previsão meteorológica';
       }
       continue;
      }
-     const line=row.querySelector('.v74-trip-route')||row.querySelector('.walk-trip-line');
-     if(!line)continue;
-     const slot=document.createElement('span');
+     const slot=document.createElement('a');
      slot.className='v86-weather';
      slot.dataset.weatherId=id;
      // O estado fica visível enquanto se consulta a previsão; uma falha
