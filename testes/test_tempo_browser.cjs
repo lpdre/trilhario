@@ -59,7 +59,7 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
   }
   assert.match(url,/^https:\/\/api.open-meteo.com\/v1\/ecmwf\?/);
   const parsed=new URL(url);
-  assert.equal(parsed.searchParams.get('forecast_days'),'15');
+  assert.equal(parsed.searchParams.get('forecast_days'),'10');
   assert.equal(parsed.searchParams.get('timezone'),'Europe/Lisbon');
   return {ok:true,json:async()=>forecastJson};
  };
@@ -68,6 +68,8 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.equal(value.temp,13);
  assert.equal(value.symbol,'⛅');
  assert.equal(value.name,'Manteigas');
+ assert.match(value.url,/open-meteo\.com\/en\/docs\/ecmwf-api\?/);
+ assert.equal(new URL(value.url).searchParams.get('longitude'),'-7.5390');
  const again=await controller.forecast(multi);
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
@@ -91,7 +93,12 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
   title:'',setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]}};
  controller.observe([node]);
  for(let i=0;i<30;i++)await Promise.resolve();
- assert.equal(node.textContent,'⛅ 13°C');
+ assert.equal(node.textContent,'13°C');
+ assert.equal(node['data-weather-icon'],'⛅');
+ assert.equal(node.target,'_blank');
+ assert.equal(node.rel,'noopener noreferrer');
+ assert.match(node.href,/^https:\/\/open-meteo\.com\/en\/docs\/ecmwf-api\?/);
+ assert.ok(new URL(node.href).searchParams.get('latitude')==='40.4020');
  assert.match(node.title,/ECMWF IFS via Open-Meteo/);
  const noLocation=await controller.forecast({...multi,town:'Por confirmar'});
  assert.equal(noLocation,null);
@@ -112,6 +119,8 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  const fromFallback=await fallback.forecast(multi);
  assert.equal(fromFallback.source,'Open-Meteo');
  assert.equal(fromFallback.temp,13);
+ assert.match(fromFallback.url,/open-meteo\.com\/en\/docs\?/);
+ assert.equal(new URL(fromFallback.url).searchParams.get('latitude'),'40.4020');
  assert.ok(urls.some(url=>url.includes('/v1/forecast?')));
  // Depois de duas respostas inválidas a temperatura é desconhecida: nunca 0°C.
  const none=Weather.create({
