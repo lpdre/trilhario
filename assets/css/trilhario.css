@@ -1881,3 +1881,6 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
  .walk-row.v51-card.v56-card .v86-weather{font-size:11.5px;gap:2px}
  .walk-row.v51-card.v56-card .v74-trip-route{row-gap:3px}
 }
+
+.footer .weather-credit{font-size:10px;line-height:1.4;color:#c4d3c1}
+.footer .weather-credit a{color:#f1d7ad;text-decoration:underline}
