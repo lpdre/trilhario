@@ -10,6 +10,7 @@
 })(typeof window==='object'?window:null,function(){
  'use strict';
  const FORECAST_API='https://api.open-meteo.com/v1/ecmwf';
+ const FORECAST_FALLBACK='https://api.open-meteo.com/v1/forecast';
  const GEO_API='https://geocoding-api.open-meteo.com/v1/search';
  const CACHE_MS=3*60*60*1000, FAILURE_MS=10*60*1000;
  const PLACEHOLDERS=new Set(['','por confirmar','a confirmar','desconhecido','por definir','local a definir']);
@@ -42,7 +43,7 @@
   if([51,53,55,56,57,80].includes(n))return {symbol:'🌦️',label:'Aguaceiros ou chuviscos'};
   if([61,63,65,66,67,81,82].includes(n))return {symbol:'🌧️',label:'Chuva'};
   if([71,73,75,77,85,86].includes(n))return {symbol:'🌨️',label:'Neve'};
-  if([95,96,99].includes(n))return {symbol:'⛈️',label:'Trovoada'};
+  if([95,96,97,99].includes(n))return {symbol:'⛈️',label:'Trovoada'};
   return null;
  }
  function noonForecast(data,day){
@@ -145,8 +146,18 @@
      latitude:lat.toFixed(4),longitude:lon.toFixed(4),
      hourly:'temperature_2m,weather_code',timezone:'Europe/Lisbon',forecast_days:'15'
     });
-    const response=await fetchJson(FORECAST_API+'?'+args);
-    return Array.isArray(response?.hourly?.time)?response:null;
+    // Preferir o ECMWF IFS, como no Windy. Se o serviço específico não
+    // devolver dados válidos, tentar a previsão geral Open-Meteo.
+    for(const [endpoint,source] of [
+     [FORECAST_API,'ECMWF IFS'],[FORECAST_FALLBACK,'Open-Meteo']
+    ]){
+     const response=await fetchJson(endpoint+'?'+args);
+     if(Array.isArray(response?.hourly?.time)&&
+        Array.isArray(response?.hourly?.temperature_2m)&&
+        Array.isArray(response?.hourly?.weather_code))
+      return {hourly:response.hourly,source};
+    }
+    return null;
    });
   }
   async function forecast(event){
@@ -157,15 +168,20 @@
    if(!point)return null;
    const data=await getHours(point.lat,point.lon);
    const value=noonForecast(data,event.date);
-   return value?{...value,name:point.name||plan.name}:null;
+   return value?{...value,name:point.name||plan.name,source:data.source}:null;
   }
   function display(node,event,result){
    if(!node||!node.isConnected||node.dataset.weatherId!==String(event.id))return;
-   if(!result){node.textContent='';node.removeAttribute('title');node.removeAttribute('aria-label');return;}
+   if(!result){
+    node.textContent='—';
+    node.title='Previsão meteorológica temporariamente indisponível';
+    node.setAttribute('aria-label',node.title);
+    return;
+   }
    node.textContent=result.symbol+' '+result.temp+'°C';
    const location=result.name||'zona da caminhada';
    const description=result.label+', '+result.temp+'°C, às 12h de '+event.date+
-    ', em '+location+'. Previsão ECMWF via Open-Meteo (aproximada).';
+    ', em '+location+'. Previsão '+(result.source||'ECMWF IFS')+' via Open-Meteo (aproximada).';
    node.title=description;
    node.setAttribute('aria-label',description);
   }
@@ -211,8 +227,13 @@
     }
     return true;
    });
+   // Os primeiros cartões são consultados imediatamente. Assim a previsão
+   // aparece mesmo em navegadores que atrasam o IntersectionObserver.
+   queue.push(...slots.slice(0,3));
+   pump();
+   const remaining=slots.slice(3);
    if(typeof IntersectionObserver!=='function'){
-    queue.push(...slots.slice(0,8));pump();return;
+    queue.push(...remaining.slice(0,8));pump();return;
    }
    const current=new IntersectionObserver(entries=>{
     for(const entry of entries){
@@ -223,7 +244,7 @@
     pump();
    },{rootMargin:'500px 0px',threshold:0});
    observer=current;
-   slots.forEach(node=>current.observe(node));
+   remaining.forEach(node=>current.observe(node));
   }
   return {forecast,observe};
  }
