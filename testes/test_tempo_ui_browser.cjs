@@ -7,6 +7,11 @@ const root=path.join(__dirname,'..');
 const page=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const main=fs.readFileSync(path.join(root,'assets/js/trilhario.js'),'utf8');
 const addon=fs.readFileSync(path.join(root,'assets/js/trilhario-weather-ui.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'assets/css/trilhario.css'),'utf8');
+assert.match(css,/\.v86-weather\[href\]::after\s*\{\s*content:"↗"/,
+ 'a previsão clicável deve ser identificada com seta exterior');
+assert.match(css,/text-decoration-style:dotted/,
+ 'a temperatura deve ter sinalização discreta de ligação');
 assert.ok(page.indexOf('trilhario.js?v=')<page.indexOf('trilhario-weather.js?v='),
  'a aplicação deve arrancar antes de carregar a previsão');
 assert.ok(page.indexOf('trilhario-weather.js?v=')<page.indexOf('trilhario-weather-ui.js?v='));
