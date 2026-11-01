@@ -230,14 +230,14 @@ def parse_meta(html: BeautifulSoup, event: dict) -> None:
                 r'\b(?:fim[- ]de[- ]semana|viagem|escapadinha|expedi[cç][aã]o)\b',
                 title, re.I):
             named_distance = re.search(
-                r'(?:[-–—]|\\()\\s*(\\d{1,2}(?:[.,]\\d{1,2})?)\\s*km(?:s)?\\s*\\)?\\s*$',
+                r'(?:[-–—]|\()\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*km(?:s)?\s*\)?\s*$',
                 title, re.I)
             if named_distance:
                 distance = float(named_distance.group(1).replace(',', '.'))
                 if 0 < distance <= 50:
                     event['km'] = round(distance, 2)
     if event.get('gain') is None:
-        gain=number(r'(?:D\\+|desn[ií]vel(?: positivo| acumulado)?|ascens[aã]o)\\s*[:\\-]?\\s*(\\d{2,4})\\s*m',text,4500)
+        gain=number(r'(?:D\+|desn[ií]vel(?: positivo| acumulado)?|ascens[aã]o)\s*[:\-]?\s*(\d{2,4})\s*m',text,4500)
         if gain is None:gain=number(r'\b(\d{2,4})\s*m\s*d\+(?=\s|$)',text+' ',4500)
         if gain is not None:event['gain']=round(gain)
     if event.get('price') is None:
