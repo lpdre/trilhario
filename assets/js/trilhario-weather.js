@@ -122,7 +122,8 @@
    return {kind:'place',name:String(event.weatherLocation).trim(),approximate:false};
   const hint=destinationFromTitle(event.title);
   const pickup=pickupLocation(start);
-  const townIsPickup=pickup&&town&&!title.includes(folded(town));
+  const cityIsPickup=(multi||pickup)&&/^(?:porto|lisboa)$/i.test(town)&&!title.includes(folded(town));
+  const townIsPickup=cityIsPickup||(pickup&&town&&folded(start).includes(folded(town))&&!title.includes(folded(town)));
   const townIsLogistics=/terminal|ponto de encontro|ponto de recolha|esta[cç][aã]o cp|parque de estacionamento/i.test(town);
   const locality=startLocality(start);
   if(multi||pickup){
@@ -288,7 +289,8 @@
    }else node.removeAttribute('href');
   }
   function eventKey(e){
-   return [e.id,e.date,e.town||'',e.start||'',e.lat??'',e.lon??''].join('|');
+   return [e.id,e.date,e.town||'',e.start||'',e.lat??'',e.lon??'',
+    e.weatherLocation||'',e.weatherLat??'',e.weatherLon??''].join('|');
   }
   function paintAll(event,value){
    const slots=typeof document==='object'?document.querySelectorAll('[data-weather-id]'):[];
