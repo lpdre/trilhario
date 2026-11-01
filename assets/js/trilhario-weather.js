@@ -139,18 +139,16 @@
     return null;
    });
   }
-  function sourcePage(point,source){
+  function windyPage(point,day){
    const lat=Number(point?.lat),lon=Number(point?.lon);
-   if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;
-   const args=new URLSearchParams({
-    latitude:lat.toFixed(4),longitude:lon.toFixed(4),
-    hourly:'temperature_2m,weather_code',timezone:'Europe/Lisbon',
-    forecast_days:source==='ECMWF IFS'?'10':'15'
-   });
-   const page=source==='ECMWF IFS'
-    ?'https://open-meteo.com/en/docs/ecmwf-api'
-    :'https://open-meteo.com/en/docs';
-   return page+'?'+args.toString();
+   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!validDate(day))return null;
+   // Windy aceita YYYY-MM-DD-HH em UTC, apenas em blocos de 3 horas.
+   // 12 UTC corresponde a 12h em Portugal no inverno e 13h no verão:
+   // é a hora admitida mais próxima das 12h locais nos dois casos.
+   // Algumas versões da app ignoram o parâmetro de data ao abrir o link;
+   // as coordenadas e a camada de temperatura continuam utilizáveis.
+   return 'https://www.windy.com/?ecmwf,temp,'+day+'-12,'+
+    lat.toFixed(4)+','+lon.toFixed(4)+',10,d:picker';
   }
   async function getHours(lat,lon,day){
    // Uma resposta com arrays mas sem valores para o dia pedido não é válida;
@@ -182,7 +180,7 @@
    const data=await getHours(point.lat,point.lon,event.date);
    const value=noonForecast(data,event.date);
    return value?{...value,name:point.name||plan.name,source:data.source,
-    url:sourcePage(point,data.source)}:null;
+    url:windyPage(point,event.date)}:null;
   }
   function display(node,event,result){
    if(!node||!node.isConnected||node.dataset.weatherId!==String(event.id))return;
@@ -199,8 +197,9 @@
    const location=result.name||'zona da caminhada';
    const description=result.label+', '+result.temp+'°C, às 12h de '+event.date+
     ', em '+location+'. Previsão '+(result.source||'ECMWF IFS')+' via Open-Meteo (aproximada).';
-   node.title=description;
-   node.setAttribute('aria-label',description+(result.url?' Abrir fonte da previsão.':''));
+   node.title=description+(result.url?' Abrir mapa no Windy (consulta complementar).':'');
+   node.setAttribute('aria-label',description+
+    (result.url?' Consultar no Windy o mapa desta localização e data.':''));
    if(result.url){
     node.setAttribute('href',result.url);
     node.setAttribute('target','_blank');
