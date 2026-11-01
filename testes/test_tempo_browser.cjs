@@ -12,6 +12,7 @@ assert.equal(Weather.condition(3).symbol,'☁️');
 assert.equal(Weather.condition(63).symbol,'🌧️');
 assert.equal(Weather.condition(73).symbol,'🌨️');
 assert.equal(Weather.condition(95).symbol,'⛈️');
+assert.equal(Weather.condition(97).symbol,'⛈️');
 assert.equal(Weather.condition(999),null);
 assert.deepEqual(Weather.noonForecast({hourly:{
  time:['2026-11-07T09:00','2026-11-07T12:00'],
@@ -77,8 +78,36 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  controller.observe([node]);
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(node.textContent,'⛅ 13°C');
- assert.match(node.title,/ECMWF via Open-Meteo/);
+ assert.match(node.title,/ECMWF IFS via Open-Meteo/);
  const noLocation=await controller.forecast({...multi,town:'Por confirmar'});
  assert.equal(noLocation,null);
+ // Quando o endpoint ECMWF falha, usar a previsão genérica e identificar a origem.
+ const urls=[];
+ const fallback=Weather.create({
+  today:()=> '2026-11-01',
+  getEvent:()=>multi,
+  fetchImpl:async url=>{
+   urls.push(url);
+   if(url.includes('geocoding-api'))return {ok:true,json:async()=>({results:[{
+    name:'Manteigas',country_code:'PT',latitude:40.402,longitude:-7.539
+   }]})};
+   if(url.includes('/v1/ecmwf?'))return {ok:false};
+   return {ok:true,json:async()=>forecastJson};
+  }
+ });
+ const fromFallback=await fallback.forecast(multi);
+ assert.equal(fromFallback.source,'Open-Meteo');
+ assert.equal(fromFallback.temp,13);
+ assert.ok(urls.some(url=>url.includes('/v1/forecast?')));
+ // Depois de duas respostas inválidas a temperatura é desconhecida: nunca 0°C.
+ const none=Weather.create({
+  today:()=> '2026-11-01',
+  getEvent:()=>multi,
+  fetchImpl:async url=>url.includes('geocoding-api')?
+   {ok:true,json:async()=>({results:[{name:'Manteigas',country_code:'PT',
+    latitude:40.402,longitude:-7.539}]})}:{ok:false}
+ });
+ const missing=await none.forecast(multi);
+ assert.equal(missing,null);
  console.log('OK: calendário, símbolos ECMWF, temperatura, localização, cache e apresentação');
 })().catch(error=>{console.error(error);process.exitCode=1});
