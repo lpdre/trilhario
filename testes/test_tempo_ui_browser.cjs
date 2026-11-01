@@ -148,7 +148,7 @@ assert.equal(mounts,2,'fora dos dois fins de semana não consultar meteorologia'
  for(let i=0;i<25;i++)await Promise.resolve();
  assert.equal(slot.textContent,'11°C');
  assert.equal(slot['data-weather-icon'],'⛅','símbolo meteorológico independente da temperatura');
- assert.equal(slot.href,'https://www.windy.com/?ecmwf,temp,2026-11-07-12,41.5610,-7.9820,10,d:picker');
+ assert.equal(slot.href,'https://www.windy.com/41.5610/-7.9820?ecmwf,temp,2026-11-07-12,41.5610,-7.9820,10,d:picker');
  assert.equal(slot.target,'_blank');
  assert.match(slot.title,/ECMWF IFS via Open-Meteo/);
  assert.equal(networkCalls,1);
