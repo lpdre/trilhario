@@ -80,11 +80,21 @@ assert.equal(row.slot.parentElement,tripLine,'ícone separado do resumo da viage
 changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'mutações repetidas não duplicam indicadores');
 
+// Sem local identificável, o cartão mantém o espaço meteorológico: o motor
+// irá apresentá-lo como "—" com explicação, em vez de apagar o indicador.
+row.dataset.eid='sem-local';row.slot=null;
+context.allEvents=()=>[{id:'sem-local',date:'2026-11-07',
+ town:'Por confirmar',start:'Por confirmar'}];
+changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
+assert.equal(mounts,2,'sem local confirmado não se elimina silenciosamente o indicador');
+assert.equal(row.slot.dataset.weatherId,'sem-local');
+
+
 // Mesmo existindo uma viagem na lista, não criar indicadores para outras datas.
 row.dataset.eid='trilho-21';row.slot=null;
 context.allEvents=()=>[{id:'trilho-21',date:'2026-11-21'}];
 changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
-assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia');
+assert.equal(mounts,2,'fora dos dois fins de semana não consultar meteorologia');
 
 // Teste integrado: a camada opcional tem de obter dados e escrever a temperatura
 // no nó real do cartão; um teste que apenas cria o <span> não chega.
