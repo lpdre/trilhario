@@ -210,8 +210,13 @@
    if(!Number.isFinite(lat)||!Number.isFinite(lon)||!validDate(day))return null;
    // Link verificado no telemóvel: local, modelo ECMWF, camada de
    // temperatura e hora de referência do dia da caminhada.
-   return 'https://www.windy.com/?ecmwf,temp,'+day+'-12,'+
-    lat.toFixed(4)+','+lon.toFixed(4)+',10,d:picker';
+   // Incluir as coordenadas tanto no caminho (painel da localização)
+   // como na consulta (mapa e data). O navegador Windy suporta ambas.
+   // Algumas versões da aplicação Android podem ignorar deep links;
+   // esta redundância melhora a compatibilidade mas não garante a app.
+   const latitude=lat.toFixed(4),longitude=lon.toFixed(4);
+   return 'https://www.windy.com/'+latitude+'/'+longitude+
+    '?ecmwf,temp,'+day+'-12,'+latitude+','+longitude+',10,d:picker';
   }
   async function getHours(lat,lon,day){
    // Uma resposta com arrays mas sem valores para o dia pedido não é válida;
