@@ -290,10 +290,24 @@ function weekendLabelLines({from,to}){
   :[String(a.getUTCDate()).padStart(2,'0')+'–'+String(b.getUTCDate()).padStart(2,'0'),month(a)+'–'+month(b)];
 }
 function updateWeekendQuickFilters(){
- const ranges=weekendWindows();
+ const clock=agendaClock(),ranges=weekendWindows(clock);
+ // No domingo, esconder o fim de semana quando todas as saídas já começaram.
+ // Os outros botões continuam acessíveis, sem criar um fim de semana fictício.
+ const current=ranges.this;
+ const hasCurrent=allEvents().some(e=>eventHasNotStarted(e,clock)&&
+  e.date>=current.from&&e.date<=current.to);
+ if(!hasCurrent&&state.weekend==='this')state.weekend='all';
  document.querySelectorAll('[data-quick-weekend]').forEach(button=>{
   const type=button.dataset.quickWeekend,range=ranges[type],on=state.weekend===type;
   if(!range)return;
+  const unavailable=type==='this'&&!hasCurrent;
+  button.hidden=unavailable;
+  button.disabled=unavailable;
+  if(unavailable){
+   button.classList.remove('active');
+   button.setAttribute('aria-pressed','false');
+   return;
+  }
   const lines=weekendLabelLines(range);
   button.replaceChildren(...lines.map(line=>{
    const span=document.createElement('span');
@@ -309,9 +323,8 @@ function updateWeekendQuickFilters(){
 }
 function eventHasNotStarted(e,clock=agendaClock()){
  if(!e||typeof e.date!=='string')return false;
- // Programas de vários dias deixam a agenda no dia seguinte ao início,
- // não no dia seguinte ao fim: depois do arranque já não são inscrições úteis.
- if(e.multiDay)return e.date>=clock.date;
+ // Programas de vários dias contam apenas até à hora da partida do primeiro dia,
+ // não até ao final do programa ou à meia-noite.
  if(e.date!==clock.date)return e.date>clock.date;
  // Se o organizador não indicar uma hora válida, conservar até ao fim desse dia.
  const match=typeof e.time==='string'?e.time.trim().match(/^([01]?\d|2[0-3])[:h]([0-5]\d)$/i):null;
