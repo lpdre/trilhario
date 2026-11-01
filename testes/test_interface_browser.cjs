@@ -63,7 +63,7 @@ assert.ok(!withoutTolls.includes('data-event-action="calculateOneRoute"'),'cálc
 // O estado não pode ficar escondido num travessão durante horas.
 const tollLabels={tollApiEndpoint:'/.netlify/functions/portagens',
  tollFresh:r=>Number.isFinite(r?.tollChecked),tollRetryAfter:0};
-vm.runInNewContext(section('function tollPendingLabel(', '// Previsão compacta:'),tollLabels);
+vm.runInNewContext(section('function tollPendingLabel(', 'function travelRow('),tollLabels);
 const now=1_000_000;
 assert.equal(tollLabels.tollPendingLabel({tollRequestId:8},now),'A consultar portagens…');
 assert.match(tollLabels.tollPendingLabel({tollStatus:'retry',tollNextRetry:now+120_000},now),/2 min/);
