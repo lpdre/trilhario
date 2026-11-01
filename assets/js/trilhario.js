@@ -734,6 +734,12 @@ function renderProgressiveList(events){
  $('listView').innerHTML=events.slice(0,listLimit).map(eventRow).join('')+
   (listLimit<events.length?listMoreHtml(events.length):'');
  observeListMore();
+ announceCardsUpdated();
+}
+// O módulo de meteorologia é autónomo e escuta apenas este sinal opcional.
+function announceCardsUpdated(){
+ if(typeof Event==='function'&&typeof document.dispatchEvent==='function')
+  document.dispatchEvent(new Event('trilhario:cards-updated'));
 }
 function listMoreHtml(total){return `<div id="listMoreSentinel" class="list-more" role="status">
  <small>A mostrar ${listLimit} de ${total} caminhadas</small>
@@ -757,8 +763,9 @@ function loadMoreWalks(){
  else {sentinel.querySelector('small').textContent=`A mostrar ${listLimit} de ${listWalks.length} caminhadas`;observeListMore();}
  // Respeitar os lotes de cálculo de deslocações para os cartões agora visíveis.
  scheduleTravelBatches(listWalks);
+ announceCardsUpdated();
 }
-function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();agendaDisplayedDate=agendaClock().date;const events=sortedWalks(selected());
+function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();agendaDisplayedDate=agendaClock().date;updateWeekendQuickFilters();const events=sortedWalks(selected());
  // O calendário usa os outros filtros, mas não restringe os resultados ao dia destacado.
  const displayedEvents=state.view==='calendar'?sortedWalks(selected({ignoreDay:true})):events;
  renderCatalogStatus();
@@ -767,7 +774,6 @@ function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();agendaDis
  updateDualUI('km',state.kmMin,state.kmMax,KM_CAP,'km');
  updateDualUI('gain',state.gainMin,state.gainMax,GAIN_CAP,'m');
   document.querySelectorAll('[data-quick-km]').forEach(b=>{const on=state.kmMin===Number(b.dataset.quickKm)&&state.kmMax===KM_CAP;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
-  updateWeekendQuickFilters();
  renderOrganizersPage();$('chips').innerHTML=chips();$('listView').hidden=state.view!=='list';$('calendarView').hidden=state.view!=='calendar';$('mapView').hidden=state.view!=='map';document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b.dataset.day===state.day));document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===state.view);b.setAttribute('aria-pressed',String(b.dataset.view===state.view))});if(state.view==='list'){renderProgressiveList(events);
    scheduleTravelBatches(events);
  }else{stopListObserver();if(tripBatchObserver){tripBatchObserver.disconnect();tripBatchObserver=null;}if(state.view==='calendar')renderCalendar(displayedEvents);else renderMap(events)}}
@@ -1629,6 +1635,7 @@ function refreshTravelCard(id){
   const e=matches.get(card.dataset.eid),line=card.querySelector('.walk-trip-line');
   if(e&&line)line.outerHTML=travelRow(e);
  }
+ announceCardsUpdated();
  renderTravelProgress();
 }
 
