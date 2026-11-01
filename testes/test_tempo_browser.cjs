@@ -53,6 +53,43 @@ assert.deepEqual(Weather.locationPlan({title:'Caminhada na Serra da Estrela',dat
  {kind:'place',name:'Serra da Estrela',approximate:true},
  'uma viagem de autocarro não deve gerar previsão da partida');
 assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de Coura')[0],'Paredes de Coura');
+
+assert.equal(Weather.startLocality('Junto à Câmara Municipal,Rua 1º de Maio, Manteigas'),'Manteigas');
+assert.equal(Weather.startLocality('Parque Desportivo Municipal de Mafra'),'Mafra');
+assert.equal(Weather.startLocality('Em Loriga junto ao Restaurante Vicente'),'Loriga');
+assert.equal(Weather.startLocality('Terminal Rodoviário do Oriente'),'');
+assert.deepEqual(Weather.locationPlan({
+ id:'carvao',title:'Pelos trilhos do carvão',date:'2026-11-07',
+ town:'Por confirmar',start:'Junto à Câmara Municipal,Rua 1º de Maio, Manteigas'
+}),{kind:'place',name:'Manteigas',approximate:true},
+ 'a descrição do ponto de encontro contém uma localidade utilizável');
+assert.deepEqual(Weather.locationPlan({
+ id:'mafra',title:'De Mafra ao Atlântico',date:'2026-11-07',
+ town:'Por confirmar',start:'Parque Desportivo Municipal de Mafra'
+}),{kind:'place',name:'Mafra',approximate:true},
+ 'o centro de Mafra é referência aproximada, não localização do percurso inteiro');
+assert.deepEqual(Weather.locationPlan({
+ id:'faias-lisboa',title:'Caminhando na Rota das Faias - Serra da Estrela',
+ date:'2026-11-07',town:'Lisboa',start:'Terminal Rodoviário do Oriente',
+ multiDay:true,lat:38.7675,lon:-9.1019,verified:true
+}),{kind:'place',name:'Manteigas',approximate:true},
+ 'não mostrar tempo de Lisboa numa viagem às Faias');
+assert.deepEqual(Weather.locationPlan({
+ id:'faias-porto',title:'Rota das Faias e o Melhor do Outono de Manteigas',
+ date:'2026-11-07',town:'Porto',start:'Porto (ponto de encontro)',
+ multiDay:true,lat:41.1628,lon:-8.5928,verified:true
+}),{kind:'place',name:'Manteigas',approximate:true},
+ 'um ponto de recolha no Porto nunca prevalece sobre o destino do título');
+assert.equal(Weather.locationPlan({
+ title:'Fim de semana nas montanhas',date:'2026-11-07',
+ town:'Porto',start:'Porto',multiDay:true
+}),null,'não inventar tempo do Porto quando não se conhece o destino');
+assert.deepEqual(Weather.locationPlan({
+ id:'loriga',title:'KM Vertical/Serra da Estrela',date:'2026-11-14',
+ town:'Por confirmar',start:'Em Loriga junto ao Restaurante Vicente'
+}),{kind:'place',name:'Loriga',approximate:true},
+ 'em regiões amplas preferir a aldeia explícita à localização genérica da serra');
+
 (async()=>{
  let calls=0,geoCalls=0;
  const forecastJson={hourly:{time:['2026-11-07T12:00'],
@@ -82,6 +119,12 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
  assert.equal(geoCalls,1);
+ const fuelHike={id:'carvao',title:'Pelos trilhos do carvão',
+  date:'2026-11-07',town:'Por confirmar',
+  start:'Junto à Câmara Municipal,Rua 1º de Maio, Manteigas'};
+ const fuelForecast=await controller.forecast(fuelHike);
+ assert.equal(fuelForecast.url,value.url,
+  'a caminhada do carvão consulta a previsão de Manteigas, não a morada inteira');
  const mislocated={...multi,multiDay:false,endDate:null,
   start:'Praça da Liberdade, Porto',lat:41.1628,lon:-8.5928,verified:true};
  assert.equal(Weather.locationPlan(mislocated).kind,'gps');
