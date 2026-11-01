@@ -721,6 +721,7 @@ function renderProgressiveList(events){
  $('listView').innerHTML=events.slice(0,listLimit).map(eventRow).join('')+
   (listLimit<events.length?listMoreHtml(events.length):'');
  observeListMore();
+ observeWeatherSlots();
 }
 function listMoreHtml(total){return `<div id="listMoreSentinel" class="list-more" role="status">
  <small>A mostrar ${listLimit} de ${total} caminhadas</small>
@@ -744,6 +745,7 @@ function loadMoreWalks(){
  else {sentinel.querySelector('small').textContent=`A mostrar ${listLimit} de ${listWalks.length} caminhadas`;observeListMore();}
  // Respeitar os lotes de cálculo de deslocações para os cartões agora visíveis.
  scheduleTravelBatches(listWalks);
+ observeWeatherSlots();
 }
 function render(){agendaCurrentFingerprint=agendaUpcomingFingerprint();agendaDisplayedDate=agendaClock().date;const events=sortedWalks(selected());
  // O calendário usa os outros filtros, mas não restringe os resultados ao dia destacado.
@@ -1016,6 +1018,20 @@ function tollPendingLabel(r,now=Date.now()){
   return 'Nova tentativa automática pendente…';
  return 'A calcular portagens…';
 }
+// Previsão compacta: apenas nos dois próximos fins de semana, sem local falso.
+const TRILHARIO_WEATHER=window.TrilharioWeather;
+const weatherController=TRILHARIO_WEATHER?.create({
+ today:()=>agendaClock().date,
+ getEvent:id=>allEvents().find(e=>String(e.id)===id)
+});
+function weatherSlot(e){
+ if(!TRILHARIO_WEATHER?.weekendDates(agendaClock().date).has(e.date))return '';
+ return '<span class="v86-weather" data-weather-id="'+esc(e.id)+'"></span>';
+}
+function observeWeatherSlots(){
+ if(state.view!=='list')return;
+ weatherController?.observe($('listView').querySelectorAll('[data-weather-id]'));
+}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key);
@@ -1032,6 +1048,7 @@ function travelRow(e){
      <strong>${fmtN(t.km)} km${approx}</strong>
      <span class="v74-trip-divider" aria-hidden="true">|</span>
      <strong>${timeStr(t.minutes)}</strong>
+     ${weatherSlot(e)}
     </div>
     <div class="v74-trip-line v74-trip-prices">
      <span class="v74-trip-piece">Combustível <strong>${travelMoney(t.fuel)}</strong></span>
@@ -1049,7 +1066,7 @@ function travelRow(e){
   body=`<div class="v53-trip-empty"><span class="v53-trip-empty-icon" aria-hidden="true">↗</span><span>${esc(status)}</span></div>`;
   if(hasOrigin&&!unavailable&&error&&!tripOriginProblem)action=`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}">Tentar novamente</button>`;
  }
- return `<div class="walk-trip-line v53-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
+ return `<div class="walk-trip-line v53-trip"><div class="walk-trip-info">${body}</div>${t?'':weatherSlot(e)}${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
 // dataset devolve o ID literal, mesmo contendo aspas ou outros caracteres.
@@ -1616,6 +1633,7 @@ function refreshTravelCard(id){
   const e=matches.get(card.dataset.eid),line=card.querySelector('.walk-trip-line');
   if(e&&line)line.outerHTML=travelRow(e);
  }
+ observeWeatherSlots();
  renderTravelProgress();
 }
 
