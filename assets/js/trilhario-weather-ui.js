@@ -22,11 +22,17 @@
     );
     for(const row of list.querySelectorAll('.walk-row[data-eid]')){
      const id=row.dataset.eid;
-     if(!id||row.querySelector('.v86-weather'))continue;
+     if(!id)continue;
+     const existing=row.querySelector('.v86-weather');
      const event=allEvents().find(item=>String(item.id)===id);
-     if(!event||!eligible.has(event.date))continue;
-     // Nunca ocupar espaço nem fazer consulta se não há local fiável.
-     if(!weather.locationPlan(event))continue;
+     // Não apresentar previsão fora da janela ou para locais desconhecidos.
+     // Isto também remove espaços deixados pelo desenho inicial do cartão.
+     if(!event||!eligible.has(event.date)||!weather.locationPlan(event)){
+      existing?.remove?.();
+      continue;
+     }
+     // O núcleo da agenda já pode ter desenhado o espaço persistente.
+     if(existing)continue;
      const line=row.querySelector('.v74-trip-route')||row.querySelector('.walk-trip-line');
      if(!line)continue;
      const slot=document.createElement('span');
