@@ -7,6 +7,7 @@ from normalizar_eventos import (
     caminhando_end_date,
     parse_caminhando_card,
     parse_caminhando_detail,
+    merge_exact_duplicates,
 )
 from recolher import extra_source_meta
 
@@ -106,6 +107,34 @@ class CaminhandoMultidayRegressao(unittest.TestCase):
         self.assertEqual(event["town"], "Manteigas")
         self.assertEqual(event["status"], "Esgotado")
         self.assertTrue(event["gpsFromAnnouncement"])
+
+    def test_late_gps_enrichment_merges_monsanto_with_manual_fallback(self):
+        base = dict(id="web-monsanto", title="Caminhando por Trilhos e Miradouros de Monsanto - 11kms",
+                    date="2026-11-01", time="09:30", organizer="Caminhando.pt",
+                    url="https://caminhando.pt/eventos/caminhando-por-trilhos-e-miradouros-de-monsanto-9kms",
+                    start="R. A, 1500-640 Lisboa (Parque de Estacionamento - Campolide Este)",
+                    km=None, verified=False)
+        old_fallback = dict(id="caminhando-monsanto-20261101", title=base["title"],
+                    date=base["date"], time=base["time"], organizer=base["organizer"],
+                    url=base["url"] + "/", start="Parque de estacionamento, entrada do Parque Florestal de Monsanto, Campolide",
+                    km=11, verified=True, lat=38.736361111111115, lon=-9.172516666666667)
+        # Na primeira passagem as designações diferentes impedem a fusão.
+        self.assertEqual(len(merge_exact_duplicates([dict(base), dict(old_fallback)])), 2)
+        # A página oficial confirma depois o mesmo GPS para ambas.
+        base.update(verified=True, lat=38.73636111, lon=-9.17251667)
+        merged = merge_exact_duplicates([base, old_fallback], preferred_ids={"web-monsanto"})
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["id"], "web-monsanto")
+        self.assertEqual(merged[0]["km"], 11)
+        self.assertIn("caminhando-monsanto-20261101", merged[0]["alias_ids"])
+
+    def test_distinct_sessions_never_merge(self):
+        a = dict(id="one", title="Caminhada Lisboa", date="2026-11-01",
+                 time="09:00", organizer="Caminhando.pt", start="Parque",
+                 url="https://caminhando.pt/eventos/caminhada-lisboa",
+                 verified=True, lat=38.73636111, lon=-9.17251667)
+        b = dict(a, id="two", time="15:00")
+        self.assertEqual(len(merge_exact_duplicates([a, b])), 2)
 
 
 if __name__ == "__main__":
