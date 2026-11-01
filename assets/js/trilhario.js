@@ -1078,7 +1078,7 @@ function travelRow(e){
   if(hasOrigin&&!unavailable&&error&&!tripOriginProblem)action=`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}">Tentar novamente</button>`;
  }
  const forecastSlot=weatherWeekendEligible(e.date)?
-  `<span class="v86-weather" data-weather-id="${esc(e.id)}" role="status" aria-live="off" title="Previsão meteorológica"></span>`:'';
+  `<a class="v86-weather" data-weather-id="${esc(e.id)}" aria-live="off" title="Previsão meteorológica"></a>`:'';
  return `<div class="walk-trip-line v53-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}${forecastSlot}</div>`;
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
