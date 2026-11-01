@@ -32,6 +32,10 @@
      const slot=document.createElement('span');
      slot.className='v86-weather';
      slot.dataset.weatherId=id;
+     // O estado fica visível enquanto se consulta a previsão; uma falha
+     // deixa um travessão explicativo, nunca inventa temperatura.
+     slot.textContent='…';
+     slot.title='A consultar a previsão meteorológica';
      slot.setAttribute('aria-live','off');
      line.appendChild(slot);
     }
@@ -46,6 +50,7 @@
    if(typeof requestAnimationFrame==='function')requestAnimationFrame(mount);
    else Promise.resolve().then(mount);
   }
+  document.addEventListener?.('trilhario:cards-updated',schedule);
   if(typeof MutationObserver==='function'){
    const observer=new MutationObserver(records=>{
     // Ignorar a escrita da própria temperatura no <span> para evitar ciclos.
