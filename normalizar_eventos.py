@@ -124,6 +124,44 @@ CAMINHANDO_CARD = re.compile(
     r"(?P<title>.+?)\s+(?P=begin)\s*[-–—]\s*(?P=end)\s+"
     r"(?P<place>.*)$", re.I)
 
+
+# A agenda The Events Calendar também antepõe datas a anúncios de 2+ dias:
+# "(nov 7) 7:00 08 (nov 8) 19:30 Nome 7:00 - 19:30 (8) Local".
+# Não misturar o texto do calendário com o título da caminhada.
+CAMINHANDO_MULTIDAY_CARD = re.compile(
+    r"^\s*\(\s*[a-zÀ-ÿ]{3,5}\s+\d{1,2}\s*\)\s*"
+    r"(?P<begin>(?:[01]?\d|2[0-3]):[0-5]\d)\s+"
+    r"\d{1,2}\s*\(\s*(?P<end_month>[a-zÀ-ÿ]{3,5})\s+"
+    r"(?P<end_day>\d{1,2})\s*\)\s*"
+    r"(?P<end>(?:[01]?\d|2[0-3]):[0-5]\d)\s+"
+    r"(?P<title>.+?)\s+(?P=begin)\s*[-–—]\s*(?P=end)\s*"
+    r"\(\s*\d{1,2}\s*\)\s*(?P<place>.*)$", re.I
+)
+CAMINHANDO_MONTHS = {
+    'jan': 1, 'fev': 2, 'mar': 3, 'abr': 4, 'mai': 5, 'jun': 6,
+    'jul': 7, 'ago': 8, 'set': 9, 'out': 10, 'nov': 11, 'dez': 12,
+}
+
+def caminhando_end_date(start_iso, end_day, end_month=None):
+    """Converte o último dia anunciado em data ISO sem adivinhar a duração."""
+    try:
+        start = date.fromisoformat(str(start_iso))
+        final_day = int(end_day)
+        if end_month:
+            month = CAMINHANDO_MONTHS.get(folded(end_month)[:3])
+            if month is None:
+                return None
+            year = start.year + (month < start.month)
+        else:
+            month, year = start.month, start.year
+            if final_day < start.day:
+                rollover = (start.replace(day=1) + timedelta(days=32)).replace(day=1)
+                month, year = rollover.month, rollover.year
+        finish = date(year, month, final_day)
+        return finish.isoformat() if finish > start else None
+    except (TypeError, ValueError):
+        return None
+
 def clock_valid(value):
     return isinstance(value,str) and re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d',value) is not None
 
@@ -143,23 +181,25 @@ def tidy_meeting(value):
     t=t.strip(' .,:;-')
     return t if 5<=len(t)<=180 and not t.endswith(('...', '…')) else None
 
-def parse_caminhando_card(title):
-    """Extrai título, hora e local de anúncio já guardado no JSON.
-
-    Se o cartão truncou o ponto de encontro, não o publica como morada válida;
-    nesse caso o extractor da página oficial completa-o.
-    """
+def parse_caminhando_card(title, start_date=None):
+    """Separa datas, horas, nome e ponto de encontro no cartão do calendário."""
     raw=' '.join(str(title or '').split())
-    m=CAMINHANDO_CARD.match(raw)
+    multi=CAMINHANDO_MULTIDAY_CARD.match(raw)
+    m=multi or CAMINHANDO_CARD.match(raw)
     if not m:return {}
     name=m['title'].strip(' -–,')
     if not 8<=len(name)<=140:return {}
     begin,end=m['begin'].zfill(5),m['end'].zfill(5)
     out={'title':name,'time':begin,'endTime':end}
-    duration=hours_between(begin,end)
-    if duration is not None:out['duration']=duration
+    if multi:
+        out['multiDay']=True
+        final=caminhando_end_date(start_date,multi['end_day'],multi['end_month'])
+        if final:out['endDate']=final
+    else:
+        duration=hours_between(begin,end)
+        if duration is not None:out['duration']=duration
     place=tidy_meeting(m['place'])
-    # Alguns cartões são cortados exactamente aos 140 caracteres.
+    # Não apresentar títulos truncados como moradas.
     if place and ('Tipo Evento' in raw or re.search(r'\)\s*$',place)):
         out['start']=place
     return out
@@ -176,7 +216,7 @@ def caminhar_dms_coordinate(text, label):
     val=deg+minutes/60+seconds/3600
     return -val if m[4].upper() in ('S','W') else val
 
-def parse_caminhando_detail(html,url):
+def parse_caminhando_detail(html,url,start_date=None):
     """Extrai os campos publicados na página individual do Caminhando.pt.
 
     Processa apenas o cabeçalho do evento, antes do bloco de descrição;
@@ -200,13 +240,34 @@ def parse_caminhando_detail(html,url):
         r'Ponto de Encontro\s+(?P<place>.+?)\s+'
         r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',schedule_head,re.I)
     out={}
-    if match:
+    # Nos programas multidiários, o horário inclui o dia de partida e o de
+    # regresso: "Horário 7 (Sábado) 7:00 - 8 (Domingo) 19:30".
+    multiday=re.search(
+        r'\bHor[aá]rio\s+(?P<first_day>\d{1,2})\s*\([^)]+\)\s*'
+        r'(?P<begin>(?:[01]?\d|2[0-3]):[0-5]\d)\s*[-–—]\s*'
+        r'(?P<end_day>\d{1,2})\s*\([^)]+\)\s*'
+        r'(?P<end>(?:[01]?\d|2[0-3]):[0-5]\d)\s+'
+        r'Ponto de Encontro\s+(?P<place>.+?)\s+'
+        r'(?:Detalhes do Evento|Descri[cç][aã]o do Evento|Tipo Evento)',
+        schedule_head, re.I)
+    if multiday:
+        out.update(time=multiday['begin'].zfill(5),
+                   endTime=multiday['end'].zfill(5),multiDay=True)
+        last=caminhando_end_date(start_date,multiday['end_day'])
+        if last:out['endDate']=last
+        place=tidy_meeting(multiday['place'])
+        if place:out['start']=place
+    elif match:
         begin,end=match['begin'].zfill(5),match['end'].zfill(5)
         out.update(time=begin,endTime=end)
         duration=hours_between(begin,end)
         if duration is not None:out['duration']=duration
         place=tidy_meeting(match['place'])
         if place:out['start']=place
+    # O estado é do anúncio corrente; nunca o procurar nas sugestões do fundo.
+    out['status']='Esgotado' if re.search(
+        r'(?:EVENTO\s*Lotado|\bEsgotad[oa]\b)',schedule_head,re.I) else ''
+    out['status_checked_at']=date.today().isoformat()
     # Algumas páginas oficiais publicam coordenadas GPS completas na secção
     # «Localização». Validar ambos os valores antes de assinalar confirmado.
     lat=caminhar_dms_coordinate(head,'Latitude')
@@ -234,7 +295,7 @@ def repair_caminhando(event, old):
     if urlsplit(url).hostname not in {'caminhando.pt','www.caminhando.pt'}:
         return {}
     raw_title=str(event.get('title') or '')
-    cached=parse_caminhando_card(raw_title)
+    cached=parse_caminhando_card(raw_title,event.get('date'))
     # Correcção sem pedidos HTTP se o título continha os dados completos.
     out=dict(cached)
     # Evitar novos pedidos quando uma execução anterior já publicou todos os campos.
@@ -256,7 +317,7 @@ def repair_caminhando(event, old):
             resp.raise_for_status()
             if (resp.url.startswith(('https://caminhando.pt/eventos/','https://www.caminhando.pt/eventos/'))
                     and 'text/html' in resp.headers.get('Content-Type','text/html').lower()):
-                details=parse_caminhando_detail(resp.text,resp.url)
+                details=parse_caminhando_detail(resp.text,resp.url,event.get('date'))
                 # Um cabeçalho genérico de uma página alterada não deve substituir
                 # um nome completo e coerente que o próprio cartão publicou.
                 if cached.get('title') and details.get('title'):
@@ -780,7 +841,7 @@ def main():
                 # O título do calendário é claramente inválido quando contém
                 # repetição de horas e o local no meio.
                 if value is not None and e.get(field)!=value:
-                    if field=='title' or not meaningful(e.get(field)) or field in ('start','time','endTime','duration'):
+                    if field=='title' or not meaningful(e.get(field)) or field in ('start','time','endTime','duration','endDate','multiDay','status','status_checked_at'):
                         e[field]=value;changed+=1
             # Não reproduzir o texto "00:00" em anúncios sem hora publicada.
             if e.get('time')=='00:00' and e.get('endTime') is None:
