@@ -109,7 +109,7 @@
   }
   // Quando o título indica uma região diferente do início anunciado,
   // privilegiar a zona do percurso (aproximada) sobre o GPS da recolha.
-  if(hint&&(!town||!title.includes(folded(town))))
+  if(hint&&(!town||(folded(hint)!==folded(town)&&!title.includes(folded(town)))))
    return {kind:'place',name:hint,approximate:true};
   const lat=Number(event.lat),lon=Number(event.lon);
   if(event.verified===true&&event.lat!=null&&event.lon!=null&&
@@ -205,12 +205,29 @@
     return null;
    });
   }
+  function distanceKm(a,b){
+   const toRad=x=>x*Math.PI/180;
+   const dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon);
+   const h=Math.sin(dLat/2)**2+
+    Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)**2;
+   return 12742*Math.asin(Math.min(1,Math.sqrt(h)));
+  }
   async function forecast(event){
    if(!weekendDates(getToday()).has(event?.date))return null;
    const plan=locationPlan(event);
    if(!plan)return null;
-   const point=plan.kind==='gps'?plan:await resolvePlace(plan.name);
+   let point=plan.kind==='gps'?plan:await resolvePlace(plan.name);
    if(!point)return null;
+   // Alguns anúncios marcam como "verificado" o GPS do transporte.
+   // Se o destino constar explicitamente do título e do município,
+   // não usar um GPS dezenas de quilómetros afastado desse destino.
+   const destination=destinationFromTitle(event.title);
+   if(plan.kind==='gps'&&plan.approximate!==false&&destination&&
+      folded(destination)===folded(event.town)){
+    const destinationPoint=await resolvePlace(destination);
+    if(destinationPoint&&distanceKm(point,destinationPoint)>35)
+     point=destinationPoint;
+   }
    const data=await getHours(point.lat,point.lon,event.date);
    const value=noonForecast(data,event.date);
    return value?{...value,name:point.name||plan.name,source:data.source,
