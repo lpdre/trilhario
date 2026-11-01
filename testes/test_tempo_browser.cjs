@@ -114,7 +114,7 @@ assert.deepEqual(Weather.locationPlan({
  assert.equal(value.symbol,'⛅');
  assert.equal(value.name,'Manteigas');
  assert.equal(value.url,
-  'https://www.windy.com/?ecmwf,temp,2026-11-07-12,40.4020,-7.5390,10,d:picker');
+  'https://www.windy.com/40.4020/-7.5390?ecmwf,temp,2026-11-07-12,40.4020,-7.5390,10,d:picker');
  const again=await controller.forecast(multi);
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
