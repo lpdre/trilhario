@@ -1866,6 +1866,26 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 /* Estado confirmado pelo organizador: perceptível também em ecrãs pequenos. */
 .walk-organizer .walk-event-state{display:inline-block;margin-left:8px;font-weight:800;color:#a1392c;white-space:nowrap}
 
+/* v98 — duas colunas na viagem: percurso e custos sempre à esquerda;
+ * previsão à direita sem permitir texto do combustível debaixo do ícone.
+ * O resumo dentro da primeira coluna conserva duas linhas independentes. */
+.walk-row.v51-card.v56-card .walk-trip-line.v53-trip{
+ display:grid;grid-template-columns:minmax(0,1fr) max-content;
+ align-items:start;column-gap:8px;row-gap:3px;
+}
+.walk-row.v51-card.v56-card .v53-trip .walk-trip-info{
+ grid-column:1;grid-row:1;min-width:0;width:100%;flex:none;
+}
+.walk-row.v51-card.v56-card .v53-trip>.v86-weather{
+ grid-column:2;grid-row:1;align-self:start;justify-self:end;
+ margin:0;
+}
+.walk-row.v51-card.v56-card .v53-trip>.walk-trip-ctrl{
+ grid-column:1/-1;grid-row:2;justify-self:end;
+}
+@media(max-width:540px){
+ .walk-row.v51-card.v56-card .walk-trip-line.v53-trip{column-gap:6px}
+}
 /* Previsão na linha da viagem, com símbolo maior e ligação à fonte.
  * O combustível e as portagens mantêm a segunda linha intacta. */
 .walk-row.v51-card.v56-card .v86-weather{
