@@ -47,7 +47,16 @@
    else Promise.resolve().then(mount);
   }
   if(typeof MutationObserver==='function'){
-   const observer=new MutationObserver(schedule);
+   const observer=new MutationObserver(records=>{
+    // Ignorar a escrita da própria temperatura no <span> para evitar ciclos.
+    // Reagir só a novos cartões ou a linhas de viagem substituídas pelo núcleo.
+    const updated=records.some(record=>Array.from(record.addedNodes||[]).some(node=>
+     node.nodeType===1&&(
+      node.matches?.('.walk-row, .walk-trip-line')||
+      node.querySelector?.('.walk-row, .walk-trip-line')
+     )));
+    if(updated)schedule();
+   });
    observer.observe(list,{subtree:true,childList:true});
   }
   schedule();
