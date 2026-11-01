@@ -1509,6 +1509,10 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 .walk-row.v51-card.v56-card .v74-trip-total strong{
  color:#185236;font-weight:850;
 }
+.walk-row.v51-card.v56-card .v74-toll-note{
+ font-size:10px;line-height:1.25;color:#657767;
+ margin-top:1px;overflow-wrap:anywhere;
+}
 .walk-row.v51-card.v56-card .v74-trip-total small{
  font-size:9.5px;font-weight:500;color:#66796a;
 }
