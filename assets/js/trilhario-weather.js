@@ -56,38 +56,71 @@
   if(typeof temp!=='number'||!Number.isFinite(temp)||temp< -60||temp>55||!wx)return null;
   return {symbol:wx.symbol,label:wx.label,temp:Math.round(temp)};
  }
+ function destinationFromTitle(title){
+  const t=folded(title);
+  // Apenas destinos geográficos explícitos; nunca inferir uma rota a partir de
+  // palavras genéricas como "outono", "bosque" ou "magusto".
+  const known=[
+   [/\bmanteigas\b/,'Manteigas'],
+   [/\bcastro laboreiro\b/,'Castro Laboreiro'],
+   [/\bparedes de coura\b/,'Paredes de Coura'],
+   [/\bcabeceiras de basto\b/,'Cabeceiras de Basto'],
+   [/\bserra de sintra\b/,'Sintra'],
+   [/\bserra da estrela\b/,'Serra da Estrela'],
+   [/\bcorno do bico\b/,'Paredes de Coura'],
+   [/\bserra de montemuro\b/,'Castro Daire'],
+   [/\blevada da vibora\b/,'Cabeceiras de Basto'],
+   [/\brota das faias\b/,'Manteigas'],
+   [/\bbosque das faias\b/,'Manteigas']
+  ];
+  return known.find(([pattern])=>pattern.test(t))?.[1]||'';
+ }
+ function pickupLocation(start){
+  return /terminal rodovi[aá]rio|terminal fluvial|esta[cç][aã]o\s+(?:de comboios|cp|do oriente|de campanh[aã])|ponto de (?:encontro|recolha)|autocarro|partida de autocarro|transfer para/i.test(start);
+ }
  function locationPlan(event){
   if(!event||!validDate(event.date))return null;
   const multi=event.multiDay===true||validDate(event.endDate)&&event.endDate>event.date;
   const town=usable(event.town)?String(event.town).trim():'';
   const start=usable(event.start)?String(event.start).trim():'';
   const title=folded(event.title);
-  if(multi){
-   // Nunca usar GPS de recolha de passageiros (Porto/Lisboa) como clima da serra.
-   if(!town)return null;
-   // Se a 'localidade' é o mesmo ponto de recolha mas não figura no título,
-   // não há prova de que seja o destino do trilho.
-   const names=folded(town).split(/[,\u2013\u2014]/).map(s=>s.trim()).filter(s=>s.length>=4);
-   if(start&&names.some(part=>folded(start).includes(part))&&!names.some(part=>title.includes(part)))
-    return null;
-   return {kind:'place',name:town};
-  }
-  // Se a morada é uma recolha rodoviária, as coordenadas descrevem o
-  // transporte e não necessariamente a zona onde se caminha.
-  if(/terminal rodovi[aá]rio|terminal fluvial|esta[cç][aã]o do oriente|ponto de recolha|autocarro/i.test(start)){
-   if(town&&(!folded(start).includes(folded(town))||title.includes(folded(town))))
-    return {kind:'place',name:town};
+  // Campos exclusivos de meteorologia, separados do GPS usado para a viagem.
+  // Só usar coordenadas de percurso se forem explicitamente fornecidas.
+  const weatherLat=Number(event.weatherLat),weatherLon=Number(event.weatherLon);
+  if(event.weatherLat!=null&&event.weatherLon!=null&&Number.isFinite(weatherLat)&&
+     Number.isFinite(weatherLon)&&weatherLat>=36&&weatherLat<=43&&
+     weatherLon>=-10&&weatherLon<=-6)
+   return {kind:'gps',lat:weatherLat,lon:weatherLon,
+    name:usable(event.weatherLocation)?event.weatherLocation:town||'zona do percurso',
+    approximate:false};
+  if(usable(event.weatherLocation))
+   return {kind:'place',name:String(event.weatherLocation).trim(),approximate:false};
+  const hint=destinationFromTitle(event.title);
+  const pickup=pickupLocation(start);
+  const townIsPickup=pickup&&town&&folded(start).includes(folded(town))&&
+   !title.includes(folded(town));
+  const townIsLogistics=/terminal|ponto de encontro|ponto de recolha|esta[cç][aã]o cp|parque de estacionamento/i.test(town);
+  if(multi||pickup){
+   // Nunca confundir transporte em Lisboa/Porto com clima da serra.
+   if(hint)return {kind:'place',name:hint,approximate:true};
+   if(town&&!townIsPickup&&!townIsLogistics)
+    return {kind:'place',name:town,approximate:true};
    return null;
   }
+  // Quando o título indica uma região diferente do início anunciado,
+  // privilegiar a zona do percurso (aproximada) sobre o GPS da recolha.
+  if(hint&&(!town||!title.includes(folded(town))))
+   return {kind:'place',name:hint,approximate:true};
   const lat=Number(event.lat),lon=Number(event.lon);
   if(event.verified===true&&event.lat!=null&&event.lon!=null&&
      Number.isFinite(lat)&&Number.isFinite(lon)&&
      lat>=36&&lat<=43&&lon>=-10&&lon<=-6)
-    return {kind:'gps',lat,lon,name:town||start||'zona do trilho'};
-  if(town)return {kind:'place',name:town};
-  // Na ausência de GPS, só usar nomes geográficos, não ruas ou pontos de encontro.
+   return {kind:'gps',lat,lon,name:town||start||'zona do início',
+    approximate:true};
+  if(town&&!townIsLogistics)return {kind:'place',name:town,approximate:true};
+  // Evitar ruas, parques de estacionamento e pontos de encontro.
   if(start&&!/^(?:rua|r\.|av\.|avenida|parque|estacionamento|terminal|junto|em frente)/i.test(start)
-      &&start.length<=65)return {kind:'place',name:start};
+      &&start.length<=65)return {kind:'place',name:start,approximate:true};
   return null;
  }
  function placeOptions(name){
@@ -139,16 +172,14 @@
     return null;
    });
   }
-  function windyPage(point,day){
+  function meteobluePage(point){
    const lat=Number(point?.lat),lon=Number(point?.lon);
-   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!validDate(day))return null;
-   // Windy aceita YYYY-MM-DD-HH em UTC, apenas em blocos de 3 horas.
-   // 12 UTC corresponde a 12h em Portugal no inverno e 13h no verão:
-   // é a hora admitida mais próxima das 12h locais nos dois casos.
-   // Algumas versões da app ignoram o parâmetro de data ao abrir o link;
-   // as coordenadas e a camada de temperatura continuam utilizáveis.
-   return 'https://www.windy.com/?ecmwf,temp,'+day+'-12,'+
-    lat.toFixed(4)+','+lon.toFixed(4)+',10,d:picker';
+   if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+   // Página pública do Meteoblue por coordenadas. O calendário aparece
+   // na previsão; não prometer abertura automática na data do trilho.
+   const location=Math.abs(lat).toFixed(3)+(lat>=0?'N':'S')+
+    Math.abs(lon).toFixed(3)+(lon>=0?'E':'W');
+   return 'https://www.meteoblue.com/pt/tempo/semana/'+location;
   }
   async function getHours(lat,lon,day){
    // Uma resposta com arrays mas sem valores para o dia pedido não é válida;
@@ -180,7 +211,8 @@
    const data=await getHours(point.lat,point.lon,event.date);
    const value=noonForecast(data,event.date);
    return value?{...value,name:point.name||plan.name,source:data.source,
-    url:windyPage(point,event.date)}:null;
+    approximate:plan.approximate!==false,
+    url:meteobluePage(point)}:null;
   }
   function display(node,event,result){
    if(!node||!node.isConnected||node.dataset.weatherId!==String(event.id))return;
@@ -195,11 +227,12 @@
    node.textContent=result.temp+'°C';
    node.setAttribute('data-weather-icon',result.symbol);
    const location=result.name||'zona da caminhada';
+   const locationNote=result.approximate?' (zona aproximada, não todo o percurso)':'';
    const description=result.label+', '+result.temp+'°C, às 12h de '+event.date+
-    ', em '+location+'. Previsão '+(result.source||'ECMWF IFS')+' via Open-Meteo (aproximada).';
-   node.title=description+(result.url?' Abrir mapa no Windy (consulta complementar).':'');
+    ', em '+location+locationNote+'. Previsão '+(result.source||'ECMWF IFS')+' via Open-Meteo.';
+   node.title=description+(result.url?' Abrir Meteoblue nesta localização.':'');
    node.setAttribute('aria-label',description+
-    (result.url?' Consultar no Windy o mapa desta localização e data.':''));
+    (result.url?' Consultar a previsão no Meteoblue (outra fonte).':''));
    if(result.url){
     node.setAttribute('href',result.url);
     node.setAttribute('target','_blank');
@@ -269,5 +302,5 @@
   }
   return {forecast,observe};
  }
- return {weekendDates,condition,noonForecast,locationPlan,placeOptions,create};
+ return {weekendDates,condition,noonForecast,locationPlan,placeOptions,destinationFromTitle,meteobluePage,create};
 });
