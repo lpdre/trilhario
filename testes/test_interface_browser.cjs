@@ -48,7 +48,8 @@ const tripCard={
   tripProblems:new Map(),departureCandidates:()=>['Arouca'],
   ambiguousDeparture:()=>false,tripOriginProblem:'',
   fmtN:x=>String(x),timeStr:()=> '2h 00min',travelMoney:()=> '15,00 €',
-  esc:x=>String(x??''),tollPendingLabel:()=> 'A calcular portagens…',weatherSlot:()=>''
+  esc:x=>String(x??''),tollPendingLabel:()=> 'A calcular portagens…',
+  weatherWeekendEligible:date=>date==='2026-11-07'
 };
 vm.runInNewContext(section('function travelRow(e){','// Delegação:'),tripCard);
 const withoutTolls=tripCard.travelRow({id:'evento'});
@@ -58,6 +59,11 @@ assert.ok(withoutTolls.includes('v74-toll-note'),'explicar portagens pendentes n
 assert.ok(!withoutTolls.includes('Calcular portagens'),'botão manual eliminado');
 assert.ok(!withoutTolls.includes('Repetir portagens'),'botão de repetição eliminado');
 assert.ok(!withoutTolls.includes('data-event-action="calculateOneRoute"'),'cálculo automático, sem botão na viagem válida');
+const withForecast=tripCard.travelRow({id:'com-tempo',date:'2026-11-07'});
+assert.ok(withForecast.includes('data-weather-id="com-tempo"'),
+ 'cartão do fim de semana inclui espaço de previsão persistente');
+assert.ok(!withoutTolls.includes('data-weather-id='),
+ 'eventos fora da janela não ocupam espaço de meteorologia');
 
 
 // O estado não pode ficar escondido num travessão durante horas.
