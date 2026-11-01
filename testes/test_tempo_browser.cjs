@@ -25,25 +25,32 @@ assert.equal(Weather.noonForecast({hourly:{
 }},'2026-11-07'),null,'não inventar previsão de outro dia');
 const e={id:'g',title:'Levada da Víbora',date:'2026-11-07',
  verified:true,lat:41.561,lon:-7.982, town:'Cabeceiras de Basto'};
-assert.equal(Weather.locationPlan(e).kind,'gps');
+assert.deepEqual(Weather.locationPlan(e),
+ {kind:'place',name:'Cabeceiras de Basto',approximate:true});
+const precise={...e,weatherLat:41.52,weatherLon:-8.02,weatherLocation:'Ponto central do trilho'};
+assert.deepEqual(Weather.locationPlan(precise),
+ {kind:'gps',lat:41.52,lon:-8.02,name:'Ponto central do trilho',approximate:false});
 const multi={id:'m',title:'Rota das Faias de Manteigas',date:'2026-11-07',
  multiDay:true,town:'Manteigas',start:'Porto (ponto de encontro)',
  verified:true,lat:41.1628,lon:-8.5928};
-assert.deepEqual(Weather.locationPlan(multi),{kind:'place',name:'Manteigas'});
-assert.equal(Weather.locationPlan({
+assert.deepEqual(Weather.locationPlan(multi),
+ {kind:'place',name:'Manteigas',approximate:true});
+assert.deepEqual(Weather.locationPlan({
  title:'Fim de semana na Serra da Estrela',date:'2026-11-07',
  multiDay:true,town:'Lisboa',
  start:'Terminal Rodoviário do Oriente, Lisboa',
  lat:38.77,lon:-9.10,verified:true
-}),null,'não apresentar tempo de Lisboa numa caminhada na Serra da Estrela');
+}),{kind:'place',name:'Serra da Estrela',approximate:true},
+ 'uma caminhada na Estrela não deve usar a previsão de Lisboa');
 assert.equal(Weather.locationPlan({id:'x',date:'2026-11-07',
  multiDay:true,town:'Por confirmar',start:'Porto',verified:true,lat:41.15,lon:-8.61}),null);
 assert.equal(Weather.locationPlan({id:'u',date:'2026-11-07',
  town:'Por confirmar',start:'Por confirmar'}),null);
-assert.equal(Weather.locationPlan({title:'Caminhada na Serra da Estrela',date:'2026-11-07',
+assert.deepEqual(Weather.locationPlan({title:'Caminhada na Serra da Estrela',date:'2026-11-07',
  town:'Lisboa',start:'Terminal Rodoviário do Oriente, Lisboa',
- verified:true,lat:38.77,lon:-9.10}),null,
- 'uma viagem de autocarro não é a previsão do trilho');
+ verified:true,lat:38.77,lon:-9.10}),
+ {kind:'place',name:'Serra da Estrela',approximate:true},
+ 'uma viagem de autocarro não deve gerar previsão da partida');
 assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de Coura')[0],'Paredes de Coura');
 (async()=>{
  let calls=0,geoCalls=0;
@@ -69,7 +76,7 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.equal(value.symbol,'⛅');
  assert.equal(value.name,'Manteigas');
  assert.equal(value.url,
-  'https://www.windy.com/?ecmwf,temp,2026-11-07-12,40.4020,-7.5390,10,d:picker');
+  'https://www.meteoblue.com/pt/tempo/semana/40.402N7.539W');
  const again=await controller.forecast(multi);
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
@@ -83,7 +90,7 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  };
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../assets/js/trilhario-weather.js'),'utf8'),browser);
  const browserEngine=browser.window.TrilharioWeather.create({today:()=> '2026-11-01'});
- const browserForecast=await browserEngine.forecast(e);
+ const browserForecast=await browserEngine.forecast(precise);
  assert.equal(browserForecast.temp,13,'fetch global do navegador deve alimentar a previsão');
  assert.equal(browserForecast.symbol,'⛅','o cartão deve receber o símbolo do tempo');
  const other=await controller.forecast({...multi,date:'2026-11-28'});
@@ -97,9 +104,10 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.equal(node['data-weather-icon'],'⛅');
  assert.equal(node.target,'_blank');
  assert.equal(node.rel,'noopener noreferrer');
- assert.equal(node.href,value.url,'clicar na temperatura abre o Windy no dia e local do trilho');
+ assert.equal(node.href,value.url,'clicar na temperatura abre o Meteoblue na zona do trilho');
  assert.match(node.title,/ECMWF IFS via Open-Meteo/);
- const noLocation=await controller.forecast({...multi,town:'Por confirmar'});
+ const noLocation=await controller.forecast({...multi,title:'Passeio genérico',
+  town:'Por confirmar',start:'Terminal Rodoviário do Oriente'});
  assert.equal(noLocation,null);
  // Quando o endpoint ECMWF falha, usar a previsão genérica e identificar a origem.
  const urls=[];
@@ -119,7 +127,7 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.equal(fromFallback.source,'Open-Meteo');
  assert.equal(fromFallback.temp,13);
  assert.equal(fromFallback.url,value.url,
-  'o link Windy usa a data/local mesmo quando o Open-Meteo recorre ao modelo alternativo');
+  'o link Meteoblue usa o local mesmo quando o Open-Meteo recorre ao modelo alternativo');
  assert.ok(urls.some(url=>url.includes('/v1/forecast?')));
  // Depois de duas respostas inválidas a temperatura é desconhecida: nunca 0°C.
  const none=Weather.create({
