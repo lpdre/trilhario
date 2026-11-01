@@ -91,7 +91,8 @@ assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia'
 (async()=>{
  const RealWeather=require('../assets/js/trilhario-weather.js');
  const event={id:'live-7',date:'2026-11-07',title:'Levada da Víbora',
-  verified:true,lat:41.561,lon:-7.982,town:'Cabeceiras de Basto'};
+  verified:true,lat:41.561,lon:-7.982,town:'Cabeceiras de Basto',
+  weatherLat:41.561,weatherLon:-7.982};
  let slot=null,networkCalls=0;
  const realList={
   querySelectorAll(selector){
@@ -137,7 +138,7 @@ assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia'
  for(let i=0;i<25;i++)await Promise.resolve();
  assert.equal(slot.textContent,'11°C');
  assert.equal(slot['data-weather-icon'],'⛅','símbolo meteorológico independente da temperatura');
- assert.equal(slot.href,'https://www.windy.com/?ecmwf,temp,2026-11-07-12,41.5610,-7.9820,10,d:picker');
+ assert.equal(slot.href,'https://www.meteoblue.com/pt/tempo/semana/41.561N7.982W');
  assert.equal(slot.target,'_blank');
  assert.match(slot.title,/ECMWF IFS via Open-Meteo/);
  assert.equal(networkCalls,1);
