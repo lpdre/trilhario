@@ -9,7 +9,7 @@ from normalizar_eventos import (
     parse_caminhando_detail,
     merge_exact_duplicates,
 )
-from recolher import extra_source_meta
+from recolher import extra_source_meta, parse_meta
 
 
 ROTA = "Caminhando na Rota das Faias - Serra da Estrela"
@@ -135,6 +135,24 @@ class CaminhandoMultidayRegressao(unittest.TestCase):
                  verified=True, lat=38.73636111, lon=-9.17251667)
         b = dict(a, id="two", time="15:00")
         self.assertEqual(len(merge_exact_duplicates([a, b])), 2)
+
+    def test_explicit_distance_in_caminhando_title_is_retained(self):
+        event = {
+            "organizer": "Caminhando.pt",
+            "title": "Caminhando por Trilhos e Miradouros de Monsanto - 11kms",
+            "date": "2026-11-01",
+            "url": "https://caminhando.pt/eventos/caminhando-por-trilhos-e-miradouros-de-monsanto-9kms",
+            "km": None,
+        }
+        parse_meta(BeautifulSoup("<main>Trilhos em Monsanto.</main>", "html.parser"), event)
+        self.assertEqual(event["km"], 11)
+
+    def test_multiday_title_distance_is_not_taken_as_total(self):
+        event = {"organizer":"Caminhando.pt",
+                 "title":"Fim-de-semana na Serra - 11kms", "date":"2026-11-07",
+                 "km":None, "multiDay":True}
+        parse_meta(BeautifulSoup("<main>Dois dias de caminhadas.</main>","html.parser"),event)
+        self.assertIsNone(event["km"])
 
 
 if __name__ == "__main__":
