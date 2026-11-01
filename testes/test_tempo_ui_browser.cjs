@@ -17,7 +17,6 @@ assert.ok(page.indexOf('trilhario.js?v=')<page.indexOf('trilhario-weather.js?v='
 assert.ok(page.indexOf('trilhario-weather.js?v=')<page.indexOf('trilhario-weather-ui.js?v='));
 assert.equal(main.includes('TRILHARIO_WEATHER'),false,
  'a agenda nunca deve depender da existência da previsão');
-const css=fs.readFileSync(path.join(root,'assets/css/trilhario.css'),'utf8');
 const layout=css.slice(css.indexOf('/* v98 — duas colunas'));
 assert.ok(layout.includes('display:grid;grid-template-columns:minmax(0,1fr) max-content;'),
  'meteorologia tem coluna própria em vez de ocupar a largura dos preços');
