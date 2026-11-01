@@ -12,6 +12,15 @@ assert.ok(page.indexOf('trilhario.js?v=')<page.indexOf('trilhario-weather.js?v='
 assert.ok(page.indexOf('trilhario-weather.js?v=')<page.indexOf('trilhario-weather-ui.js?v='));
 assert.equal(main.includes('TRILHARIO_WEATHER'),false,
  'a agenda nunca deve depender da existência da previsão');
+const css=fs.readFileSync(path.join(root,'assets/css/trilhario.css'),'utf8');
+const layout=css.slice(css.indexOf('/* v98 — duas colunas'));
+assert.ok(layout.includes('display:grid;grid-template-columns:minmax(0,1fr) max-content;'),
+ 'meteorologia tem coluna própria em vez de ocupar a largura dos preços');
+assert.ok(layout.includes('grid-column:1;grid-row:1'),
+ 'percursos e combustível partilham a coluna esquerda');
+assert.ok(layout.includes('grid-column:2;grid-row:1'),
+ 'o ícone fica apenas na coluna direita');
+
 
 // A meteorologia pode não estar acessível ou falhar ao inicializar.
 // Não pode provocar uma exceção não tratada nem impedir o núcleo.
@@ -24,13 +33,13 @@ assert.doesNotThrow(()=>vm.runInNewContext(addon,{
 }));
 
 let installed=null,mounts=0,changed=null;
-const route={appendChild:node=>{row.slot=node;node.parentElement=route;mounts++;}};
+const tripLine={appendChild:node=>{row.slot=node;node.parentElement=tripLine;mounts++;}};
 const row={
  dataset:{eid:'trilho-7'},
  slot:null,
  querySelector(selector){
   if(selector==='.v86-weather')return this.slot;
-  if(selector==='.v74-trip-route')return route;
+  if(selector==='.walk-trip-line')return tripLine;
   return null;
  }
 };
@@ -63,7 +72,7 @@ assert.equal(row.slot.className,'v86-weather');
 assert.equal(row.slot.dataset.weatherId,'trilho-7');
 assert.equal(row.slot.textContent,'…','mostrar consulta enquanto carrega a temperatura');
 assert.equal(installed.length,1);
-assert.equal(row.slot.parentElement,route,'indicador permanece na linha do percurso');
+assert.equal(row.slot.parentElement,tripLine,'ícone separado do resumo da viagem e dos preços');
 changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'mutações repetidas não duplicam indicadores');
 
@@ -87,12 +96,12 @@ assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia'
    return [];
   }
  };
- const realRoute={appendChild:n=>{slot=n;n.parentElement=realRoute}};
+ const realTripLine={appendChild:n=>{slot=n;n.parentElement=realTripLine}};
  const realRow={
   dataset:{eid:event.id},
   querySelector(selector){
    if(selector==='.v86-weather')return slot;
-   if(selector==='.v74-trip-route')return realRoute;
+   if(selector==='.walk-trip-line')return realTripLine;
    return null;
   }
  };
