@@ -94,7 +94,7 @@
   const getToday=options.today||(()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Lisbon'}));
   const getEvent=options.getEvent||(()=>null);
   const weatherCache=new Map(),geoCache=new Map();
-  const active=new Set(),queue=[];
+  const active=new Set(),queue=[],results=new Map();
   let observer=null,working=0;
   async function fetchJson(url){
    if(!fetchImpl)return null;
@@ -162,35 +162,61 @@
    node.title=description;
    node.setAttribute('aria-label',description);
   }
+  function eventKey(e){
+   return [e.id,e.date,e.town||'',e.start||'',e.lat??'',e.lon??''].join('|');
+  }
+  function paintAll(event,value){
+   const slots=typeof document==='object'?document.querySelectorAll('[data-weather-id]'):[];
+   for(const node of slots)if(node.dataset.weatherId===String(event.id))display(node,event,value);
+  }
   function pump(){
    while(working<3&&queue.length){
     const node=queue.shift();
     if(!node?.isConnected)continue;
     const event=getEvent(node.dataset.weatherId);
     if(!event||!weekendDates(getToday()).has(event.date))continue;
-    const key=String(event.id);
+    const key=eventKey(event);
+    const previous=results.get(key);
+    if(previous&&previous.exp>Date.now()){
+     display(node,event,previous.value);
+     continue;
+    }
     if(active.has(key))continue;
     active.add(key);working++;
-    forecast(event).then(value=>display(node,event,value)).catch(()=>display(node,event,null)).finally(()=>{
+    forecast(event).then(value=>{
+     results.set(key,{value,exp:Date.now()+(value?CACHE_MS:FAILURE_MS)});
+     paintAll(event,value);
+     display(node,event,value);
+    }).catch(()=>display(node,event,null)).finally(()=>{
      active.delete(key);working--;pump();
     });
    }
   }
   function observe(elements){
    if(observer)observer.disconnect();
-   const slots=Array.from(elements||[]);
+   const slots=Array.from(elements||[]).filter(node=>{
+    const event=getEvent(node.dataset.weatherId);
+    if(!event)return false;
+    const cached=results.get(eventKey(event));
+    if(cached&&cached.exp>Date.now()){
+     display(node,event,cached.value);
+     return false;
+    }
+    return true;
+   });
    if(typeof IntersectionObserver!=='function'){
     queue.push(...slots.slice(0,8));pump();return;
    }
-   observer=new IntersectionObserver(entries=>{
+   const current=new IntersectionObserver(entries=>{
     for(const entry of entries){
      if(!entry.isIntersecting)continue;
-     observer.unobserve(entry.target);
+     current.unobserve(entry.target);
      queue.push(entry.target);
     }
     pump();
    },{rootMargin:'500px 0px',threshold:0});
-   slots.forEach(node=>observer.observe(node));
+   observer=current;
+   slots.forEach(node=>current.observe(node));
   }
   return {forecast,observe};
  }
