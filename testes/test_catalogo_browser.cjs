@@ -42,8 +42,10 @@ const dateContext={agendaClock:()=>({date:'2026-10-29',minute:12*60})};
 vm.runInNewContext(s.slice(clockStart,clockEnd),dateContext);
 const trip={id:'expedicao',date:'2026-10-29',endDate:'2026-11-01',
             multiDay:true,time:'08:00'};
-assert.equal(dateContext.eventHasNotStarted(trip,{date:'2026-10-29',minute:23*60}),true,
-             'programa multidiario visivel durante o dia inicial');
+assert.equal(dateContext.eventHasNotStarted(trip,{date:'2026-10-29',minute:7*60}),true,
+             'programa multidiario visivel antes da hora inicial');
+assert.equal(dateContext.eventHasNotStarted(trip,{date:'2026-10-29',minute:23*60}),false,
+             'programa multidiario oculto depois de iniciar');
 assert.equal(dateContext.eventHasNotStarted(trip,{date:'2026-10-30',minute:0}),false,
              'programa multidiario oculto no dia seguinte ao inicio');
 assert.equal(dateContext.eventHasNotStarted({...trip,date:'2026-10-31'},
