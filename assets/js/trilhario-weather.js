@@ -175,14 +175,13 @@
     return null;
    });
   }
-  function meteobluePage(point){
+  function windyPage(point,day){
    const lat=Number(point?.lat),lon=Number(point?.lon);
-   if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;
-   // Página pública do Meteoblue por coordenadas. O calendário aparece
-   // na previsão; não prometer abertura automática na data do trilho.
-   const location=Math.abs(lat).toFixed(3)+(lat>=0?'N':'S')+
-    Math.abs(lon).toFixed(3)+(lon>=0?'E':'W');
-   return 'https://www.meteoblue.com/pt/tempo/semana/'+location;
+   if(!Number.isFinite(lat)||!Number.isFinite(lon)||!validDate(day))return null;
+   // Link verificado no telemóvel: local, modelo ECMWF, camada de
+   // temperatura e hora de referência do dia da caminhada.
+   return 'https://www.windy.com/?ecmwf,temp,'+day+'-12,'+
+    lat.toFixed(4)+','+lon.toFixed(4)+',10,d:picker';
   }
   async function getHours(lat,lon,day){
    // Uma resposta com arrays mas sem valores para o dia pedido não é válida;
@@ -232,7 +231,7 @@
    const value=noonForecast(data,event.date);
    return value?{...value,name:point.name||plan.name,source:data.source,
     approximate:plan.approximate!==false,
-    url:meteobluePage(point)}:null;
+    url:windyPage(point,event.date)}:null;
   }
   function display(node,event,result){
    if(!node||!node.isConnected||node.dataset.weatherId!==String(event.id))return;
@@ -250,9 +249,9 @@
    const locationNote=result.approximate?' (zona aproximada, não todo o percurso)':'';
    const description=result.label+', '+result.temp+'°C, às 12h de '+event.date+
     ', em '+location+locationNote+'. Previsão '+(result.source||'ECMWF IFS')+' via Open-Meteo.';
-   node.title=description+(result.url?' Abrir Meteoblue nesta localização.':'');
+   node.title=description+(result.url?' Abrir Windy na localização e data da caminhada.':'');
    node.setAttribute('aria-label',description+
-    (result.url?' Consultar a previsão no Meteoblue (outra fonte).':''));
+    (result.url?' Consultar a meteorologia no Windy (outra fonte).':''));
    if(result.url){
     node.setAttribute('href',result.url);
     node.setAttribute('target','_blank');
