@@ -1753,6 +1753,7 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
  -webkit-overflow-scrolling:touch;
 }
 .results .v51-quick-filters.v64-quick-filters .v83-strip::-webkit-scrollbar{display:none}
+.results .v51-quick-filters.v64-quick-filters .v83-strip > button[hidden]{display:none!important}
 .results .v51-quick-filters.v64-quick-filters .v83-strip > button{
  box-sizing:border-box;flex:0 0 calc((100% - 10px)/3.3);
  width:calc((100% - 10px)/3.3);max-width:calc((100% - 10px)/3.3);
