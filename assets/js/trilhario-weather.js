@@ -71,6 +71,13 @@
     return null;
    return {kind:'place',name:town};
   }
+  // Se a morada é uma recolha rodoviária, as coordenadas descrevem o
+  // transporte e não necessariamente a zona onde se caminha.
+  if(/terminal rodovi[aá]rio|terminal fluvial|esta[cç][aã]o do oriente|ponto de recolha|autocarro/i.test(start)){
+   if(town&&(!folded(start).includes(folded(town))||title.includes(folded(town))))
+    return {kind:'place',name:town};
+   return null;
+  }
   const lat=Number(event.lat),lon=Number(event.lon);
   if(event.verified===true&&event.lat!=null&&event.lon!=null&&
      Number.isFinite(lat)&&Number.isFinite(lon)&&
