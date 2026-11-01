@@ -1,6 +1,8 @@
 'use strict';
 const assert=require('node:assert/strict');
 const Weather=require('../assets/js/trilhario-weather.js');
+const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+
 const days=[...Weather.weekendDates('2026-11-01')].sort();
 assert.deepEqual(days,['2026-11-07','2026-11-08','2026-11-14','2026-11-15']);
 assert.deepEqual([...Weather.weekendDates('2026-11-07')].sort(),days);
@@ -70,6 +72,18 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
  assert.equal(geoCalls,1);
+ // Simular o carregamento real no navegador, sem injectar fetchImpl.
+ // A função fetch nativa existe globalmente, não no âmbito lexical de factory().
+ const browser={
+  window:{},
+  fetch:async url=>({ok:true,json:async()=>forecastJson}),
+  URLSearchParams
+ };
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../assets/js/trilhario-weather.js'),'utf8'),browser);
+ const browserEngine=browser.window.TrilharioWeather.create({today:()=> '2026-11-01'});
+ const browserForecast=await browserEngine.forecast(e);
+ assert.equal(browserForecast.temp,13,'fetch global do navegador deve alimentar a previsão');
+ assert.equal(browserForecast.symbol,'⛅','o cartão deve receber o símbolo do tempo');
  const other=await controller.forecast({...multi,date:'2026-11-28'});
  assert.equal(other,null,'nunca consultar datas fora dos dois fins de semana');
  assert.equal(calls,2);
