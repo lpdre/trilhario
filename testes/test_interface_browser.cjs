@@ -48,7 +48,7 @@ const tripCard={
   tripProblems:new Map(),departureCandidates:()=>['Arouca'],
   ambiguousDeparture:()=>false,tripOriginProblem:'',
   fmtN:x=>String(x),timeStr:()=> '2h 00min',travelMoney:()=> '15,00 €',
-  esc:x=>String(x??''),tollPendingLabel:()=> 'A calcular portagens…'
+  esc:x=>String(x??''),tollPendingLabel:()=> 'A calcular portagens…',weatherSlot:()=>''
 };
 vm.runInNewContext(section('function travelRow(e){','// Delegação:'),tripCard);
 const withoutTolls=tripCard.travelRow({id:'evento'});
