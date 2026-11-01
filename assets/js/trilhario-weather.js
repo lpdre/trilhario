@@ -305,5 +305,5 @@
   }
   return {forecast,observe};
  }
- return {weekendDates,condition,noonForecast,locationPlan,placeOptions,destinationFromTitle,meteobluePage,create};
+ return {weekendDates,condition,noonForecast,locationPlan,placeOptions,destinationFromTitle,create};
 });
