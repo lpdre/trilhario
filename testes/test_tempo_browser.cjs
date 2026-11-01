@@ -26,7 +26,8 @@ assert.equal(Weather.noonForecast({hourly:{
 const e={id:'g',title:'Levada da Víbora',date:'2026-11-07',
  verified:true,lat:41.561,lon:-7.982, town:'Cabeceiras de Basto'};
 assert.deepEqual(Weather.locationPlan(e),
- {kind:'place',name:'Cabeceiras de Basto',approximate:true});
+ {kind:'gps',lat:41.561,lon:-7.982,name:'Cabeceiras de Basto',approximate:true},
+ 'GPS próximo do percurso continua a ser melhor que o centro da cidade');
 const precise={...e,weatherLat:41.52,weatherLon:-8.02,weatherLocation:'Ponto central do trilho'};
 assert.deepEqual(Weather.locationPlan(precise),
  {kind:'gps',lat:41.52,lon:-8.02,name:'Ponto central do trilho',approximate:false});
@@ -81,6 +82,13 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
  assert.equal(geoCalls,1);
+ const mislocated={...multi,multiDay:false,endDate:null,
+  start:'Praça da Liberdade, Porto',lat:41.1628,lon:-8.5928,verified:true};
+ assert.equal(Weather.locationPlan(mislocated).kind,'gps');
+ const fixed=await controller.forecast(mislocated);
+ assert.equal(fixed.url,value.url,
+  'quando o GPS de encontro está longe do destino explícito, prever na zona do trilho');
+ assert.equal(fixed.name,'Manteigas');
  // Simular o carregamento real no navegador, sem injectar fetchImpl.
  // A função fetch nativa existe globalmente, não no âmbito lexical de factory().
  const browser={
