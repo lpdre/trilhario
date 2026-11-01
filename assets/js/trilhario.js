@@ -106,7 +106,7 @@ let travelBusy=false,geoLastRequest=0,roadLastRequest=0;
 const TRAVEL_BATCH_SIZE=10;
 let tripJobs=[],tripJobsSet=new Set(),tripActiveKey='',tripProblems=new Map(),tripOriginProblem='';
 let tripFilterSignature='',tripBatchObserver=null,tripWorking=false;
-let tollJobs=[],tollWorking=false;
+let tollJobs=[],tollWorking=false,tollActiveKey='';
 const ROUNDTRIP_VERSION=37; // v37: ida e volta com percursos independentes; cache antiga não é fiável.
 const GEOCODER_VERSION=37,geoMisses=new Map(),tripRetryAfter=new Map(); // v35: invalidar rotas geocodificadas sem validação geográfica
 
@@ -328,7 +328,16 @@ function refreshAgendaForClock(){
   if(bounds.bottom>=-300&&bounds.top<=height+300)near.add(row.dataset.eid);
   if(near.size>=TRAVEL_BATCH_SIZE)break;
  }
- if(near.size)queueTrips(allEvents().filter(e=>near.has(e.id)),false);
+ if(near.size){
+  const visible=allEvents().filter(e=>near.has(e.id));
+  queueTrips(visible,false);
+  // Atualizar contagem decrescente sem refazer cálculos ou cartões.
+  const byId=new Map(visible.map(e=>[String(e.id),e]));
+  for(const row of list.querySelectorAll('.walk-row[data-eid]')){
+   const hint=row.querySelector('.v74-toll-note'),event=byId.get(row.dataset.eid);
+   if(hint&&event)hint.textContent=tollPendingLabel(travelData(event));
+  }
+ }
 }
 function renderCatalogStatus(){
  // O estado normal do catálogo não ocupa espaço na página.
@@ -981,6 +990,22 @@ function tripCalc(e){
  return {km,minutes,fuel,toll,total:toll==null?null:fuel+toll};
 }
 function timeStr(min){if(!Number.isFinite(min))return '—';const m=Math.round(min),h=Math.floor(m/60);return (h?h+'h ':'')+String(m%60).padStart(2,'0')+'min';}
+// Distinguir cálculo, espera e falha; nunca apresentar desconhecido como zero.
+function tollPendingLabel(r,now=Date.now()){
+ if(!tollApiEndpoint)return 'Serviço de portagens indisponível neste endereço';
+ if(!r)return 'A aguardar dados do percurso…';
+ if(tollFresh(r,now))return '';
+ if(r.tollRequestId)return 'A consultar portagens…';
+ const retryAt=Math.max(Number(r.tollNextRetry||0),tollRetryAfter);
+ if(retryAt>now){
+  const mins=Math.max(1,Math.ceil((retryAt-now)/60000));
+  const reason=r.tollStatus==='unknown'?'Tarifa não confirmada':'Consulta temporariamente indisponível';
+  return reason+' · nova tentativa automática em '+mins+' min';
+ }
+ if(r.tollStatus==='unknown'||r.tollStatus==='retry')
+  return 'Nova tentativa automática pendente…';
+ return 'A calcular portagens…';
+}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key);
@@ -1005,6 +1030,7 @@ function travelRow(e){
      <span class="v74-trip-divider" aria-hidden="true">|</span>
      <span class="v74-trip-piece v74-trip-total" ${t.total==null?'title="Total pendente da confirmação das portagens"':''}>Total <strong>${t.total==null?'—':travelMoney(t.total)}</strong> <small>(ida e volta)</small></span>
     </div>
+    ${t.toll==null?`<div class="v74-toll-note" aria-live="off">${esc(tollPendingLabel(route))}</div>`:''}
    </div>`;
  }else{
   const status=!hasOrigin?'Define a origem acima para calcular a deslocação.':
@@ -1464,7 +1490,7 @@ async function loadTollApiEndpoint(){
    tollApiEndpoint=url.href;
  }catch(error){console.info('Backend de portagens não configurado.',error?.message||error);}
 }
-const TOLL_RETRY_MS=3*60*1000,TOLL_UNKNOWN_MS=12*60*60*1000;
+const TOLL_RETRY_MS=3*60*1000,TOLL_UNKNOWN_MS=15*60*1000;
 let tollRetryAfter=0,tollRequestSerial=0;
 // Erros de rede são temporários; ausência de estimativa não é uma portagem de zero euros.
 async function autoTollsForGeometry(geometry){
@@ -1584,9 +1610,14 @@ function refreshTravelCard(id){
 }
 
 function renderTravelProgress(){
- const n=tripJobs.length+(tripActiveKey?1:0),status=$('travelProgress');
+ const n=tripJobs.length+(tripActiveKey?1:0);
+ const pendingTolls=tollJobs.length+(tollActiveKey?1:0);
+ const status=$('travelProgress');
  if(!status)return;
- const message=tripOriginProblem?tripOriginProblem:n?`${n} deslocaç${n===1?'ão':'ões'} em cálculo…`:'';
+ const labels=[];
+ if(n)labels.push(`${n} deslocaç${n===1?'ão':'ões'} em cálculo`);
+ if(pendingTolls)labels.push(`${pendingTolls} portage${pendingTolls===1?'m':'ns'} em consulta`);
+ const message=tripOriginProblem||(labels.length?labels.join(' · ')+'…':'');
  status.textContent=message;status.hidden=!message;
 }
 function calculateOneRoute(id){
@@ -1599,35 +1630,60 @@ function calculateOneRoute(id){
 function runTollQueue(){
  if(tollWorking)return;
  tollWorking=true;
- (async()=>{try{while(tollJobs.length){
-  const job=tollJobs.shift(),current=travelRoutes[job.key];
-  if(!current||current.tollSource==='manual'||current.tollReturn!=null||current.tollRequestId!==job.requestId)continue;
-  let unknown=false,retry=false;
-  for(const part of [{field:'tollOut',geometry:job.outGeometry},{field:'tollBack',geometry:job.backGeometry}]){
-   const latest=travelRoutes[job.key];
-   if(!latest||latest.tollRequestId!==job.requestId||latest.tollSource==='manual')break;
-   if(Number.isFinite(latest[part.field]))continue;
-   const result=await autoTollsForGeometry(part.geometry);
-   const still=travelRoutes[job.key];
-   if(!still||still.tollRequestId!==job.requestId||still.tollSource==='manual')break;
-   if(result.status==='ok')still[part.field]=result.amount;
-   else if(result.status==='unknown')unknown=true;
-   else retry=true;
+ (async()=>{
+  try{
+   while(tollJobs.length){
+    const job=tollJobs.shift(),current=travelRoutes[job.key];
+    if(!current||current.tollSource==='manual'||current.tollReturn!=null||
+       current.tollRequestId!==job.requestId)continue;
+    tollActiveKey=job.key;renderTravelProgress();
+    try{
+     let unknown=false,retry=false;
+     for(const part of [{field:'tollOut',geometry:job.outGeometry},
+                        {field:'tollBack',geometry:job.backGeometry}]){
+      const latest=travelRoutes[job.key];
+      if(!latest||latest.tollRequestId!==job.requestId||
+         latest.tollSource==='manual')break;
+      if(Number.isFinite(latest[part.field]))continue;
+      const result=await autoTollsForGeometry(part.geometry);
+      const still=travelRoutes[job.key];
+      if(!still||still.tollRequestId!==job.requestId||
+         still.tollSource==='manual')break;
+      if(result.status==='ok')still[part.field]=result.amount;
+      else if(result.status==='unknown')unknown=true;
+      else retry=true;
+     }
+     const latest=travelRoutes[job.key];
+     if(!latest||latest.tollRequestId!==job.requestId||
+        latest.tollSource==='manual')continue;
+     if(Number.isFinite(latest.tollOut)&&Number.isFinite(latest.tollBack)){
+      latest.tollReturn=Math.round((latest.tollOut+latest.tollBack)*100)/100;
+      latest.tollSource='IP';latest.tollChecked=Date.now();
+      delete latest.tollNextRetry;delete latest.tollStatus;
+     }else{
+      delete latest.tollReturn;delete latest.tollChecked;
+      latest.tollNextRetry=Date.now()+(unknown?TOLL_UNKNOWN_MS:TOLL_RETRY_MS);
+      latest.tollStatus=unknown?'unknown':'retry';
+     }
+     delete latest.tollRequestId;persistTravel();refreshTravelCard(job.id||null);
+    }catch(error){
+     // Mesmo uma exceção inesperada deve desbloquear a tentativa seguinte.
+     const latest=travelRoutes[job.key];
+     if(latest&&latest.tollRequestId===job.requestId){
+      delete latest.tollRequestId;
+      latest.tollStatus='retry';
+      latest.tollNextRetry=Date.now()+TOLL_RETRY_MS;
+      persistTravel();refreshTravelCard(job.id||null);
+     }
+     console.info('Consulta de portagens falhou:',error?.message||error);
+    }finally{
+     tollActiveKey='';renderTravelProgress();
+    }
+   }
+  }finally{
+   tollActiveKey='';tollWorking=false;renderTravelProgress();
   }
-  // Não aplicar portagens de um traçado antigo à cache de um percurso novo.
-  const latest=travelRoutes[job.key];
-  if(!latest||latest.tollRequestId!==job.requestId||latest.tollSource==='manual')continue;
-  if(Number.isFinite(latest.tollOut)&&Number.isFinite(latest.tollBack)){
-   latest.tollReturn=Math.round((latest.tollOut+latest.tollBack)*100)/100;
-   latest.tollSource='IP';latest.tollChecked=Date.now();
-   delete latest.tollNextRetry;delete latest.tollStatus;
-  }else{
-   delete latest.tollReturn;delete latest.tollChecked;
-   latest.tollNextRetry=Date.now()+(unknown?TOLL_UNKNOWN_MS:TOLL_RETRY_MS);
-   latest.tollStatus=unknown?'unknown':retry?'retry':'unknown';
-  }
-  delete latest.tollRequestId;persistTravel();refreshTravelCard(job.id||null);
- }}finally{tollWorking=false;}})();
+ })();
 }
 // Assinatura reduzida da geometria para não reutilizar portagens se o OSRM mudar o traçado.
 async function processTripQueue(){
