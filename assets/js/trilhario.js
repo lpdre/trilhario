@@ -100,7 +100,17 @@ let travelRoutes=storage(TRAVEL_ROUTES_KEY,{}),travelGeocodes=storage(TRAVEL_GEO
 let travelTollGeometry=storage(TRAVEL_TOLL_GEOMETRY_KEY,{});
 if(!travelTollGeometry||typeof travelTollGeometry!=='object'||Array.isArray(travelTollGeometry))travelTollGeometry={};
 // Uma consulta em voo terminou ao fechar a página; nunca bloquear a próxima sessão.
-for(const route of Object.values(travelRoutes))if(route&&typeof route==='object')delete route.tollRequestId;
+const tollStartupNow=Date.now();
+for(const route of Object.values(travelRoutes)){
+ if(!route||typeof route!=='object')continue;
+ delete route.tollRequestId;
+ // Versões antigas guardavam esperas de 12 horas sem tarifa: desbloquear
+ // esses registos na primeira abertura da versão corrigida.
+ if(route.tollStatus==='unknown'&&Number.isFinite(Number(route.tollNextRetry))&&
+    Number(route.tollNextRetry)>tollStartupNow+15*60*1000){
+  route.tollNextRetry=tollStartupNow;
+ }
+}
 let travelBusy=false,geoLastRequest=0,roadLastRequest=0;
 // v23: partida GPS validada, geocodificação progressiva e lotes de 10.
 const TRAVEL_BATCH_SIZE=10;
