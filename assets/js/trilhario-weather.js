@@ -164,9 +164,12 @@
      const q=new URLSearchParams({name:candidate,count:'5',countryCode:'PT',language:'pt',format:'json'});
      const response=await fetchJson(GEO_API+'?'+q);
      const items=response?.results;
+     // Não aceitar qualquer resultado português para um nome ambíguo.
+     // Um topónimo semelhante mas de outra região daria previsões enganadoras.
      const found=Array.isArray(items)?items.find(x=>
       x.country_code==='PT'&&Number.isFinite(x.latitude)&&Number.isFinite(x.longitude)&&
-      x.latitude>=36&&x.latitude<=43&&x.longitude>=-10&&x.longitude<=-6):null;
+      x.latitude>=36&&x.latitude<=43&&x.longitude>=-10&&x.longitude<=-6&&
+      folded(x.name)===folded(candidate)):null;
      if(found)return {lat:found.latitude,lon:found.longitude,name:found.name||candidate};
     }
     return null;
