@@ -63,12 +63,12 @@ assert.equal(mounts,1,'apenas um espaço meteorológico na viagem');
 assert.equal(row.slot.className,'v86-weather');
 assert.equal(row.slot.dataset.weatherId,'trilho-7');
 assert.equal(installed.length,1);
-changed();
+changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'mutações repetidas não duplicam indicadores');
 
 // Mesmo existindo uma viagem na lista, não criar indicadores para outras datas.
 row.dataset.eid='trilho-21';row.slot=null;
 context.allEvents=()=>[{id:'trilho-21',date:'2026-11-21'}];
-changed();
+changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia');
 console.log('OK: núcleo independente, previsão falha em segurança, posicionamento e datas');
