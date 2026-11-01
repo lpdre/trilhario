@@ -1906,7 +1906,7 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
 }
 .walk-row.v51-card.v56-card .v86-weather:empty{display:none}
 .walk-row.v51-card.v56-card .v74-trip-route{width:100%}
-.walk-row.v51-card.v56-card .v53-trip>.v86-weather{margin-left:auto}
+.walk-row.v51-card.v56-card .v53-trip>.v86-weather{margin:0}
 @media(max-width:540px){
  .walk-row.v51-card.v56-card .v86-weather{font-size:11.5px;gap:3px}
  .walk-row.v51-card.v56-card .v86-weather::before{font-size:20px}
