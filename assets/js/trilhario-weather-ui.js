@@ -31,8 +31,15 @@
       existing?.remove?.();
       continue;
      }
-     // O núcleo da agenda já pode ter desenhado o espaço persistente.
-     if(existing)continue;
+     // Só mostrar o carregamento após confirmar que o módulo está funcional.
+     // Se a camada opcional falhar, o núcleo deixa o espaço vazio.
+     if(existing){
+      if(!existing.textContent.trim()){
+       existing.textContent='…';
+       existing.title='A consultar a previsão meteorológica';
+      }
+      continue;
+     }
      const line=row.querySelector('.v74-trip-route')||row.querySelector('.walk-trip-line');
      if(!line)continue;
      const slot=document.createElement('span');
