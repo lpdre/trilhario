@@ -1857,3 +1857,6 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
  .results .v65-toolbar .toolbar-sort.v65-sort{height:30px;min-height:30px}
  .results .v65-toolbar .v64-view-switch button{min-height:24px;padding-block:2px}
 }
+
+/* Estado confirmado pelo organizador: perceptível também em ecrãs pequenos. */
+.walk-organizer .walk-event-state{display:inline-block;margin-left:8px;font-weight:800;color:#a1392c;white-space:nowrap}
