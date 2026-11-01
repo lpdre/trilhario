@@ -956,6 +956,15 @@ def main():
         elif re.search(r'[,\s]+[A-Za-zÀ-ÿ]{1,2}$', start) or start.endswith('('):
             truncated += 1
 
+    # Voltar a fundir depois da recuperação de GPS/horário da ficha oficial.
+    # Antes desta fase, os locais escritos de formas diferentes impedem
+    # corretamente a fusão; depois, mesma data, hora, URL e GPS verificado
+    # permitem confirmar a identidade. Ex.: Monsanto 01-11-2026 (2 cartões).
+    before_late_merge=len(events)
+    events[:]=merge_exact_duplicates(events, preferred_ids=preferred_ids)
+    sanitize_aliases(events)
+    removed_invalid_or_duplicate += before_late_merge-len(events)
+
     # Dar prioridade às primeiras 50 caminhadas futuras. Fotografias válidas
     # guardadas no eventos.json nunca são procuradas novamente. Preservar
     # igualmente fotografias de eventos fora deste grupo.
