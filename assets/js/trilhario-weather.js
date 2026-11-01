@@ -98,7 +98,7 @@
   return [...new Set(choices)].filter(x=>x.length>=3&&x.length<=80).slice(0,3);
  }
  function create(options={}){
-  const fetchImpl=options.fetchImpl||(typeof fetch==='function'?fetch.bind(root):null);
+  const fetchImpl=options.fetchImpl||(typeof fetch==='function'?fetch.bind(typeof window==='object'?window:null):null);
   const getToday=options.today||(()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Lisbon'}));
   const getEvent=options.getEvent||(()=>null);
   const weatherCache=new Map(),geoCache=new Map();
