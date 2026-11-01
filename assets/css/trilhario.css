@@ -1899,7 +1899,15 @@ body.organizers-mode .org-page{display:block;padding-bottom:58px}
  content:attr(data-weather-icon);font-size:21px;line-height:1;
  display:inline-block;flex:0 0 auto;
 }
-.walk-row.v51-card.v56-card .v86-weather[href]{cursor:pointer}
+.walk-row.v51-card.v56-card .v86-weather[href]{
+ cursor:pointer;
+ text-decoration:underline;text-decoration-style:dotted;
+ text-decoration-color:#6b9c82;text-underline-offset:3px;
+}
+.walk-row.v51-card.v56-card .v86-weather[href]::after{
+ content:"↗";display:inline-block;margin-left:1px;
+ font-size:13px;font-weight:800;line-height:1;color:#497c63;
+}
 .walk-row.v51-card.v56-card .v86-weather[href]:hover,
 .walk-row.v51-card.v56-card .v86-weather[href]:focus-visible{
  background:#e0eadd;text-decoration:underline;outline-offset:2px;
