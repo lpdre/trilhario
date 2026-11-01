@@ -25,9 +25,10 @@
      if(!id)continue;
      const existing=row.querySelector('.v86-weather');
      const event=allEvents().find(item=>String(item.id)===id);
-     // Não apresentar previsão fora da janela ou para locais desconhecidos.
-     // Isto também remove espaços deixados pelo desenho inicial do cartão.
-     if(!event||!eligible.has(event.date)||!weather.locationPlan(event)){
+     // Fora da janela temporal ocultar o símbolo; dentro da janela,
+     // se o local não for identificável, mostrar "—" com a explicação.
+     // Nunca esconder silenciosamente a previsão em falta.
+     if(!event||!eligible.has(event.date)){
       existing?.remove?.();
       continue;
      }
