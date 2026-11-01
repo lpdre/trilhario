@@ -34,6 +34,15 @@ const {handler}=require('../netlify/functions/portagens.js');
   return site.slice(i,j);
  };
  assert.ok(site.includes('TOLL_UNKNOWN_MS=15*60*1000'),'resposta desconhecida não bloqueia 12 horas');
+ const migration=section('const tollStartupNow=Date.now();','let travelBusy=');
+ const oldWait=Date.now()+8*60*60*1000,shortWait=Date.now()+10*60*1000;
+ const stale={tollStatus:'unknown',tollNextRetry:oldWait,tollRequestId:42};
+ const recent={tollStatus:'unknown',tollNextRetry:shortWait};
+ vm.runInNewContext(migration,{travelRoutes:{stale,recent}});
+ assert.equal(stale.tollRequestId,undefined,'pedidos de outra sessão não ficam bloqueados');
+ assert.ok(stale.tollNextRetry<=Date.now(),'desbloquear esperas de 12 horas antigas');
+ assert.equal(recent.tollNextRetry,shortWait,'preservar espera curta legítima');
+
  const queueSource=section('function runTollQueue(){','// Assinatura reduzida da geometria');
  const once=async(getResponse)=>{
   const row={tollRequestId:9};
