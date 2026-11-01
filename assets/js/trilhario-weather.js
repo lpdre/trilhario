@@ -58,35 +58,60 @@
  }
  function destinationFromTitle(title){
   const t=folded(title);
-  // Apenas destinos geográficos explícitos; nunca inferir uma rota a partir de
-  // palavras genéricas como "outono", "bosque" ou "magusto".
+  // Priorizar a região concreta do percurso sobre uma serra ampla ou a cidade
+  // onde os participantes apanham transporte.
   const known=[
+   [/\brota das faias\b/,'Manteigas'],
+   [/\bbosque das faias\b/,'Manteigas'],
    [/\bmanteigas\b/,'Manteigas'],
+   [/\blevada da vibora\b/,'Cabeceiras de Basto'],
+   [/\bcorno do bico\b/,'Paredes de Coura'],
+   [/\bmafra\b/,'Mafra'],
    [/\bcastro laboreiro\b/,'Castro Laboreiro'],
    [/\bparedes de coura\b/,'Paredes de Coura'],
    [/\bcabeceiras de basto\b/,'Cabeceiras de Basto'],
    [/\bserra de sintra\b/,'Sintra'],
-   [/\bserra da estrela\b/,'Serra da Estrela'],
-   [/\bcorno do bico\b/,'Paredes de Coura'],
    [/\bserra de montemuro\b/,'Castro Daire'],
-   [/\blevada da vibora\b/,'Cabeceiras de Basto'],
-   [/\brota das faias\b/,'Manteigas'],
-   [/\bbosque das faias\b/,'Manteigas']
+   [/\bserra da estrela\b/,'Serra da Estrela']
   ];
   return known.find(([pattern])=>pattern.test(t))?.[1]||'';
  }
  function pickupLocation(start){
   return /terminal rodovi[aá]rio|terminal fluvial|esta[cç][aã]o\s+(?:de comboios|cp|do oriente|de campanh[aã])|ponto de (?:encontro|recolha)|autocarro|partida de autocarro|transfer para/i.test(start);
  }
+ function startLocality(start){
+  if(!usable(start)||pickupLocation(start))return '';
+  const s=String(start).replace(/\s+/g,' ').trim();
+  // "Em Loriga junto ao restaurante...", ou "Na aldeia de Valdigem..."
+  const leading=s.match(/^(?:em|na aldeia de|no lugar de)\s+([\p{Lu}][\p{L}'’-]{2,35})(?=\s+|,|$)/iu);
+  if(leading)return leading[1];
+  // A última parte de uma morada geralmente identifica a localidade:
+  // "Junto à Câmara Municipal, Rua 1.º de Maio, Manteigas".
+  const fragments=s.split(/\s*[,;–—]\s*/).map(x=>x.trim()).filter(Boolean);
+  if(fragments.length>1){
+   const tail=fragments[fragments.length-1].replace(/\s*\([^)]*\)\s*$/,'').trim();
+   if(tail.length>=3&&tail.length<=45&&/^[\p{L}\s'’-]+$/u.test(tail)&&
+      !/^(?:rua|avenida|r\.|av\.|parque|estacionamento|terminal|ponto|junto|estrada|km\b)/i.test(tail))
+    return tail;
+  }
+  // "Parque Desportivo Municipal de Mafra": extrair a vila em vez de
+  // pedir ao geocodificador que procure o nome do equipamento.
+  const civic=s.match(/\b(?:municipal|cidade|vila|aldeia|freguesia|concelho)\s+d[aeo]\s+([\p{Lu}][\p{L}'’-]{2,35})\s*$/iu);
+  if(civic)return civic[1];
+  // Um topónimo simples, como "Tourém", já serve de referência aproximada.
+  if(s.length<=45&&/^[\p{L}\s'’-]+$/u.test(s)&&
+     !/^(?:rua|avenida|parque|estacionamento|terminal|junto|em frente|igreja|cafe|café|centro|posto|estacao|estação)\b/i.test(s))
+   return s;
+  return '';
+ }
  function locationPlan(event){
   if(!event||!validDate(event.date))return null;
-  const multi=event.multiDay===true||validDate(event.endDate)&&event.endDate>event.date;
+  const multi=event.multiDay===true||(validDate(event.endDate)&&event.endDate>event.date);
   const town=usable(event.town)?String(event.town).trim():'';
   const start=usable(event.start)?String(event.start).trim():'';
   const title=folded(event.title);
-  // Campos exclusivos de meteorologia, separados do GPS usado para a viagem.
-  // Só usar coordenadas de percurso se forem explicitamente fornecidas.
   const weatherLat=Number(event.weatherLat),weatherLon=Number(event.weatherLon);
+  // Coordenadas meteorológicas, se um dia forem fornecidas a partir do GPX.
   if(event.weatherLat!=null&&event.weatherLon!=null&&Number.isFinite(weatherLat)&&
      Number.isFinite(weatherLon)&&weatherLat>=36&&weatherLat<=43&&
      weatherLon>=-10&&weatherLon<=-6)
@@ -97,30 +122,34 @@
    return {kind:'place',name:String(event.weatherLocation).trim(),approximate:false};
   const hint=destinationFromTitle(event.title);
   const pickup=pickupLocation(start);
-  const townIsPickup=pickup&&town&&folded(start).includes(folded(town))&&
-   !title.includes(folded(town));
+  const townIsPickup=pickup&&town&&!title.includes(folded(town));
   const townIsLogistics=/terminal|ponto de encontro|ponto de recolha|esta[cç][aã]o cp|parque de estacionamento/i.test(town);
+  const locality=startLocality(start);
   if(multi||pickup){
-   // Nunca confundir transporte em Lisboa/Porto com clima da serra.
+   // Um ponto de recolha em Porto/Lisboa não é o início nem o destino
+   // meteorológico do trilho. Não reutilizar o GPS dessa recolha.
    if(hint)return {kind:'place',name:hint,approximate:true};
    if(town&&!townIsPickup&&!townIsLogistics)
     return {kind:'place',name:town,approximate:true};
    return null;
   }
-  // Quando o título indica uma região diferente do início anunciado,
-  // privilegiar a zona do percurso (aproximada) sobre o GPS da recolha.
+  // Para serras extensas preferir uma localidade mais concreta indicada no
+  // início anunciado, se existir (ex.: Loriga numa caminhada na Estrela).
+  if(hint==='Serra da Estrela'&&locality)
+   return {kind:'place',name:locality,approximate:true};
   if(hint&&(!town||(folded(hint)!==folded(town)&&!title.includes(folded(town)))))
    return {kind:'place',name:hint,approximate:true};
+  // Um GPS de início conhecido pode ser melhor do que o centro da vila;
+  // nunca o interpretar como centro/altitude média do percurso.
   const lat=Number(event.lat),lon=Number(event.lon);
   if(event.verified===true&&event.lat!=null&&event.lon!=null&&
      Number.isFinite(lat)&&Number.isFinite(lon)&&
      lat>=36&&lat<=43&&lon>=-10&&lon<=-6)
-   return {kind:'gps',lat,lon,name:town||start||'zona do início',
+   return {kind:'gps',lat,lon,name:town||locality||start||'zona do início',
     approximate:true};
+  if(hint)return {kind:'place',name:hint,approximate:true};
   if(town&&!townIsLogistics)return {kind:'place',name:town,approximate:true};
-  // Evitar ruas, parques de estacionamento e pontos de encontro.
-  if(start&&!/^(?:rua|r\.|av\.|avenida|parque|estacionamento|terminal|junto|em frente)/i.test(start)
-      &&start.length<=65)return {kind:'place',name:start,approximate:true};
+  if(locality)return {kind:'place',name:locality,approximate:true};
   return null;
  }
  function placeOptions(name){
@@ -239,7 +268,7 @@
     node.removeAttribute('href');
     node.removeAttribute('data-weather-icon');
     node.textContent='—';
-    node.title='Previsão meteorológica temporariamente indisponível';
+    node.title=locationPlan(event)?'Previsão indisponível para esta data ou localização':'Local do trilho insuficientemente identificado para uma previsão fiável';
     node.setAttribute('aria-label',node.title);
     return;
    }
@@ -321,5 +350,5 @@
   }
   return {forecast,observe};
  }
- return {weekendDates,condition,noonForecast,locationPlan,placeOptions,destinationFromTitle,create};
+ return {weekendDates,condition,noonForecast,locationPlan,placeOptions,startLocality,destinationFromTitle,create};
 });
