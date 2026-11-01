@@ -68,8 +68,8 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.equal(value.temp,13);
  assert.equal(value.symbol,'⛅');
  assert.equal(value.name,'Manteigas');
- assert.match(value.url,/open-meteo\.com\/en\/docs\/ecmwf-api\?/);
- assert.equal(new URL(value.url).searchParams.get('longitude'),'-7.5390');
+ assert.equal(value.url,
+  'https://www.windy.com/?ecmwf,temp,2026-11-07-12,40.4020,-7.5390,10,d:picker');
  const again=await controller.forecast(multi);
  assert.deepEqual(again,value);
  assert.equal(calls,2,'mesma localidade e modelo devem usar cache');
@@ -97,8 +97,7 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  assert.equal(node['data-weather-icon'],'⛅');
  assert.equal(node.target,'_blank');
  assert.equal(node.rel,'noopener noreferrer');
- assert.match(node.href,/^https:\/\/open-meteo\.com\/en\/docs\/ecmwf-api\?/);
- assert.ok(new URL(node.href).searchParams.get('latitude')==='40.4020');
+ assert.equal(node.href,value.url,'clicar na temperatura abre o Windy no dia e local do trilho');
  assert.match(node.title,/ECMWF IFS via Open-Meteo/);
  const noLocation=await controller.forecast({...multi,town:'Por confirmar'});
  assert.equal(noLocation,null);
@@ -119,8 +118,8 @@ assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de 
  const fromFallback=await fallback.forecast(multi);
  assert.equal(fromFallback.source,'Open-Meteo');
  assert.equal(fromFallback.temp,13);
- assert.match(fromFallback.url,/open-meteo\.com\/en\/docs\?/);
- assert.equal(new URL(fromFallback.url).searchParams.get('latitude'),'40.4020');
+ assert.equal(fromFallback.url,value.url,
+  'o link Windy usa a data/local mesmo quando o Open-Meteo recorre ao modelo alternativo');
  assert.ok(urls.some(url=>url.includes('/v1/forecast?')));
  // Depois de duas respostas inválidas a temperatura é desconhecida: nunca 0°C.
  const none=Weather.create({
