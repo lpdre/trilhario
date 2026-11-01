@@ -1035,6 +1035,15 @@ function tollPendingLabel(r,now=Date.now()){
   return 'Nova tentativa automática pendente…';
  return 'A calcular portagens…';
 }
+// O espaço da previsão integra o cartão desde o primeiro desenho. A recolha
+// é opcional e não interfere com o cálculo de deslocações nem com os filtros.
+function weatherWeekendEligible(date,clock=agendaClock()){
+ if(typeof date!=='string')return false;
+ const periods=weekendWindows(clock);
+ const nextTwo=clock.date>periods.this.from?
+  [periods.next,periods.following]:[periods.this,periods.next];
+ return nextTwo.some(period=>date>=period.from&&date<=period.to);
+}
 function travelRow(e){
  const t=tripCalc(e),hasOrigin=!!travelPrefs.origin,route=travelData(e);
  const key=routeCacheKey(e),error=tripProblems.get(key);
@@ -1068,7 +1077,9 @@ function travelRow(e){
   body=`<div class="v53-trip-empty"><span class="v53-trip-empty-icon" aria-hidden="true">↗</span><span>${esc(status)}</span></div>`;
   if(hasOrigin&&!unavailable&&error&&!tripOriginProblem)action=`<button type="button" data-event-action="calculateOneRoute" data-event-id="${esc(e.id)}">Tentar novamente</button>`;
  }
- return `<div class="walk-trip-line v53-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}</div>`;
+ const forecastSlot=weatherWeekendEligible(e.date)?
+  `<span class="v86-weather" data-weather-id="${esc(e.id)}" role="status" aria-live="off" title="A consultar a previsão meteorológica">…</span>`:'';
+ return `<div class="walk-trip-line v53-trip"><div class="walk-trip-info">${body}</div>${action?`<div class="walk-trip-ctrl">${action}</div>`:''}${forecastSlot}</div>`;
 }
 // Delegação: IDs vindos de catálogos externos nunca entram em código onclick.
 // dataset devolve o ID literal, mesmo contendo aspas ou outros caracteres.
