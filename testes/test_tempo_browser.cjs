@@ -37,6 +37,10 @@ assert.equal(Weather.locationPlan({id:'x',date:'2026-11-07',
  multiDay:true,town:'Por confirmar',start:'Porto',verified:true,lat:41.15,lon:-8.61}),null);
 assert.equal(Weather.locationPlan({id:'u',date:'2026-11-07',
  town:'Por confirmar',start:'Por confirmar'}),null);
+assert.equal(Weather.locationPlan({title:'Caminhada na Serra da Estrela',date:'2026-11-07',
+ town:'Lisboa',start:'Terminal Rodoviário do Oriente, Lisboa',
+ verified:true,lat:38.77,lon:-9.10}),null,
+ 'uma viagem de autocarro não é a previsão do trilho');
 assert.deepEqual(Weather.placeOptions('Túmio, Freguesia de Bico – Paredes de Coura')[0],'Paredes de Coura');
 (async()=>{
  let calls=0,geoCalls=0;
