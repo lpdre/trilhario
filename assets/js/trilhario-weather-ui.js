@@ -31,13 +31,12 @@
       existing?.remove?.();
       continue;
      }
-     const route=row.querySelector('.v74-trip-route');
-     const line=route||row.querySelector('.walk-trip-line');
+     const line=row.querySelector('.walk-trip-line');
      if(!line)continue;
-     // Colocar o símbolo na linha da distância/tempo da viagem, nunca
-     // ao lado dos preços: evita empurrar o combustível no telemóvel.
+     // Manter a previsão numa coluna própria, ao lado do resumo completo.
+     // Assim os custos continuam em baixo da viagem, nunca sob o ícone.
      if(existing){
-      if(route&&existing.parentElement!==route)route.appendChild(existing);
+      if(existing.parentElement!==line)line.appendChild(existing);
       if(!existing.textContent.trim()){
        existing.textContent='…';
        existing.title='A consultar a previsão meteorológica';
