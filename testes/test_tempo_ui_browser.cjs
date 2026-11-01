@@ -62,6 +62,7 @@ vm.runInNewContext(addon,context);
 assert.equal(mounts,1,'apenas um espaço meteorológico na viagem');
 assert.equal(row.slot.className,'v86-weather');
 assert.equal(row.slot.dataset.weatherId,'trilho-7');
+assert.equal(row.slot.textContent,'…','mostrar consulta enquanto carrega a temperatura');
 assert.equal(installed.length,1);
 changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'mutações repetidas não duplicam indicadores');
@@ -71,4 +72,58 @@ row.dataset.eid='trilho-21';row.slot=null;
 context.allEvents=()=>[{id:'trilho-21',date:'2026-11-21'}];
 changed([{addedNodes:[{nodeType:1,matches:selector=>selector.includes('.walk-row')}]}]);
 assert.equal(mounts,1,'fora dos dois fins de semana não consultar meteorologia');
-console.log('OK: núcleo independente, previsão falha em segurança, posicionamento e datas');
+
+// Teste integrado: a camada opcional tem de obter dados e escrever a temperatura
+// no nó real do cartão; um teste que apenas cria o <span> não chega.
+(async()=>{
+ const RealWeather=require('../assets/js/trilhario-weather.js');
+ const event={id:'live-7',date:'2026-11-07',title:'Levada da Víbora',
+  verified:true,lat:41.561,lon:-7.982,town:'Cabeceiras de Basto'};
+ let slot=null,networkCalls=0;
+ const realList={
+  querySelectorAll(selector){
+   if(selector==='.walk-row[data-eid]')return [realRow];
+   if(selector==='[data-weather-id]')return slot?[slot]:[];
+   return [];
+  }
+ };
+ const realRow={
+  dataset:{eid:event.id},
+  querySelector(selector){
+   if(selector==='.v86-weather')return slot;
+   if(selector==='.v74-trip-route')return {appendChild:n=>{slot=n}};
+   return null;
+  }
+ };
+ const getForecast=async url=>{
+  networkCalls++;
+  assert.match(url,/^https:\/\/api.open-meteo.com\/v1\/ecmwf\?/);
+  return {ok:true,json:async()=>({hourly:{
+   time:['2026-11-07T12:00'],temperature_2m:[11.4],weather_code:[2]
+  }})};
+ };
+ const realContext={
+  window:{TrilharioWeather:{...RealWeather,
+   create:opts=>RealWeather.create({...opts,fetchImpl:getForecast})}},
+  document:{
+   getElementById:id=>id==='listView'?realList:null,
+   createElement:()=>({dataset:{},isConnected:true,textContent:'',
+    setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]}}),
+   addEventListener(){}
+  },
+  allEvents:()=>[event],
+  agendaClock:()=>({date:'2026-11-01'}),
+  requestAnimationFrame:fn=>fn(),
+  Promise,
+  console:{info(){}}
+ };
+ vm.runInNewContext(addon,realContext);
+ assert.equal(slot.textContent,'…','o indicador é visível enquanto consulta');
+ // Dar oportunidade às promessas internas de recolher e apresentar a previsão.
+ for(let i=0;i<25;i++)await Promise.resolve();
+ assert.equal(slot.textContent,'⛅ 11°C');
+ assert.match(slot.title,/ECMWF IFS via Open-Meteo/);
+ assert.equal(networkCalls,1);
+ console.log('OK: módulos separados, indicadores e temperatura real simulada no cartão');
+})().catch(error=>{console.error(error);process.exitCode=1});
+
