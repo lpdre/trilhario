@@ -12,6 +12,8 @@ on:
       - 'netlify.toml'
       - 'portagens-config.json'
       - 'scripts/build-netlify.cjs'
+      - 'excepcoes_catalogo.json'
+      - '.github/workflows/actualizar.yml'
       - '.github/workflows/validar.yml'
   pull_request:
     paths:
@@ -19,6 +21,8 @@ on:
       - 'index.html'
       - 'testes/**'
       - '*.py'
+      - 'excepcoes_catalogo.json'
+      - '.github/workflows/actualizar.yml'
       - '.github/workflows/validar.yml'
   workflow_dispatch:
 
