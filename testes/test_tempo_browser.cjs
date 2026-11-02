@@ -58,6 +58,18 @@ assert.equal(Weather.startLocality('Junto à Câmara Municipal,Rua 1º de Maio, 
 assert.equal(Weather.startLocality('Parque Desportivo Municipal de Mafra'),'Mafra');
 assert.equal(Weather.startLocality('Em Loriga junto ao Restaurante Vicente'),'Loriga');
 assert.equal(Weather.startLocality('Terminal Rodoviário do Oriente'),'');
+const catalog=JSON.parse(fs.readFileSync(path.join(__dirname,'../eventos.json'),'utf8')).events;
+const valinhas=catalog.find(x=>x.id==='web-5b4218700508ce0')||{
+ id:'web-5b4218700508ce0',date:'2026-11-14',title:'Além do Trilho',
+ url:'https://maistrilhos.pt/caminhadas/alem-do-trilho',
+ start:'Parque de lazer de Valinhas',town:'Por confirmar'};
+assert.deepEqual(Weather.locationPlan(valinhas),
+ {kind:'gps',lat:41.305067,lon:-8.449997,
+ name:'Parque de Lazer de Valinhas, Santo Tirso',approximate:true},
+ 'Além do Trilho localiza-se em Santo Tirso, não numa Valinhas desconhecida');
+assert.equal(Weather.locationPlan({...valinhas,url:'https://example.org/walk'}),null,
+ 'não atribuir coordenadas de Valinhas a outros eventos com nome semelhante');
+
 assert.deepEqual(Weather.locationPlan({
  id:'carvao',title:'Pelos trilhos do carvão',date:'2026-11-07',
  town:'Por confirmar',start:'Junto à Câmara Municipal,Rua 1º de Maio, Manteigas'
@@ -91,6 +103,19 @@ assert.deepEqual(Weather.locationPlan({
  'em regiões amplas preferir a aldeia explícita à localização genérica da serra');
 
 (async()=>{
+ const valinhasForecast=Weather.create({today:()=> '2026-11-02',
+  fetchImpl:async url=>{
+   if(url.includes('/v1/ecmwf'))return {ok:true,json:async()=>({hourly:{
+    time:['2026-11-09T12:00'],temperature_2m:[12],weather_code:[1]}})};
+   assert.match(url,/^https:\/\/api\.open-meteo\.com\/v1\/forecast\?/);
+   return {ok:true,json:async()=>({hourly:{
+    time:['2026-11-14T12:00'],temperature_2m:[14.1],weather_code:[2]}})};
+  }});
+ const valinhasResult=await valinhasForecast.forecast(valinhas);
+ assert.equal(valinhasResult.temp,14);
+ assert.equal(valinhasResult.url,
+  'https://www.windy.com/41.3051/-8.4500?ecmwf,temp,2026-11-14-12,41.3051,-8.4500,10,d:picker',
+  'Windy deve abrir em Valinhas (Santo Tirso), dia 14 de Novembro');
  let calls=0,geoCalls=0;
  const forecastJson={hourly:{time:['2026-11-07T12:00'],
   temperature_2m:[12.6],weather_code:[2]}};
