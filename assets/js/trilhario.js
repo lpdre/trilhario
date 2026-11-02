@@ -1402,6 +1402,13 @@ function ambiguousDeparture(e){
 }
 function departureCandidates(e){
  if(ambiguousDeparture(e))return [];
+ // "Além do Trilho": o anúncio só dizia "Parque de lazer de Valinhas".
+ // O parque foi localizado em Monte Córdova, Santo Tirso, por fonte externa.
+ // Ponto aproximado de partida, não GPS publicado pelo organizador.
+ if(/\/caminhadas\/alem-do-trilho\/?(?:[?#]|$)/i.test(String(e.url||''))&&
+    /\bparque de lazer de valinhas\b/i.test(String(e.start||'')))
+  return [{coords:{lat:41.305067,lon:-8.449997},precision:'aproximado',
+   label:'Parque de Lazer de Valinhas, Santo Tirso (referência)'}];
  if(e.verified&&hasCoords(e))return [{coords:{lat:Number(e.lat),lon:Number(e.lon)},precision:'gps',label:'GPS do organizador'}];
  const start=cleanLocationHint(displayDeparture(e)),town=cleanLocationHint(e.town);
  const candidates=[],seen=new Set();
