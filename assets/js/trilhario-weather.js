@@ -120,6 +120,14 @@
     approximate:false};
   if(usable(event.weatherLocation))
    return {kind:'place',name:String(event.weatherLocation).trim(),approximate:false};
+  // Local documentado: "Além do Trilho" da Mais Trilhos percorre Valinhas,
+  // em Monte Córdova/Santo Tirso. A coordenada é do Parque de Lazer de
+  // Nossa Senhora de Valinhas, não do centro do percurso.
+  // Referência: descrição oficial do evento + guia do PR1 Santo Tirso.
+  if(/\/caminhadas\/alem-do-trilho\/?(?:[?#]|$)/i.test(String(event.url||''))&&
+     /\bparque de lazer de valinhas\b/i.test(start))
+   return {kind:'gps',lat:41.305067,lon:-8.449997,
+    name:'Parque de Lazer de Valinhas, Santo Tirso',approximate:true};
   const hint=destinationFromTitle(event.title);
   const pickup=pickupLocation(start);
   const cityIsPickup=(multi||pickup)&&/^(?:porto|lisboa)$/i.test(town)&&!title.includes(folded(town));
