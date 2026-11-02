@@ -6,12 +6,8 @@ on:
     - cron: '5 6 * * *'
       timezone: 'Europe/Lisbon'
   workflow_dispatch:
-  push:
-    paths:
-      - '*.py'
-      - 'testes/**'
-      - 'excepcoes_catalogo.json'
-      - '.github/workflows/actualizar.yml'
+    # A recolha não é lançada por alterações ao código.
+    # As alterações são verificadas pelo workflow "Validar Trilhário".
 
 permissions:
   contents: write
@@ -23,9 +19,6 @@ concurrency:
 
 jobs:
   recolha:
-    # Um push num ramo de auditoria só deve validar código, não consultar
-    # organizadores nem alterar o catálogo desse ramo.
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
