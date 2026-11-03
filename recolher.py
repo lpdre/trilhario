@@ -487,6 +487,29 @@ def extra_source_meta(html: BeautifulSoup, item: dict, organizer: str) -> None:
             if folded(place) != "local por definir":
                 item["town"] = place
                 item["start"] = place
+        # Algumas fichas listam explicitamente «Dia 1 — AAAA-MM-DD» e
+        # «Dia 2 — AAAA-MM-DD», embora o título não indique os dois dias.
+        # Só reconhecer datas da secção do evento, nunca descrições genéricas.
+        day_section = re.search(r"\bDias do evento\b", value, re.I)
+        if day_section and item.get("date"):
+            day_dates = []
+            for match in re.finditer(
+                r"\bDia\s+\d{1,2}\s*[-–—:]\s*(20\d{2}-\d{2}-\d{2})\b",
+                value[day_section.end():day_section.end()+3000], re.I
+            ):
+                try:
+                    day_dates.append(date.fromisoformat(match[1]))
+                except ValueError:
+                    continue
+            try:
+                start_day = date.fromisoformat(str(item["date"]))
+            except (TypeError, ValueError):
+                start_day = None
+            if start_day and len(set(day_dates)) >= 2 and day_dates[0] == start_day:
+                end_day = max(day_dates)
+                if end_day > start_day:
+                    item["multiDay"] = True
+                    item["endDate"] = end_day.isoformat()
         # Data «15/11/2026, 10:00», que não existia no date_from original.
     elif organizer == "Caminhadas Smile":
         if not item.get("time"):
