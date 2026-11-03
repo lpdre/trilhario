@@ -23,6 +23,9 @@ MULTIDAY = re.compile(
 VERIFIED_MULTIDAY_URLS = frozenset({
     ('trekkingroots.pt', '/caminhada/rota-das-faias-e-o-melhor-do-outono-de-manteigas'),
     ('trekkingroots.pt', '/caminhada/bosques-magicos-do-courel'),
+    # Programas de dois dias confirmados nas fichas oficiais da Trekkin.
+    ('trekkin.pt', '/evento/castro-laboreiro-micologico/-p294wzode3jxr_xsmeu'),
+    ('trekkin.pt', '/evento/caminhos-de-outono/-p3crbifiiocxstnkezb'),
     ('maistrilhos.pt', '/caminhadas/parque-nacional-de-monfrague'),
     ('caminhando.pt', '/eventos/caminhando-em-aracena-gruta-das-maravilhas-e-parque-mineiro-de-rio-tinto'),
 })
