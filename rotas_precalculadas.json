@@ -3875,6 +3875,101 @@
       },
       "failures": {}
     },
+    "41.16192,-8.07393": {
+      "routes": {
+        "aveiro": {
+          "km": 128.5,
+          "minutes": 100,
+          "updated": "2026-11-06"
+        },
+        "beja": {
+          "km": 506.3,
+          "minutes": 343,
+          "updated": "2026-11-06"
+        },
+        "braga": {
+          "km": 75.2,
+          "minutes": 60,
+          "updated": "2026-11-06"
+        },
+        "braganca": {
+          "km": 170.8,
+          "minutes": 124,
+          "updated": "2026-11-06"
+        },
+        "castelo branco": {
+          "km": 262.5,
+          "minutes": 200,
+          "updated": "2026-11-06"
+        },
+        "coimbra": {
+          "km": 176.1,
+          "minutes": 127,
+          "updated": "2026-11-06"
+        },
+        "evora": {
+          "km": 461.2,
+          "minutes": 309,
+          "updated": "2026-11-06"
+        },
+        "faro": {
+          "km": 606.7,
+          "minutes": 398,
+          "updated": "2026-11-06"
+        },
+        "guarda": {
+          "km": 168.8,
+          "minutes": 141,
+          "updated": "2026-11-06"
+        },
+        "leiria": {
+          "km": 236.6,
+          "minutes": 164,
+          "updated": "2026-11-06"
+        },
+        "lisboa": {
+          "km": 368.1,
+          "minutes": 248,
+          "updated": "2026-11-06"
+        },
+        "portalegre": {
+          "km": 345.8,
+          "minutes": 256,
+          "updated": "2026-11-06"
+        },
+        "porto": {
+          "km": 65.1,
+          "minutes": 54,
+          "updated": "2026-11-06"
+        },
+        "santarem": {
+          "km": 299.2,
+          "minutes": 203,
+          "updated": "2026-11-06"
+        },
+        "setubal": {
+          "km": 401.8,
+          "minutes": 268,
+          "updated": "2026-11-06"
+        },
+        "viana do castelo": {
+          "km": 130.2,
+          "minutes": 95,
+          "updated": "2026-11-06"
+        },
+        "vila real": {
+          "km": 57.7,
+          "minutes": 53,
+          "updated": "2026-11-06"
+        },
+        "viseu": {
+          "km": 93.4,
+          "minutes": 84,
+          "updated": "2026-11-06"
+        }
+      },
+      "failures": {}
+    },
     "38.47815,-9.03015": {
       "routes": {
         "aveiro": {
@@ -3966,6 +4061,101 @@
           "km": 330.6,
           "minutes": 236,
           "updated": "2026-10-24"
+        }
+      },
+      "failures": {}
+    },
+    "41.04129,-8.05895": {
+      "routes": {
+        "aveiro": {
+          "km": 123.4,
+          "minutes": 107,
+          "updated": "2026-11-06"
+        },
+        "beja": {
+          "km": 491.7,
+          "minutes": 344,
+          "updated": "2026-11-06"
+        },
+        "braga": {
+          "km": 87.8,
+          "minutes": 76,
+          "updated": "2026-11-06"
+        },
+        "braganca": {
+          "km": 191.8,
+          "minutes": 140,
+          "updated": "2026-11-06"
+        },
+        "castelo branco": {
+          "km": 234.3,
+          "minutes": 172,
+          "updated": "2026-11-06"
+        },
+        "coimbra": {
+          "km": 154.7,
+          "minutes": 122,
+          "updated": "2026-11-06"
+        },
+        "evora": {
+          "km": 424.9,
+          "minutes": 308,
+          "updated": "2026-11-06"
+        },
+        "faro": {
+          "km": 592.1,
+          "minutes": 399,
+          "updated": "2026-11-06"
+        },
+        "guarda": {
+          "km": 140.5,
+          "minutes": 113,
+          "updated": "2026-11-06"
+        },
+        "leiria": {
+          "km": 221.9,
+          "minutes": 165,
+          "updated": "2026-11-06"
+        },
+        "lisboa": {
+          "km": 353.5,
+          "minutes": 249,
+          "updated": "2026-11-06"
+        },
+        "portalegre": {
+          "km": 324.6,
+          "minutes": 233,
+          "updated": "2026-11-06"
+        },
+        "porto": {
+          "km": 77.7,
+          "minutes": 70,
+          "updated": "2026-11-06"
+        },
+        "santarem": {
+          "km": 284.5,
+          "minutes": 204,
+          "updated": "2026-11-06"
+        },
+        "setubal": {
+          "km": 387.2,
+          "minutes": 269,
+          "updated": "2026-11-06"
+        },
+        "viana do castelo": {
+          "km": 142.8,
+          "minutes": 111,
+          "updated": "2026-11-06"
+        },
+        "vila real": {
+          "km": 71.6,
+          "minutes": 70,
+          "updated": "2026-11-06"
+        },
+        "viseu": {
+          "km": 65.2,
+          "minutes": 56,
+          "updated": "2026-11-06"
         }
       },
       "failures": {}
@@ -4350,6 +4540,101 @@
       },
       "failures": {}
     },
+    "41.28996,-7.98594": {
+      "routes": {
+        "aveiro": {
+          "km": 132.0,
+          "minutes": 98,
+          "updated": "2026-11-06"
+        },
+        "beja": {
+          "km": 509.8,
+          "minutes": 342,
+          "updated": "2026-11-06"
+        },
+        "braga": {
+          "km": 79.7,
+          "minutes": 59,
+          "updated": "2026-11-06"
+        },
+        "braganca": {
+          "km": 146.5,
+          "minutes": 103,
+          "updated": "2026-11-06"
+        },
+        "castelo branco": {
+          "km": 289.3,
+          "minutes": 205,
+          "updated": "2026-11-06"
+        },
+        "coimbra": {
+          "km": 179.6,
+          "minutes": 125,
+          "updated": "2026-11-06"
+        },
+        "evora": {
+          "km": 464.7,
+          "minutes": 307,
+          "updated": "2026-11-06"
+        },
+        "faro": {
+          "km": 610.3,
+          "minutes": 397,
+          "updated": "2026-11-06"
+        },
+        "guarda": {
+          "km": 195.6,
+          "minutes": 147,
+          "updated": "2026-11-06"
+        },
+        "leiria": {
+          "km": 240.1,
+          "minutes": 162,
+          "updated": "2026-11-06"
+        },
+        "lisboa": {
+          "km": 371.6,
+          "minutes": 247,
+          "updated": "2026-11-06"
+        },
+        "portalegre": {
+          "km": 349.3,
+          "minutes": 254,
+          "updated": "2026-11-06"
+        },
+        "porto": {
+          "km": 68.6,
+          "minutes": 52,
+          "updated": "2026-11-06"
+        },
+        "santarem": {
+          "km": 302.7,
+          "minutes": 201,
+          "updated": "2026-11-06"
+        },
+        "setubal": {
+          "km": 405.3,
+          "minutes": 266,
+          "updated": "2026-11-06"
+        },
+        "viana do castelo": {
+          "km": 134.7,
+          "minutes": 95,
+          "updated": "2026-11-06"
+        },
+        "vila real": {
+          "km": 30.5,
+          "minutes": 29,
+          "updated": "2026-11-06"
+        },
+        "viseu": {
+          "km": 120.2,
+          "minutes": 89,
+          "updated": "2026-11-06"
+        }
+      },
+      "failures": {}
+    },
     "38.76376,-9.42207": {
       "routes": {
         "aveiro": {
@@ -4536,6 +4821,101 @@
           "km": 183.6,
           "minutes": 162,
           "updated": "2026-10-24"
+        }
+      },
+      "failures": {}
+    },
+    "40.09920,-8.48940": {
+      "routes": {
+        "aveiro": {
+          "km": 70.1,
+          "minutes": 54,
+          "updated": "2026-11-06"
+        },
+        "beja": {
+          "km": 329.1,
+          "minutes": 226,
+          "updated": "2026-11-06"
+        },
+        "braga": {
+          "km": 180.0,
+          "minutes": 123,
+          "updated": "2026-11-06"
+        },
+        "braganca": {
+          "km": 302.1,
+          "minutes": 212,
+          "updated": "2026-11-06"
+        },
+        "castelo branco": {
+          "km": 128.0,
+          "minutes": 106,
+          "updated": "2026-11-06"
+        },
+        "coimbra": {
+          "km": 17.6,
+          "minutes": 19,
+          "updated": "2026-11-06"
+        },
+        "evora": {
+          "km": 284.0,
+          "minutes": 192,
+          "updated": "2026-11-06"
+        },
+        "faro": {
+          "km": 429.6,
+          "minutes": 282,
+          "updated": "2026-11-06"
+        },
+        "guarda": {
+          "km": 169.8,
+          "minutes": 132,
+          "updated": "2026-11-06"
+        },
+        "leiria": {
+          "km": 59.4,
+          "minutes": 47,
+          "updated": "2026-11-06"
+        },
+        "lisboa": {
+          "km": 190.9,
+          "minutes": 131,
+          "updated": "2026-11-06"
+        },
+        "portalegre": {
+          "km": 162.9,
+          "minutes": 134,
+          "updated": "2026-11-06"
+        },
+        "porto": {
+          "km": 129.2,
+          "minutes": 88,
+          "updated": "2026-11-06"
+        },
+        "santarem": {
+          "km": 122.0,
+          "minutes": 86,
+          "updated": "2026-11-06"
+        },
+        "setubal": {
+          "km": 224.6,
+          "minutes": 151,
+          "updated": "2026-11-06"
+        },
+        "viana do castelo": {
+          "km": 200.6,
+          "minutes": 137,
+          "updated": "2026-11-06"
+        },
+        "vila real": {
+          "km": 213.5,
+          "minutes": 145,
+          "updated": "2026-11-06"
+        },
+        "viseu": {
+          "km": 106.8,
+          "minutes": 85,
+          "updated": "2026-11-06"
         }
       },
       "failures": {}
