@@ -3875,6 +3875,101 @@
       },
       "failures": {}
     },
+    "38.76754,-9.39682": {
+      "routes": {
+        "aveiro": {
+          "km": 260.1,
+          "minutes": 178,
+          "updated": "2026-11-10"
+        },
+        "beja": {
+          "km": 198.7,
+          "minutes": 148,
+          "updated": "2026-11-10"
+        },
+        "braga": {
+          "km": 388.4,
+          "minutes": 254,
+          "updated": "2026-11-10"
+        },
+        "braganca": {
+          "km": 510.5,
+          "minutes": 343,
+          "updated": "2026-11-10"
+        },
+        "castelo branco": {
+          "km": 249.5,
+          "minutes": 164,
+          "updated": "2026-11-10"
+        },
+        "coimbra": {
+          "km": 231.9,
+          "minutes": 154,
+          "updated": "2026-11-10"
+        },
+        "evora": {
+          "km": 153.9,
+          "minutes": 114,
+          "updated": "2026-11-10"
+        },
+        "faro": {
+          "km": 299.1,
+          "minutes": 203,
+          "updated": "2026-11-10"
+        },
+        "guarda": {
+          "km": 343.4,
+          "minutes": 224,
+          "updated": "2026-11-10"
+        },
+        "leiria": {
+          "km": 151.1,
+          "minutes": 108,
+          "updated": "2026-11-10"
+        },
+        "lisboa": {
+          "km": 28.8,
+          "minutes": 27,
+          "updated": "2026-11-10"
+        },
+        "portalegre": {
+          "km": 255.0,
+          "minutes": 173,
+          "updated": "2026-11-10"
+        },
+        "porto": {
+          "km": 337.6,
+          "minutes": 220,
+          "updated": "2026-11-10"
+        },
+        "santarem": {
+          "km": 105.7,
+          "minutes": 75,
+          "updated": "2026-11-10"
+        },
+        "setubal": {
+          "km": 70.7,
+          "minutes": 58,
+          "updated": "2026-11-10"
+        },
+        "viana do castelo": {
+          "km": 409.0,
+          "minutes": 269,
+          "updated": "2026-11-10"
+        },
+        "vila real": {
+          "km": 421.8,
+          "minutes": 277,
+          "updated": "2026-11-10"
+        },
+        "viseu": {
+          "km": 315.2,
+          "minutes": 217,
+          "updated": "2026-11-10"
+        }
+      },
+      "failures": {}
+    },
     "41.28996,-7.98594": {
       "routes": {
         "aveiro": {
