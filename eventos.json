@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-11-27T16:33:05+00:00",
+  "updated_at": "2026-11-28T15:26:27+00:00",
   "sources_health": {
     "Amigos da Montanha": {
       "state": "erro_parcial",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 3,
       "http_errors": 2,
       "network_errors": 0,
@@ -17,7 +17,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -28,7 +28,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -39,7 +39,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 2,
       "http_errors": 0,
       "network_errors": 0,
@@ -49,8 +49,8 @@
     "Caminhadas Smile": {
       "state": "com_eventos",
       "count": 11,
-      "last_success": "2026-11-27T16:33:05+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_success": "2026-11-28T15:26:27+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 37,
       "http_errors": 0,
       "network_errors": 0,
@@ -61,7 +61,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 2,
       "http_errors": 0,
       "network_errors": 0,
@@ -72,7 +72,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -82,8 +82,8 @@
     "DRenergies": {
       "state": "com_eventos",
       "count": 1,
-      "last_success": "2026-11-27T16:33:05+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_success": "2026-11-28T15:26:27+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -94,7 +94,7 @@
       "state": "nao_verificada",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 0,
       "http_errors": 0,
       "network_errors": 0,
@@ -105,7 +105,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -116,7 +116,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 3,
       "http_errors": 0,
       "network_errors": 0,
@@ -126,8 +126,8 @@
     "Hiking Around Adventures": {
       "state": "com_eventos",
       "count": 15,
-      "last_success": "2026-11-27T16:33:05+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_success": "2026-11-28T15:26:27+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 33,
       "http_errors": 0,
       "network_errors": 0,
@@ -138,7 +138,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -149,7 +149,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -160,7 +160,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-12T15:07:56+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 7,
       "http_errors": 0,
       "network_errors": 0,
@@ -171,7 +171,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -182,7 +182,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -193,7 +193,7 @@
       "state": "erro_rede",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 1,
@@ -204,7 +204,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": null,
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -214,8 +214,8 @@
     "RB Hiking & Trekking": {
       "state": "com_eventos",
       "count": 5,
-      "last_success": "2026-11-27T16:33:05+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_success": "2026-11-28T15:26:27+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 14,
       "http_errors": 0,
       "network_errors": 0,
@@ -226,7 +226,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-10-25T11:17:42+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -237,7 +237,7 @@
       "state": "sem_anuncios_reconhecidos",
       "count": 0,
       "last_success": "2026-11-25T17:09:59+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 1,
       "http_errors": 0,
       "network_errors": 0,
@@ -247,8 +247,8 @@
     "Trekking Roots": {
       "state": "com_eventos",
       "count": 11,
-      "last_success": "2026-11-27T16:33:05+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_success": "2026-11-28T15:26:27+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 13,
       "http_errors": 0,
       "network_errors": 0,
@@ -258,8 +258,8 @@
     "Trilhos Nocturnos": {
       "state": "com_eventos",
       "count": 3,
-      "last_success": "2026-11-27T16:33:05+00:00",
-      "last_checked": "2026-11-27T16:33:05+00:00",
+      "last_success": "2026-11-28T15:26:27+00:00",
+      "last_checked": "2026-11-28T15:26:27+00:00",
       "requests": 4,
       "http_errors": 0,
       "network_errors": 0,
@@ -268,106 +268,6 @@
     }
   },
   "events": [
-    {
-      "id": "web-75eaa4c00a44d05",
-      "title": "Abertura das Talhas – São Martinho em Vila de Frades - Vidigueira 2ª Edição",
-      "date": "2026-11-27",
-      "organizer": "GreenTrekker",
-      "url": "https://www.greentrekker.pt/agenda/abertura-das-talhas-sao-martinho-em-vila-de-frades-vidigueira-1",
-      "town": "Por confirmar",
-      "start": "Hotel Santa Clara",
-      "region": "",
-      "area": "",
-      "time": "20:00",
-      "km": 2.0,
-      "gain": 174,
-      "duration": 6.0,
-      "price": 305.0,
-      "difficulty": null,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "endDate": "2026-11-29",
-      "multiDay": true,
-      "last_seen_at": "2026-11-25",
-      "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
-      "image": "https://www.greentrekker.pt/site/assets/files/200374/8968936187419d_1920.700x700.jpg",
-      "image_checked_at": "2026-11-16"
-    },
-    {
-      "id": "web-f98b42d0b49d48d",
-      "title": "Homenagem a Fernando Cabral",
-      "date": "2026-11-27",
-      "organizer": "Clube de Montanhismo da Guarda",
-      "url": "https://www.montanhismo-guarda.pt/portal/evento/homenagem-a-fernando-cabral",
-      "town": "Por confirmar",
-      "start": "Por confirmar",
-      "region": "",
-      "area": "",
-      "time": "",
-      "km": 12.0,
-      "gain": null,
-      "duration": null,
-      "price": null,
-      "difficulty": null,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "status": "",
-      "status_checked_at": "2026-11-25",
-      "last_seen_at": "2026-11-25",
-      "source_name": "Clube de Montanhismo da Guarda",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
-      "image": "https://www.montanhismo-guarda.pt/portal/wp-content/uploads/2026/11/MARCHA-FERNANDO-CABRAL-27-11-2026.jpg",
-      "image_checked_at": "2026-11-16"
-    },
-    {
-      "id": "web-c1d4e5607bf048f",
-      "title": "Parque Natural Vale do Tua: a Pérola do Nordeste Transmontano",
-      "date": "2026-11-27",
-      "organizer": "Hike Land",
-      "url": "https://www.hikeland.pt/eventos/parque-natural-vale-do-tua-a-perola-do-nordeste-transmontano-3",
-      "town": "Por confirmar",
-      "start": "Por confirmar",
-      "region": "",
-      "area": "",
-      "time": "",
-      "km": 12.0,
-      "gain": 500,
-      "duration": 5.0,
-      "price": null,
-      "difficulty": 2,
-      "description": "Consultar os detalhes na página do organizador.",
-      "tag": "Caminhada",
-      "last_seen_at": "2026-11-25",
-      "source_name": "Hike Land",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
-      "image": "https://www.hikeland.pt/wp-content/uploads/2023/10/DSC01160_Site-e1697195204925.jpg",
-      "image_checked_at": "2026-11-20"
-    },
-    {
-      "id": "web-0d89f4f784a5db9",
-      "title": "Ver actividade",
-      "date": "2026-11-27",
-      "organizer": "CAAL — Clube de Actividades de Ar Livre",
-      "url": "https://clubearlivre.org/produto/viagem-a-serra-de-grazalema-e-pueblos-bonitos-da-andaluzia",
-      "town": "Por confirmar",
-      "start": "Por confirmar",
-      "region": "",
-      "area": "",
-      "time": "",
-      "km": null,
-      "gain": null,
-      "duration": null,
-      "price": 0.0,
-      "difficulty": null,
-      "description": "Descobre todos os detalhes aqui.",
-      "tag": "Caminhada",
-      "last_seen_at": "2026-11-25",
-      "source_name": "CAAL — Clube de Actividades de Ar Livre",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
-      "image": "https://clubearlivre.org/wp-content/uploads/2026/10/CAAL_261127_Grazalema_03.jpg",
-      "image_checked_at": "2026-11-16"
-    },
     {
       "id": "web-999155c520bc685",
       "title": "Destaque Fim-de-semana em Terras de Sicó (Buracas de Casmilo e Canhão de Poios)",
@@ -445,13 +345,13 @@
       "description": "No dia 19 de setembro, desafiamos-te a conquistar a Nevosa (1.546 m), o ponto mais alto da Serra do Gerês e o segundo ponto mais alto de Portugal Continental, através de um percurso exigente e repleto de história.",
       "tag": "Caminhada",
       "status": "Esgotado",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.866664,
       "lon": -8.092046,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://trekkingroots.pt/assets/images/caminhadas/6acd5c24be9de.jpg",
       "image_checked_at": "2026-11-15"
     },
@@ -505,11 +405,11 @@
       "tag": "Caminhada",
       "endDate": "2026-12-01",
       "multiDay": true,
-      "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status": "Esgotado",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://static.wixstatic.com/media/1cceb1_308d8ebc10774766b38b6eb7260998fe~mv2.jpg/v1/fill/w_2626,h_3283,al_c,q_90/1cceb1_308d8ebc10774766b38b6eb7260998fe~mv2.jpg",
       "image_checked_at": "2026-11-15",
       "verified": false
@@ -857,7 +757,7 @@
       "description": "Nesta proposta de atividade iremos fazer 1 caminhada nos Bosques de Aracena, e passeios em Cortegana, Aroche, Aracena, Fregenal de La Sierra e Barrancos, com destaque para várias visitas: Parque Mineiro de Rio Tinto, e a Gruta das Maravilhas, para além de Cast",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 38.76750556,
       "lon": -9.10195278,
       "verified": true,
@@ -1028,13 +928,13 @@
       "description": "Há lugares onde o tempo parece passar mais devagar. A Serra da Aboboreira é um desses territórios, onde a natureza e as tradições rurais permanecem bem presentes, longe da pressão urbanística.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.161925,
       "lon": -8.07393,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://trekkingroots.pt/assets/images/caminhadas/6aed0858c9fa7.jpg",
       "image_checked_at": "2026-11-15"
     },
@@ -1062,9 +962,9 @@
       "lon": -8.130879,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://www.caminhadassmile.pt/wp-content/uploads/2026/10/4.jpg",
       "image_checked_at": "2026-11-15"
     },
@@ -1509,14 +1409,14 @@
       "difficulty": 1,
       "description": "A Trekking Roots convida-o(a) a descobrir um dos tesouros mais mágicos do Gerês: a Mata de Albergaria, um dos mais antigos e emblemáticos carvalhais da Península Ibérica.",
       "tag": "Caminhada",
-      "status": "",
-      "status_checked_at": "2026-11-27",
+      "status": "Esgotado",
+      "status_checked_at": "2026-11-28",
       "lat": 41.808398,
       "lon": -8.130657,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://trekkingroots.pt/assets/images/caminhadas/6afa584b0fea7.jpg",
       "image_checked_at": "2026-11-23"
     },
@@ -1589,7 +1489,8 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-11-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00"
+      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
+      "image_checked_at": "2026-11-28"
     },
     {
       "id": "web-4c8b83699a3f3c1",
@@ -1611,7 +1512,8 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-11-25",
       "source_name": "GreenTrekker",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00"
+      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
+      "image_checked_at": "2026-11-28"
     },
     {
       "id": "web-a1da5a28940a67a",
@@ -1633,7 +1535,8 @@
       "tag": "Caminhada",
       "last_seen_at": "2026-11-25",
       "source_name": "CAAL — Clube de Actividades de Ar Livre",
-      "last_confirmed_at": "2026-11-25T17:09:59+00:00"
+      "last_confirmed_at": "2026-11-25T17:09:59+00:00",
+      "image_checked_at": "2026-11-28"
     },
     {
       "id": "web-355efdd232c4a7f",
@@ -1720,9 +1623,9 @@
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
       "date_verified": "official_detail",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://barbosa-trekking.pt/wp-content/uploads/2021/12/Fonte_Fria_Gralheiras_5_DEZ_26-009799.jpg",
       "image_checked_at": "2026-11-22"
     },
@@ -1771,10 +1674,10 @@
       "endDate": "2026-12-06",
       "multiDay": true,
       "status": "Esgotado",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://static.wixstatic.com/media/1cceb1_fa736e1a00fe499fbda349581730400c~mv2.jpg/v1/fill/w_2400,h_2400,al_c,q_90/1cceb1_fa736e1a00fe499fbda349581730400c~mv2.jpg",
       "image_checked_at": "2026-11-22",
       "verified": false
@@ -1907,13 +1810,13 @@
       "description": "No dia 5 de dezembro, a Trekking Roots convida-te a descobrir o fabuloso Vale do Rio Bestança, um dos últimos rios verdadeiramente puros e selvagens do país...",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.041293,
       "lon": -8.058946,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://trekkingroots.pt/assets/images/caminhadas/6aecf0e8a0f1c.jpg",
       "image_checked_at": "2026-11-22"
     },
@@ -2217,9 +2120,9 @@
       "difficulty": null,
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "DRenergies",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image_checked_at": "2026-11-22"
     },
     {
@@ -2241,11 +2144,11 @@
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
       "date_verified": "official_detail",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
-      "image_checked_at": "2026-11-27",
-      "image": "https://barbosa-trekking.pt/wp-content/uploads/2021/12/Nevosa_06_DEZ_26-009973.jpg"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
+      "image": "https://barbosa-trekking.pt/wp-content/uploads/2021/12/Nevosa_06_DEZ_26-009973.jpg",
+      "image_checked_at": "2026-11-27"
     },
     {
       "id": "web-e25ff76804d87ac",
@@ -2370,13 +2273,13 @@
       "description": "Uma caminhada para descobrir alguns dos recantos mais bonitos da Serra do Marão, onde a água e a montanha se encontram numa paisagem de grande beleza natural...",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.289958,
       "lon": -7.985937,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00",
       "image": "https://trekkingroots.pt/assets/images/caminhadas/6aed0df2379af.jpg",
       "image_checked_at": "2026-11-22"
     },
@@ -2643,9 +2546,9 @@
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
       "date_verified": "official_detail",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-3f16d8777ec33b2",
@@ -2767,6 +2670,29 @@
       "gps_checked_at": "2026-11-25"
     },
     {
+      "id": "web-eaa79cb329c8c4c",
+      "title": "Caminhada ao Iteiro d’Ovos (Serra do Gerês, 12 de Dezembro)",
+      "date": "2026-12-12",
+      "organizer": "RB Hiking & Trekking",
+      "url": "https://barbosa-trekking.pt/caminhada-ao-iteiro-dovos-serra-do-geres-29-de-novembro",
+      "town": "Por confirmar",
+      "start": "Por confirmar",
+      "region": "",
+      "area": "",
+      "time": "08:30",
+      "km": 17.0,
+      "gain": null,
+      "duration": null,
+      "price": 25.0,
+      "difficulty": null,
+      "description": "Consultar informações e inscrições junto do organizador.",
+      "tag": "Caminhada",
+      "date_verified": "official_detail",
+      "last_seen_at": "2026-11-28",
+      "source_name": "RB Hiking & Trekking",
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
+    },
+    {
       "id": "web-5cc14b80ea4a64c",
       "title": "Rocalva - PNP.Gerês",
       "date": "2026-12-12",
@@ -2785,10 +2711,10 @@
       "description": "12 de dezembro de 2026 Percurso circular - 15 km Desnível positivo + 677 m Dificuldade: Difícil Desde 25 € por pessoa",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-9c8827b1c799278",
@@ -3262,13 +3188,13 @@
       "description": "O Natal é tempo de partilha, reencontros e bons momentos à mesa. No dia 13 de dezembro, a Trekking Roots convida-te para um dia especial, pensado para juntar a malta dos trilhos e celebrar mais um ano de caminhadas, aventuras e histórias partilhadas.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.162813,
       "lon": -8.592803,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-efc1930727f2fd0",
@@ -3338,9 +3264,9 @@
       "lon": -8.073581,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-5be6547738a7134",
@@ -3366,9 +3292,9 @@
       "lon": -9.422074,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-376320e59e205bf",
@@ -3455,10 +3381,10 @@
       "description": "Este Natal, queremos juntar à mesa quem faz parte das nossas aventuras, juntamente com familiares e amigos! Um dia de reencontros, boa comida, muitas histórias e uma caminhada opcional pelas montanhas de Arouca. Porque os melhores momentos são aqueles que part",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-6b9d8260b6b8eb6",
@@ -3592,9 +3518,9 @@
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
       "date_verified": "official_detail",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-bfe33659a86f6e7",
@@ -3951,13 +3877,13 @@
       "description": "Desta vez, a Trekking Roots propõe uma experiência diferente do habitual, com uma visita à encantadora aldeia de Cabeça...",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 40.327643,
       "lon": -7.68821,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-f575b1e3625e906",
@@ -4115,13 +4041,13 @@
       "description": "Em dezembro, vamos até à Serra da Lousã para descobrir alguns dos seus recantos mais encantadores, numa caminhada que junta natureza, tradição e o espírito especial da época natalícia...",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 40.104911,
       "lon": -8.250833,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-de713ddc6493ff5",
@@ -4147,9 +4073,9 @@
       "lon": -9.259927,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-7795cc3da02bc0a",
@@ -4526,10 +4452,10 @@
       "description": "26 de Dezembro 8H00 15 km Dificuldade Difícil 25€ por pessoa",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-04e6dcbe0fb2fdd",
@@ -4550,9 +4476,9 @@
       "description": "Consultar informações e inscrições junto do organizador.",
       "tag": "Caminhada",
       "date_verified": "official_detail",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "RB Hiking & Trekking",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-85f1e1b86ff7ab3",
@@ -4727,10 +4653,10 @@
       "description": "27 de Dezembro ​ 08H30 10 km Dificuldade - Média 25 euros por pessoa",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-6198b68da931570",
@@ -4977,10 +4903,10 @@
       "description": "Minas das Sombras — Serra do Xurés Sábado, 2 de janeiro de 2027 14,50 km | +674 m | Percurso circular | Dificuldade: Difícil Horário: 08h30–17h00 Preço: Desde 30 € por pessoa Grupo: Máximo de 10 participantes",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-6adab1c8f76e657",
@@ -5023,13 +4949,13 @@
       "description": "O trilho do Prado da Rocalva é uma excelente oportunidade para descobrir alguns dos cenários mais emblemáticos do Parque Nacional da Peneda-Gerês..",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.719795,
       "lon": -8.128454,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-9baf844592f1ecf",
@@ -5072,10 +4998,10 @@
       "description": "Minas dos Carris — Serra do Gerês Domingo, 3 de janeiro de 2027 22,50 km | +800 m |Linear | Ida e volta | Dificuldade: Difícil Horário: 08h00–17h30 Preço: Desde 30 € por pessoa Grupo: Máximo 9 participantes",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-1c44ab4866d4344",
@@ -5118,13 +5044,13 @@
       "description": "No dia 1 de fevereiro de 2026, venha descobrir connosco um dos trilhos mais encantadores de Santo Tirso! Um percurso envolvente, onde o rio Leça serpenteia pelas margens e as imponentes quedas de Fervença oferecem cenários de cortar a respiração.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.305327,
       "lon": -8.45014,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-ba7a89fd3aced47",
@@ -5235,13 +5161,13 @@
       "description": "Esta é uma caminhada flash e desafiante até ao topo da Serra do Marão, pensada para quem procura aventura e a experiência única de caminhar em ambiente de inverno.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
       "lat": 41.258591,
       "lon": -7.859873,
       "verified": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trekking Roots",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-fae12b8b73772aa",
@@ -5372,10 +5298,10 @@
       "description": "Domingo, 10 de janeiro de 2027 16,00 km | +1.013 m | Percurso circular | Dificuldade: Difícil Horário: 08h30–17h30 Preço: Desde 30 € por pessoa Grupo: Máximo de 10 participantes",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-088bab51edeecfc",
@@ -5401,9 +5327,9 @@
       "lon": -8.4894,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-d7a8cf412abbd95",
@@ -5797,10 +5723,10 @@
       "description": "Ermida — Cascatas e Miradouros da Serra do Gerês Sábado, 23 de janeiro de 2027 11,74 km | +489 m | Percurso circular | Dificuldade: Moderada Horário: 09h00–16h30 Preço: Desde 30 € por pessoa Grupo: Máximo de 10 participantes",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-a0572266764bf12",
@@ -5826,9 +5752,9 @@
       "lon": -8.130879,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-f5e02085d196470",
@@ -5948,10 +5874,10 @@
       "description": "4 de Maio de 2025 - ​ 8 km Dificuldade - Média/Fácil 25 euros por pessoa",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-b85902685db4700",
@@ -6056,10 +5982,10 @@
       "description": "Sábado, 6 de fevereiro de 2027 10 km | +644 m Percurso circular | Dificuldade: Moderada/Fáci Horário: 09h30–17h00 Preço: Desde 30 € por pessoa Grupo: Máximo de 10 participantes",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-01f4702704d0500",
@@ -6152,10 +6078,10 @@
       "description": "Travessia da Serra do Gerês — PNPG Sábado, 13 de fevereiro de 2027 24 km | +933 m | −1.282 m Travessia linear | Dificuldade: Difícil/Muito Difícil Horário: 07h00–17h30 Encontro: Portela do Homem, às 07h00 Início da caminhada: Pitões das Júnias, após transfer i",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-97974a8e51d3d99",
@@ -6231,10 +6157,10 @@
       "description": "Sábado, 20 de fevereiro de 2027 12,5 km | +578 m Percurso circular | Dificuldade: Moderada Horário: 10h00–16h30 Preço: Desde 30 € por pessoa Grupo: Máximo de 10 participantes",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-6c491df97beebf9",
@@ -6260,9 +6186,9 @@
       "lon": -8.8415709,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-86c0f54c5efbb40",
@@ -6364,10 +6290,10 @@
       "endDate": "2027-02-28",
       "multiDay": true,
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Hiking Around Adventures",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-d64f444f43d9568",
@@ -6388,10 +6314,10 @@
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trilhos Nocturnos",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-17660932d21113f",
@@ -6472,9 +6398,9 @@
       "lon": -9.030149,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-298a8d27324dbb5",
@@ -6531,9 +6457,9 @@
       "lon": -9.031,
       "verified": true,
       "gpsFromAnnouncement": true,
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-a2dda998669b33b",
@@ -6578,10 +6504,10 @@
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trilhos Nocturnos",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-6a1ae771db87117",
@@ -6663,10 +6589,10 @@
       "description": "Consultar os detalhes na página do organizador.",
       "tag": "Caminhada",
       "status": "",
-      "status_checked_at": "2026-11-27",
-      "last_seen_at": "2026-11-27",
+      "status_checked_at": "2026-11-28",
+      "last_seen_at": "2026-11-28",
       "source_name": "Trilhos Nocturnos",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     },
     {
       "id": "web-9d253d64176dcb3",
@@ -6689,9 +6615,9 @@
       "date_verified": "official_detail",
       "multiDay": true,
       "endDate": "2027-04-25",
-      "last_seen_at": "2026-11-27",
+      "last_seen_at": "2026-11-28",
       "source_name": "Caminhadas Smile",
-      "last_confirmed_at": "2026-11-27T16:33:05+00:00"
+      "last_confirmed_at": "2026-11-28T15:26:27+00:00"
     }
   ]
 }
